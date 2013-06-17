@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: TemplateEditor
+Bundle-SymbolicName: com.rytong.template.editor; singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.rytong.template.editor.Activator
+Bundle-Vendor: RYTONG
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.jface.text,
+ org.eclipse.ui.editors,
+ org.eclipse.dltk.core;bundle-version="3.0.1",
+ org.eclipse.dltk.ui;bundle-version="3.0.1",
+ org.eclipse.core.resources;bundle-version="3.7.101",
+ org.eclipse.ui.ide;bundle-version="3.7.0",
+ org.erlide.core;bundle-version="1.0.0",
+ org.erlide.ui,
+ org.erlide.jinterface;bundle-version="0.15.2"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Export-Package: com.rytong.ewp.wizards,
+ com.rytong.template.editor

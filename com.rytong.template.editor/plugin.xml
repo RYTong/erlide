@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="com.rytong.template.editor.template.TemplateEditor"
+            default="false"
+            extensions="cs"
+            icon="icons/cs.gif"
+            id="com.rytong.editors.TemplateEditor"
+            name="EWP Template Editor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.rytong.template.editor.template.TemplatePreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
+         id="com.rytong.template.editor.templateError"
+         name="XML Error Marker"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <super
+            type="org.eclipse.core.resources.textmarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <wizard
+            category="org.erlide.ui.wizards.newWizards"
+            class="com.rytong.ewp.wizards.EWPWizard"
+            icon="icons/erlang-notext130.gif"
+            id="com.rytong.ewp.Wizard"
+            name="EWP Node">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            description="Indent Code"
+            id="com.rytong.template.editor.actions.indent"
+            name="Indent Code">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.rytong.template.editor.actions.indent"
+            contextId="com.rytong.template.editor.templateEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+I">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.contexts">
+      <context
+            id="com.rytong.template.editor.templateEditorScope"
+            name="EWP Template Editor"
+            parentId="org.eclipse.ui.textEditorScope">
+      </context>
+   </extension>
+
+</plugin>
