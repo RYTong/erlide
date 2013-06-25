@@ -161,15 +161,17 @@ lines_to_text(Lines) ->
 initial_scan(ScannerName, ModuleFileName, InitialText, StateDir, UseCache) ->
     Text = case InitialText of
                "" ->
-                   {ok, B} = file:read_file(ModuleFileName),
-					   try
-						   unicode:characters_to_list(B, unicode)
-					   catch
-						   _:_ ->
-							   binary_to_list(B)
-					   end;
-               _ ->
-                   InitialText
+				   {ok, B} = file:read_file(ModuleFileName),
+				   %% transform the file content encoding from utf-8 to unicode,
+				   %% this process can avoid an error in a file with chiness content
+				   try
+					   unicode:characters_to_list(B, unicode)
+				   catch
+					   _:_ ->
+						   binary_to_list(B)
+				   end;
+			   _ ->
+				   InitialText
            end,
 	?ewp_log({initial_scan_length, ?MODULE, length(Text)}),
 	?ewp_log({initial_scan_cach, ?MODULE, UseCache}),
@@ -209,9 +211,7 @@ replace_text(Module, Offset, RemoveLength, NewText) ->
 
 get_token_at(Module, Offset) ->
 	?ewp_log({erlide_scanner_gta,Offset, Module#module.tokens}),
-	Re = find_line_w_offset(Offset, Module#module.tokens) ,
-	?ewp_log({erlide_scanner_Re,Re}),
-    case Re of
+    case find_line_w_offset(Offset, Module#module.tokens) of
         {N, Pos, _Length, Tokens, false} ->
             case get_token_at_aux(Tokens, Offset - Pos) of
                 token_not_found ->

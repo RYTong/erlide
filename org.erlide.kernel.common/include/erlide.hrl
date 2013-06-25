@@ -9,6 +9,7 @@
 -define(ewp_info(Format, Data), ?Debug(io_lib:format(Format, Data))).
 -else.
 -define(ewp_log(T), ok).
+-define(ewp_info(F,D), ok).
 -endif.
 
 -ifdef(DEBUG).
@@ -23,6 +24,5 @@
 -else.
 -define(D(T), ok).
 -define(D(F, T), ok).
--define(ewp_info(Format, Data), ok).
 -endif.
 
