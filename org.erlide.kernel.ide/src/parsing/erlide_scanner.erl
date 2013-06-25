@@ -17,7 +17,7 @@
 %%
 %% Exported Functions
 %%
-
+-compile([export_all]).
 -export([light_scan_string/2, scan_string/1, convert_tokens/1,
          tokens_to_string/1, do_scan/2, get_all_tokens/1, initial_scan/5,
          get_token_at/2, replace_text/4, lines_to_text/1, get_token_window/4]).
