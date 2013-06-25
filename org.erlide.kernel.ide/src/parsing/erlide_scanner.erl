@@ -1,6 +1,6 @@
 %% Author: jakob
 %% Created: 24 apr 2008
-%% Description: 
+%% Description:
 -module(erlide_scanner).
 
 %%
@@ -8,6 +8,8 @@
 %%
 
 %% -define(DEBUG, 1).
+%% -define(EWP, 1).
+
 
 -include("erlide.hrl").
 -include("erlide_scanner.hrl").
@@ -36,7 +38,7 @@ light_scan_string(B, utf8) ->
 do_light_scan(S) ->
     case erlide_scan:string(S, {0, 0}) of
         {ok, T, _} ->
-            ?D(T),
+            %% ?D(T),
             {ok, fixup_tokens(T, [])};
         {error, _, _} ->
             error
@@ -68,13 +70,13 @@ split_lines_w_lengths("", _Length, [], Acc) ->
 split_lines_w_lengths("", Length, LineAcc, Acc) ->
     lists:reverse(Acc, [{Length, lists:reverse(LineAcc)}]);
 split_lines_w_lengths("\r\n" ++ Text, Length, LineAcc, Acc) ->
-    split_lines_w_lengths(Text, 0, [], 
+    split_lines_w_lengths(Text, 0, [],
                           [{Length+2, lists:reverse(LineAcc, "\r\n")} | Acc]);
 split_lines_w_lengths("\n" ++ Text, Length, LineAcc, Acc) ->
-    split_lines_w_lengths(Text, 0, [], 
+    split_lines_w_lengths(Text, 0, [],
                           [{Length+1, lists:reverse(LineAcc, "\n")} | Acc]);
 split_lines_w_lengths("\r" ++ Text, Length, LineAcc, Acc) ->
-    split_lines_w_lengths(Text, 0, [], 
+    split_lines_w_lengths(Text, 0, [],
                           [{Length+1, lists:reverse(LineAcc, "\r")} | Acc]);
 split_lines_w_lengths([C | Text], Length, LineAcc, Acc) ->
     split_lines_w_lengths(Text, Length+1, [C | LineAcc], Acc).
@@ -91,7 +93,8 @@ find_line_w_offset(_Offset, _Pos, _N, []) ->
 find_line_w_offset(Offset, Pos, N, [{Length, _Line} | Lines]) when Offset >= Pos+Length, Lines =/= [] ->
     find_line_w_offset(Offset, Pos+Length, N+1, Lines);
 find_line_w_offset(Offset, Pos, N, [{Length, Line} |_]) when Pos =< Offset, Offset < Pos + Length ->
-    {N, Pos, Length, Line, false};
+	%% ?ewp_log({find_line_w_offset, Length, Line}),
+	{N, Pos, Length, Line, false};
 find_line_w_offset(Offset, Pos, N, [{Length, Line}]) ->
     case ends_with_newline(Line) orelse Offset >= Pos + Length of
         true ->
@@ -116,7 +119,7 @@ substr(Text, Start) when Start>length(Text) ->
 substr(Text, Start) when Start < 1 ->
     Text;
 substr(Text, Start) ->
-    string:substr(Text, Start).    
+    string:substr(Text, Start).
 
 %%
 %% Nicer version of string:substring/3 accepting out-of-bounds parameters
@@ -129,7 +132,7 @@ substr(Text, Start, Length) when Start < 1 ->
 substr(Text, Start, Length) when Start+Length>length(Text) ->
     substr(Text, Start, length(Text)-(Start+Length));
 substr(Text, Start, Length) ->
-    string:substr(Text, Start, Length).    
+    string:substr(Text, Start, Length).
 
 replace_between_lines(From, Length, With, Lines) ->
     {LineNo1, Pos1, _Length1, Line1, Beyond1} = find_line_w_offset(From, Lines),
@@ -159,10 +162,17 @@ initial_scan(ScannerName, ModuleFileName, InitialText, StateDir, UseCache) ->
     Text = case InitialText of
                "" ->
                    {ok, B} = file:read_file(ModuleFileName),
-                   binary_to_list(B);
+					   try
+						   unicode:characters_to_list(B, unicode)
+					   catch
+						   _:_ ->
+							   binary_to_list(B)
+					   end;
                _ ->
                    InitialText
            end,
+	?ewp_log({initial_scan_length, ?MODULE, length(Text)}),
+	?ewp_log({initial_scan_cach, ?MODULE, UseCache}),
     CacheFileName = filename:join(StateDir, atom_to_list(ScannerName) ++ ".scan"),
     RenewFun = fun(_F) -> do_scan(ScannerName, Text) end,
     erlide_util:check_and_renew_cached(ModuleFileName, CacheFileName, ?CACHE_VERSION, RenewFun, UseCache).
@@ -177,6 +187,7 @@ do_scan(ScannerName, InitialText) ->
     Lines = split_lines_w_lengths(InitialText),
     LineTokens = [scan_line(L) || L <- Lines],
     ?D([ScannerName]), % , InitialText, LineTokens]),
+    ?ewp_log({scan_result, LineTokens}),
     #module{name=ScannerName, lines=Lines, tokens=LineTokens}.
 
 scan_line({Length, S}) ->
@@ -190,14 +201,17 @@ scan_line({Length, S}) ->
     end.
 
 replace_text(Module, Offset, RemoveLength, NewText) ->
-    {Line, NOldLines, AffectedLines, NewLines} = 
+    {Line, NOldLines, AffectedLines, NewLines} =
         replace_between_lines(Offset, RemoveLength, NewText, Module#module.lines),
     LineTokens = [scan_line(L) || L <- AffectedLines],
     NewTokens = replace_between(Line, NOldLines, LineTokens, Module#module.tokens),
     Module#module{lines=NewLines, tokens=NewTokens}.
 
 get_token_at(Module, Offset) ->
-    case find_line_w_offset(Offset, Module#module.tokens) of
+	?ewp_log({erlide_scanner_gta,Offset, Module#module.tokens}),
+	Re = find_line_w_offset(Offset, Module#module.tokens) ,
+	?ewp_log({erlide_scanner_Re,Re}),
+    case Re of
         {N, Pos, _Length, Tokens, false} ->
             case get_token_at_aux(Tokens, Offset - Pos) of
                 token_not_found ->
@@ -210,7 +224,7 @@ get_token_at(Module, Offset) ->
             line_not_found
     end.
 
-get_tokens_at(Module, Offset, N) -> 
+get_tokens_at(Module, Offset, N) ->
     get_tokens_at(Module, Offset, N, []).
 
 get_tokens_at(_Module, _Offset, 0, Acc) ->
@@ -219,7 +233,7 @@ get_tokens_at(Module, Offset, N, Acc0) ->
     case find_line_w_offset(Offset, Module#module.tokens) of
         {LineNo, Pos, Length, Tokens, false} ->
             {M, Ts} = get_tokens_at_aux(Tokens, Offset - Pos, N),
-            Acc1 = 
+            Acc1 =
                 lists:foldl(fun(T, LAcc) ->
                                     [fix_token(T, Pos, LineNo) | LAcc]
                             end, Acc0, Ts),
@@ -234,7 +248,7 @@ get_tokens_before(Module, Offset, N) ->
     R = get_tokens_before_aux(Lines, Offset, N, []),
     lists:reverse(R).
 
-get_lines_before_and_upto(Lines, Offset) -> 
+get_lines_before_and_upto(Lines, Offset) ->
     get_lines_before_and_upto(Lines, 0, 0, Offset, []).
 
 get_lines_before_and_upto(L, CurOfs, _, Offset, Acc) when L == []; CurOfs >= Offset ->
@@ -268,7 +282,7 @@ get_token_at_aux([T | Rest], Offset) ->
             get_token_at_aux(Rest, Offset)
     end.
 
-get_tokens_at_aux(Tokens, Offset, N) -> 
+get_tokens_at_aux(Tokens, Offset, N) ->
     get_tokens_at_aux(Tokens, Offset, 0, N, []).
 
 get_tokens_at_aux([], _, M, _, Acc) ->
@@ -439,7 +453,7 @@ fixup_macro(L, O, G) ->
 fixup_tokens([], Acc) ->
     erlang:iolist_to_binary(Acc);
 fixup_tokens([{'?', {{L, _}, _}}=T1, {'?', {{L, _}, _}}=T2, T3 | Rest], Acc) ->
-    fixup_tokens(Rest, [Acc | [fixup_tokens([T1], []), fixup_tokens([T2], []), 
+    fixup_tokens(Rest, [Acc | [fixup_tokens([T1], []), fixup_tokens([T2], []),
                                fixup_tokens([T3], [])]]);
 fixup_tokens([{'?', {{L, O}, _}}, {var, {{L, O1}, G}, _V} | Rest], Acc) when O1=:=O+1->
     T = fixup_macro(L, O, G),
