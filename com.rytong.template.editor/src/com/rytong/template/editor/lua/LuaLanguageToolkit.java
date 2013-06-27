@@ -38,8 +38,8 @@ public class LuaLanguageToolkit extends AbstractLanguageToolkit {
 
     @Override
     public String getNatureId() {
-        // TODO Auto-generated method stub
-        return null;
+        //return null;
+    	  return "org.eclipse.dltk.javascript.core.nature";
     }
 
 }
