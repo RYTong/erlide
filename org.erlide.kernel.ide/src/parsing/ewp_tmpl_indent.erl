@@ -8,6 +8,9 @@
 %%
 %% -define(DEBUG, 1).
 %% -define(IO_FORMAT_DEBUG, 1).
+
+%%-define(EWP, 1).
+
 -include("erlide.hrl").
 
 -define(Tab, 4).
@@ -27,7 +30,10 @@ indent_lines(Offset, Length, Text) ->
           catch _:_ ->
                     Text
           end,
-    {First, FirstLineNum, Lines} = erlide_text:get_text_and_lines(Str, 0, Length),
+
+
+	%%?ewp_log(Str),
+    {First, FirstLineNum, Lines} = erlide_text:get_text_and_lines(Str, 0, length(Str)),
     ?D(Lines),
     do_indent_lines(Lines).
 
