@@ -6,14 +6,8 @@ import java.util.List;
 import org.eclipse.dltk.ui.text.AbstractScriptScanner;
 import org.eclipse.dltk.ui.text.IColorManager;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.*;
 import org.eclipse.jface.text.rules.*;
-
-import com.rytong.template.editor.cs.CSCodeScanner.CSWordDetector;
-import com.rytong.template.editor.cs.CSCodeScanner.LuaWhitespaceDetector;
 import com.rytong.template.editor.template.ITemplateColorConstants;
-import com.rytong.template.editor.template.ITemplatePartitions;
-import com.rytong.template.editor.template.StringRule;
 
 public class XMLTagScanner extends AbstractScriptScanner {
 
@@ -23,12 +17,12 @@ public class XMLTagScanner extends AbstractScriptScanner {
 		this.initialize();
 	}
 
-	private static String[] fgTokenProperties = new String[] { 
+	private static String[] fgTokenProperties = new String[] {
 		ITemplateColorConstants.CS_TAG,
 		ITemplateColorConstants.XML_STRING,
 		ITemplateColorConstants.XML_SINGLE_QUOTE_STRING,
 		ITemplateColorConstants.XML_TAG };
-	
+
 	@Override
 	protected List<IRule> createRules() {
 		List<IRule> rules = new ArrayList<IRule>();
@@ -51,7 +45,7 @@ public class XMLTagScanner extends AbstractScriptScanner {
 		this.setDefaultReturnToken(other);
 		return rules;
 	}
-	
+
 	public class XMLWhitespaceDetector implements IWhitespaceDetector {
 
 		public boolean isWhitespace(char c) {
