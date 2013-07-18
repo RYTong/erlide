@@ -17,44 +17,55 @@ import java.util.List;
 import org.eclipse.jface.text.rules.EndOfLineRule;
 import org.eclipse.jface.text.rules.IPredicateRule;
 import org.eclipse.jface.text.rules.IToken;
-import org.eclipse.jface.text.rules.MultiLineRule;
-import org.eclipse.jface.text.rules.PatternRule;
 import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
+import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
 
-import com.rytong.template.editor.template.ITemplatePartitions;
-import com.rytong.template.editor.template.TemplateConstants;
+import com.rytong.template.editor.lua.LuaMultLineStringRule;
 
 public class LuaPartitionScanner extends RuleBasedPartitionScanner {
 
     public LuaPartitionScanner() {
         super();
-        List<PatternRule> rules = new ArrayList<PatternRule>();
+		List<IPredicateRule> rules = new ArrayList<IPredicateRule>();
 
-        /*
-         * Deal with single and double quote multi lines strings
-         */
-        IToken string = new Token(ITemplatePartitions.LUA_STRING);
-        IToken singleQuoteString = new Token(ITemplatePartitions.LUA_SINGLE_QUOTE_STRING);
-        rules.add(new MultiLineRule("\'", "\'", singleQuoteString, '\\', false)); //$NON-NLS-1$ //$NON-NLS-2$
-        rules.add(new MultiLineRule("\"", "\"", string, '\\', false)); //$NON-NLS-1$ //$NON-NLS-2$
+		/*
+		 * Deal with documentation
+		 */
+		// Multi-line documentation
+//		IToken docMultiLine = new Token(ILuaPartitions.LUA_DOC_MULTI);
+//		rules.add(new LuaDocMultLineCommentRule(docMultiLine));
+//
+//		// Documentation starting with "---"
+//		IToken doc = new Token(ILuaPartitions.LUA_DOC);
+//		rules.add(new LuaDocSingleCommentSeriesRule(doc));
+//
+//		/*
+//		 * Deal with comments
+//		 */
+//		// Multi-line documentation
+//		IToken multilineComment = new Token(ILuaPartitions.LUA_MULTI_LINE_COMMENT);
+//		rules.add(new LuaMultLineCommentRule(multilineComment));
 
-        /*
-         * Deal with comments
-         */
+		// Single line
+		IToken singleLineComment = new Token(ILuaPartitions.LUA_COMMENT);
+		rules.add(new EndOfLineRule(ILuaPartitions.COMMENT_STRING, singleLineComment));
 
-        // Multi-line
-        IToken multiLineComment = new Token(ITemplatePartitions.LUA_MULTI_LINE_COMMENT);
-        rules.add(new MultiLineRule("--[[", "]]", multiLineComment));//$NON-NLS-1$ //$NON-NLS-2$
+		/*
+		 * Deal with single and double quote multi lines strings
+		 */
+		IToken multilineString = new Token(ILuaPartitions.LUA_MULTI_LINE_STRING);
+		rules.add(new LuaMultLineStringRule(multilineString));
 
-        // Single line
-        IToken comment = new Token(ITemplatePartitions.LUA_COMMENT);
-        rules.add(new EndOfLineRule(TemplateConstants.COMMENT_STRING, comment));
+		IToken singleQuoteString = new Token(ILuaPartitions.LUA_SINGLE_QUOTE_STRING);
+		rules.add(new SingleLineRule("\'", "\'", singleQuoteString, '\\', false)); //$NON-NLS-1$ //$NON-NLS-2$
 
-        // Apply rules
-        IPredicateRule[] result = new IPredicateRule[rules.size()];
-        rules.toArray(result);
-        setPredicateRules(result);
+		IToken string = new Token(ILuaPartitions.LUA_STRING);
+		rules.add(new SingleLineRule("\"", "\"", string, '\\', false)); //$NON-NLS-1$ //$NON-NLS-2$
+
+		// Apply rules
+		IPredicateRule[] result = new IPredicateRule[rules.size()];
+		rules.toArray(result);
+		setPredicateRules(result);
     }
-    
 }

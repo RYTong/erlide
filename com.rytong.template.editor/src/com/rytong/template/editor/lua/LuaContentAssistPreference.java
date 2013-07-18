@@ -27,7 +27,7 @@ public class LuaContentAssistPreference extends ContentAssistPreference {
     }
     @Override
     protected ScriptTextTools getTextTools() {
-        return Activator.getDefault().getTextTools();
+        return Activator.getDefault().getLuaTextTools();
     }
 
 }

@@ -23,11 +23,8 @@ import org.erlide.jinterface.ErlLogger;
 import org.erlide.jinterface.rpc.RpcException;
 import org.erlide.utils.Util;
 
-import com.ericsson.otp.erlang.OtpErlangList;
-import com.ericsson.otp.erlang.OtpErlangLong;
+
 import com.ericsson.otp.erlang.OtpErlangObject;
-import com.ericsson.otp.erlang.OtpErlangString;
-import com.ericsson.otp.erlang.OtpErlangTuple;
 import com.rytong.template.editor.template.TemplateEditor;
 import com.rytong.template.editor.template.TemplateEditorMessages;
 
@@ -38,7 +35,7 @@ public class IndentAction extends TextEditorAction {
 		super(bundle, prefix, editor);
 		// TODO Auto-generated constructor stub
 	}
-	
+
     protected ISelection getSelection() {
         return getTextEditor().getSelectionProvider().getSelection();
     }
@@ -46,7 +43,7 @@ public class IndentAction extends TextEditorAction {
     /**
      * Extend the selection that the action will work on. Default
      * implementation, extend to whole lines. Might be overridden.
-     * 
+     *
      * @param document
      *            text {@link IDocument}
      * @param selection
@@ -70,11 +67,11 @@ public class IndentAction extends TextEditorAction {
         }
         return selection;
     }
-    
+
 
     /**
      * Selects the given range on the editor.
-     * 
+     *
      * @param newOffset
      *            the selection offset
      * @param newLength
@@ -91,7 +88,7 @@ public class IndentAction extends TextEditorAction {
         }
 
     }
-    
+
     protected OtpErlangObject indentLines(final int offset, final int length,
     		final String text) throws RpcException {
     	IBackend ideBackend = BackendCore.getBackendManager().getIdeBackend();
@@ -105,7 +102,7 @@ public class IndentAction extends TextEditorAction {
     	return null;
 
     }
-    
+
     @Override
     public void run() {
         super.run();
@@ -123,12 +120,12 @@ public class IndentAction extends TextEditorAction {
                 (ITextSelection) sel);
 //        final ITextSelection getSelection = getTextSelection(document,
 //                selection);
-        
+
         final int startLine = selection.getStartLine();
         final int endLine = selection.getEndLine();
         final int nLines = endLine - startLine + 1;
 
-        
+
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -138,7 +135,7 @@ public class IndentAction extends TextEditorAction {
                     text = document.get(selection.getOffset(), selection.getLength());
                     ErlLogger.debug("the selected text : "+ text);
                     // call erlang, with selection within text
-                    r1 = indentLines(selection.getOffset(), selection.getLength(), text);
+                    r1 = indentLines(0, 0, text);
                 } catch (final Exception e) {
                     e.printStackTrace();
                 }

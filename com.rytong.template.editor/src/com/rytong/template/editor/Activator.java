@@ -4,6 +4,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import com.rytong.template.editor.lua.LuaTextTools;
 import com.rytong.template.editor.template.TemplateTextTools;
 
 /**
@@ -16,9 +17,10 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
-	
+
 	private TemplateTextTools fTextTools;
-	
+	private LuaTextTools lTextTools;
+
 	/**
 	 * The constructor
 	 */
@@ -51,13 +53,21 @@ public class Activator extends AbstractUIPlugin {
 	public static Activator getDefault() {
 		return plugin;
 	}
-	
+
 	public synchronized TemplateTextTools getTextTools() {
 		if (fTextTools == null) {
 			fTextTools = new TemplateTextTools(true);
 		}
 		return fTextTools;
 	}
+
+	public synchronized LuaTextTools getLuaTextTools() {
+		if (lTextTools == null) {
+			lTextTools = new LuaTextTools(true);
+		}
+		return lTextTools;
+	}
+
 
 	/**
 	 * Returns an image descriptor for the image file at the given

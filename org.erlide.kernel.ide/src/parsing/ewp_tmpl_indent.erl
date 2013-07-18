@@ -23,7 +23,7 @@
 %% API Functions
 %%
 
-indent_lines(Offset, Length, Text) ->
+indent_lines(_Offset, _Length, Text) ->
     ?D(Text),
     Str = try
               re:replace(Text, "\\t", "    ", [global, {return, list}, unicode])

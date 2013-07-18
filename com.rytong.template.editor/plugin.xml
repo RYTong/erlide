@@ -68,5 +68,16 @@
             parentId="org.eclipse.ui.textEditorScope">
       </context>
    </extension>
+      <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="com.rytong.template.editor.lua.LuaEditor"
+            default="false"
+            extensions="lua"
+            icon="icons/lua-logo.gif"
+            id="com.rytong.editors.LuaEditor"
+            name="EWP Lua Editor">
+      </editor>
+   </extension>
 
 </plugin>

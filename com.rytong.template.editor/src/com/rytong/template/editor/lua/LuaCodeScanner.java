@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.dltk.ui.text.AbstractScriptScanner;
 import org.eclipse.dltk.ui.text.IColorManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.EndOfLineRule;
 import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IRule;
@@ -37,15 +38,15 @@ public class LuaCodeScanner extends AbstractScriptScanner {
     private static String[] fgKeywords = { "and", "break", "do", "else", "elseif", "end", "false", "for", "function", "if", "in", "local", "nil",
             "not", "or", "repeat", "return", "then", "true", "until", "while" };
 
-    private static String[] fgTokenProperties = new String[] { 
-    	ITemplateColorConstants.CS_TAG,
-    	ITemplateColorConstants.LUA_STRING, 
+    private static String[] fgTokenProperties = new String[] {
+    	ITemplateColorConstants.LUA_STRING,
     	ITemplateColorConstants.LUA_SINGLE_LINE_COMMENT,
     	ITemplateColorConstants.LUA_MULTI_LINE_COMMENT,
-    	ITemplateColorConstants.LUA_NUMBER, 
+    	ITemplateColorConstants.LUA_NUMBER,
     	ITemplateColorConstants.LUA_DEFAULT,
     	ITemplateColorConstants.LUA_SINGLE_QUOTE_STRING,
     	ITemplateColorConstants.LUA_KEYWORD };
+
 
     public LuaCodeScanner(IColorManager manager, IPreferenceStore store) {
         super(manager, store);
@@ -63,21 +64,21 @@ public class LuaCodeScanner extends AbstractScriptScanner {
         IToken multiline = this.getToken(ITemplateColorConstants.LUA_MULTI_LINE_COMMENT);
         IToken numbers = this.getToken(ITemplateColorConstants.LUA_NUMBER);
         IToken other = this.getToken(ITemplateColorConstants.LUA_DEFAULT);
-        
+
         IToken string = this.getToken(ITemplateColorConstants.LUA_STRING);
         IToken singleQuoteString = this.getToken(ITemplateColorConstants.LUA_SINGLE_QUOTE_STRING);
         IToken noparseString = this.getToken(ITemplateColorConstants.LUA_STRING);
-        
+
         IToken csTag = this.getToken(ITemplateColorConstants.CS_TAG);
 		rules.add(new MultiLineRule("<?cs", "?>", csTag));//$NON-NLS-1$ //$NON-NLS-2$
-		
-		IToken csTag1 = this.getToken(ITemplateColorConstants.CS_TAG);	
+
+		IToken csTag1 = this.getToken(ITemplateColorConstants.CS_TAG);
 		rules.add(new MultiLineRule("#{cs", "}#", csTag1));//$NON-NLS-1$ //$NON-NLS-2$
         // Add rule for Strings
         rules.add(new MultiLineRule("\'", "\'", singleQuoteString, '\\', false)); //$NON-NLS-1$ //$NON-NLS-2$
         rules.add(new MultiLineRule("\"", "\"", string, '\\', false)); //$NON-NLS-1$ //$NON-NLS-2$
         rules.add(new MultiLineRule("[[", "]]", noparseString));
-        
+
         // Add rule for multi-line comments
         rules.add(new MultiLineRule("--[[", "]]", multiline));
 
@@ -105,7 +106,7 @@ public class LuaCodeScanner extends AbstractScriptScanner {
 
     /**
      * Indicates if argument is a white space
-     * 
+     *
      * @param char Tested character
      */
     public class LuaWhitespaceDetector implements IWhitespaceDetector {
@@ -117,7 +118,7 @@ public class LuaCodeScanner extends AbstractScriptScanner {
     public class LuaWordDetector implements IWordDetector {
         /**
          * Indicates if argument is part of a word
-         * 
+         *
          * @param char Tested character
          */
         public boolean isWordPart(char character) {
@@ -126,7 +127,7 @@ public class LuaCodeScanner extends AbstractScriptScanner {
 
         /**
          * Indicates if argument starts of a word
-         * 
+         *
          * @param char Tested character
          */
         public boolean isWordStart(char character) {
