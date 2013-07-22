@@ -2,7 +2,7 @@
 %% Created: Mar 23, 2006
 %% Description: TODO: Add description to erlide_open
 -module(erlide_open).
--author(jakobce@gmail.com).
+-author('jakobce@gmail.com').
 
 %%
 %% Exported Functions
