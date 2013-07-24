@@ -145,4 +145,19 @@ public class RytongUIPlugin extends AbstractUIPlugin {
     public ResourceBundle getResourceBundle() {
         return resourceBundle;
     }
+    
+    public static String[] getAppDirs() {
+    	return new String[]{
+    			RytongUIConstants.APP_BIN_DIR,
+            RytongUIConstants.APP_CONFIG_DIR,
+            RytongUIConstants.APP_DRIVERS_DIR,
+            RytongUIConstants.APP_EBIN_DIR,
+    			RytongUIConstants.APP_CERT_DIR, 
+    			RytongUIConstants.APP_CS_DIR, 
+    			RytongUIConstants.APP_INCLUDE_DIR,
+    			RytongUIConstants.APP_LOG_DIR,
+    			RytongUIConstants.APP_PUSHKEY_DIR,
+    			RytongUIConstants.APP_SRC_DIR,
+    			RytongUIConstants.APP_WWW_DIR};
+    }
 }

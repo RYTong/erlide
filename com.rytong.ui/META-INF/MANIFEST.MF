@@ -7,12 +7,13 @@ Bundle-Activator: com.rytong.ui.internal.RytongUIPlugin
 Bundle-Vendor: RYTONG
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.core.resources;bundle-version="3.8.1",
+ org.eclipse.core.resources,
  org.erlide.core;bundle-version="1.0.0",
  org.erlide.ui;bundle-version="0.15.2",
  org.erlide.jinterface;bundle-version="0.15.2",
- org.eclipse.ui.ide;bundle-version="3.8.2"
+ org.eclipse.ui.ide,
+ org.eclipse.ui.forms;bundle-version="3.5.200"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: com.rytong.ui,
- com.rytong.ui.wizard
+ com.rytong.ui.internal.wizard

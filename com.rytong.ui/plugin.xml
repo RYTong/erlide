@@ -5,7 +5,7 @@
          point="org.eclipse.ui.newWizards">
       <wizard
             category="org.erlide.ui.wizards.newWizards"
-            class="com.rytong.ui.wizard.NewAppProjectWizard"
+            class="com.rytong.ui.internal.wizard.NewAppProjectWizard"
             finalPerspective="org.erlide.ui.perspectives.ErlangPerspective"
             hasPages="true"
             icon="icons/sample.gif"
