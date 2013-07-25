@@ -39,6 +39,13 @@ public class NewAppProjectWizard extends Wizard implements INewWizard {
 	private AppFieldData fData;
    private IProject project;
 
+
+	public NewAppProjectWizard() {
+		super();
+//		setNeedsProgressMonitor(true);
+		setWindowTitle(RytongUIMessages.NewAppProjectWizard_title);
+}
+
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		setNeedsProgressMonitor(true);

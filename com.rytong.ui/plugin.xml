@@ -13,6 +13,15 @@
             name="EMP App Project"
             project="true">
       </wizard>
+      <wizard
+            category="org.erlide.ui.wizards.newWizards"
+            class="com.rytong.ui.internal.wizard.NewAdapterConfWizard"
+            finalPerspective="org.erlide.ui.perspectives.ErlangPerspective"
+            hasPages="true"
+            icon="icons/sample.gif"
+            id="com.rytong.ui.NewAdapterConfWizard"
+            name="EMP Adapter">
+      </wizard>
    </extension>
 
 </plugin>

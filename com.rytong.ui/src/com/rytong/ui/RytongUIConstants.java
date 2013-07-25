@@ -10,7 +10,12 @@ public final class RytongUIConstants {
     /**
      * The new project wizard
      */
-    public static final String IMG_NEW_PROJECT_WIZARD = "wizard.ico";
+    public static final String IMG_NEW_PROJECT_WIZARD = "project_wizard.ico";
+    
+    /**
+     * the adapter wizard
+     */
+	 public static final String IMG_NEW_ADAPTER_WIZARD = "adapter_wizard.ico";
     
     /**
      * The bin dir 
@@ -71,6 +76,7 @@ public final class RytongUIConstants {
      * template properties file name
      */
     public static final String TEMPLATE_PROPFILE = "template.properties";
+
     
 
     private RytongUIConstants() {

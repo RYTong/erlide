@@ -30,8 +30,22 @@ public class RytongUIMessages extends NLS {
 	public static String TemplateListSelectionPage_templates;
     
    public static String TemplateListSelectionPage_noDes;
+   
+   
+   public static String NewAdapterConfWizard_title;
+   
+   
+   public static String CreateAdapterConfPage_title;
+   
+   public static String CreateAdapterConfPage_desc;
+   
+   public static String CreateAdapterConfPage_name_label;
     
+   public static String CreateAdapterConfPage_protocol_label;
+   
+   public static String CreateAdapterConfPage_protocol_names;
 	
+   
 	static {
 		// load message values from bundle file
 		NLS.initializeMessages(BUNDLE_NAME, RytongUIMessages.class);
