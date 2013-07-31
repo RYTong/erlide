@@ -12,8 +12,11 @@ Require-Bundle: org.eclipse.ui,
  org.erlide.ui;bundle-version="0.15.2",
  org.erlide.jinterface;bundle-version="0.15.2",
  org.eclipse.ui.ide,
- org.eclipse.ui.forms;bundle-version="3.5.200"
+ org.eclipse.ui.forms;bundle-version="3.5.200",
+ org.eclipse.ui.editors;bundle-version="3.8.0",
+ org.eclipse.jface.text;bundle-version="3.8.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: com.rytong.ui,
+ com.rytong.ui.econfeditor,
  com.rytong.ui.internal.wizard

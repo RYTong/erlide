@@ -23,5 +23,22 @@
             name="EMP Adapter">
       </wizard>
    </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="com.rytong.ui.econfeditor.EconfEditor"
+            default="true"
+            extensions="conf"
+            icon="icons/econf.ico"
+            id="com.rytong.ui.econfeditor"
+            name="EconfEditor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.rytong.ui.internal.preference.PreferenceInitializer">
+      </initializer>
+   </extension>
 
 </plugin>

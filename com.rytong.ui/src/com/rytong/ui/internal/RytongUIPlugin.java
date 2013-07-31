@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -160,4 +161,13 @@ public class RytongUIPlugin extends AbstractUIPlugin {
     			RytongUIConstants.APP_SRC_DIR,
     			RytongUIConstants.APP_WWW_DIR};
     }
+    
+	/**
+	 * Returns the default preference store.
+	 * 
+	 * @return IPreferenceStore
+	 */
+	public static IPreferenceStore getRytongPreferenceStore() {
+		return getDefault().getPreferenceStore();
+	}
 }
