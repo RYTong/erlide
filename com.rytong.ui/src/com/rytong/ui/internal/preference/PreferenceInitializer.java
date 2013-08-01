@@ -27,6 +27,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		PreferenceConverter.setDefault(store, ColorManager.UNDEFINED, new RGB(128, 0, 0));
 		PreferenceConverter.setDefault(store, ColorManager.COMMENT, new RGB(128, 128, 128));
 		PreferenceConverter.setDefault(store, ColorManager.DEFAULT, new RGB(64, 64, 64));
+        
+      store.setDefault(PreferenceConstants.VALIDATION, PreferenceConstants.SYNTAX_VALIDATION_ERROR);
 	}
 
 }
