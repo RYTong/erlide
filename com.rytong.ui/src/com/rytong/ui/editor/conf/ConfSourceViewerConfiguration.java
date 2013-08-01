@@ -1,4 +1,4 @@
-package com.rytong.ui.econfeditor;
+package com.rytong.ui.editor.conf;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
@@ -16,11 +16,11 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
  * @author lu.jingbo@rytong.com
  *
  */
-public class EconfSourceViewerConfiguration extends SourceViewerConfiguration {
+public class ConfSourceViewerConfiguration extends SourceViewerConfiguration {
 
-	private EconfEditor editor;
+	private ConfEditor editor;
 
-	public EconfSourceViewerConfiguration(EconfEditor editor) {
+	public ConfSourceViewerConfiguration(ConfEditor editor) {
 		super();
       this.editor = editor;
 	}
@@ -35,7 +35,7 @@ public class EconfSourceViewerConfiguration extends SourceViewerConfiguration {
 	public IPresentationReconciler getPresentationReconciler(
 			ISourceViewer sourceViewer) {
       PresentationReconciler reconciler = new PresentationReconciler();
-      addDamagerRepairer(reconciler, editor.getEconfScanner(), IDocument.DEFAULT_CONTENT_TYPE);
+      addDamagerRepairer(reconciler, editor.getConfScanner(), IDocument.DEFAULT_CONTENT_TYPE);
       return reconciler;
 	}
 

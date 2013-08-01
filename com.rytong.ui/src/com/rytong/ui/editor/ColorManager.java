@@ -1,4 +1,4 @@
-package com.rytong.ui.econfeditor;
+package com.rytong.ui.editor;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,20 +16,24 @@ import com.rytong.ui.internal.RytongUIPlugin;
  */
 public class ColorManager {
 
-	public static final String STRING = "colorString";
-   public static final String BOOLEAN = "colorBoolean";
-   public static final String NUMBER = "colorNumber";
-   public static final String UNDEFINED = "colorUndefined";
-   public static final String COMMENT = "colorComment";
-	public static final String DEFAULT = "colorDefault";
-
-	protected Map<String, Color> fColorTable = new HashMap<String, Color>(10);
-
+	protected Map<String, Color> fColorTable;
+    
+    
+	public ColorManager() {
+    	this(10);
+	}
+    
+	public ColorManager(int i) {
+		fColorTable = new HashMap<String, Color>(i);		
+	}
+    
+    
 	public void dispose() {
 		Iterator<Color> e = fColorTable.values().iterator();
 		while (e.hasNext())
 			 ((Color) e.next()).dispose();
 	}
+    
 	public Color getColor(String rgb) {
 		Color color = (Color) fColorTable.get(rgb);
 		if (color == null) {

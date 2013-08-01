@@ -1,4 +1,4 @@
-package com.rytong.ui.econfeditor;
+package com.rytong.ui.editor.conf;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -20,21 +20,22 @@ import com.ericsson.otp.erlang.OtpErlangLong;
 import com.ericsson.otp.erlang.OtpErlangObject;
 import com.ericsson.otp.erlang.OtpErlangString;
 import com.ericsson.otp.erlang.OtpErlangTuple;
+import com.rytong.ui.editor.ColorManager;
 import com.rytong.ui.internal.RytongUIPlugin;
 import com.rytong.ui.internal.preference.PreferenceConstants;
 
 /**
- * EconfTextEditor is the TextEditor instance used by the plugin.
+ * ConfEditor is the TextEditor instance used by the plugin.
  * 
  * @author lu.jingbo@rytong.com
  * 
  */
-public class EconfEditor extends TextEditor {
+public class ConfEditor extends TextEditor {
 
 	private ColorManager colorManager;
-	private EconfScanner econfScanner;
+	private ConfScanner confScanner;
 
-	public EconfEditor() {
+	public ConfEditor() {
 		super();
 		// setDocumentProvider(provider);
 	}
@@ -42,8 +43,8 @@ public class EconfEditor extends TextEditor {
 	@Override
 	protected void initializeEditor() {
 		super.initializeEditor();
-		colorManager = new ColorManager();
-		SourceViewerConfiguration cfg = new EconfSourceViewerConfiguration(this);
+		colorManager = new ConfColorManager();
+		SourceViewerConfiguration cfg = new ConfSourceViewerConfiguration(this);
 		setSourceViewerConfiguration(cfg);
 	}
 
@@ -64,10 +65,10 @@ public class EconfEditor extends TextEditor {
 		super.dispose();
 	}
 
-	public EconfScanner getEconfScanner() {
-		if (econfScanner == null)
-			econfScanner = new EconfScanner(colorManager);
-		return econfScanner;
+	public ConfScanner getConfScanner() {
+		if (confScanner == null)
+			confScanner = new ConfScanner(colorManager);
+		return confScanner;
 	}
 
 	private void make_errors() {

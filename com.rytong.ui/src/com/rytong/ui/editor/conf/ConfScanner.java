@@ -1,4 +1,4 @@
-package com.rytong.ui.econfeditor;
+package com.rytong.ui.editor.conf;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -15,32 +15,15 @@ import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WhitespaceRule;
 import org.eclipse.jface.text.rules.WordRule;
 
+import com.rytong.ui.editor.ColorManager;
+import com.rytong.ui.editor.NumberDetector;
+
 /**
  * @author lu.jingbo@rytong.com
  *
  */
-public class EconfScanner extends RuleBasedScanner {
+public class ConfScanner extends RuleBasedScanner {
 
-	/**
-	 * Detector for number.
-	 */
-	static class NumberDetector implements IWordDetector {
-
-		/* (non-Javadoc)
-		* Method declared on IWordDetector
-	 	*/
-		public boolean isWordStart(char c) {
-			return (c >= '0' && c <= '9');
-		}
-
-		/* (non-Javadoc)
-		* Method declared on IWordDetector
-	 	*/
-		public boolean isWordPart(char c) {
-			return ((c >= '0' && c <= '9') || c == '.');
-		}
-	}
-    
     /**
      * Detector for atom.
      */
@@ -77,15 +60,15 @@ public class EconfScanner extends RuleBasedScanner {
 		}
 	}
 
-	public EconfScanner(ColorManager colorManager) {
+	public ConfScanner(ColorManager colorManager) {
 		super();
         
-		IToken string = new Token(new TextAttribute(colorManager.getColor(ColorManager.STRING)));
-		IToken bool = new Token(new TextAttribute(colorManager.getColor(ColorManager.BOOLEAN)));
-		IToken number = new Token(new TextAttribute(colorManager.getColor(ColorManager.NUMBER)));
-		IToken undefined = new Token(new TextAttribute(colorManager.getColor(ColorManager.UNDEFINED)));
-		IToken comment = new Token(new TextAttribute(colorManager.getColor(ColorManager.COMMENT)));
-		IToken other = new Token(new TextAttribute(colorManager.getColor(ColorManager.DEFAULT)));
+		IToken string = new Token(new TextAttribute(colorManager.getColor(ConfColorManager.STRING)));
+		IToken bool = new Token(new TextAttribute(colorManager.getColor(ConfColorManager.BOOLEAN)));
+		IToken number = new Token(new TextAttribute(colorManager.getColor(ConfColorManager.NUMBER)));
+		IToken undefined = new Token(new TextAttribute(colorManager.getColor(ConfColorManager.UNDEFINED)));
+		IToken comment = new Token(new TextAttribute(colorManager.getColor(ConfColorManager.COMMENT)));
+		IToken other = new Token(new TextAttribute(colorManager.getColor(ConfColorManager.DEFAULT)));
 		
 		List<IRule> rules= new LinkedList<IRule>();
 		

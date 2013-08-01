@@ -26,12 +26,12 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="com.rytong.ui.econfeditor.EconfEditor"
+            class="com.rytong.ui.editor.conf.ConfEditor"
             default="true"
             extensions="conf"
             icon="icons/econf.ico"
-            id="com.rytong.ui.econfeditor"
-            name="EconfEditor">
+            id="com.rytong.ui.editor.conf"
+            name="Erlang Conf Editor">
       </editor>
    </extension>
    <extension
@@ -39,6 +39,18 @@
       <initializer
             class="com.rytong.ui.internal.preference.PreferenceInitializer">
       </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="com.rytong.ui.editor.lua.LuaEditor"
+            default="false"
+            extensions="lua"
+            filenames="l"
+            icon="icons/lua.ico"
+            id="com.rytong.ui.editor.lua"
+            name="Lua Editor Pro">
+      </editor>
    </extension>
 
 </plugin>

@@ -10,36 +10,25 @@
  *******************************************************************************/
 package com.rytong.template.editor.template;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
-import java.io.StringBufferInputStream;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.ui.text.ScriptTextTools;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
-import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.actions.ActionContext;
-import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.texteditor.ContentAssistAction;
-import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
-import org.eclipse.ui.texteditor.ResourceAction;
-import org.eclipse.ui.texteditor.TextOperationAction;
 import org.erlide.backend.BackendCore;
 import org.erlide.backend.IBackend;
 import org.erlide.jinterface.ErlLogger;
 import org.erlide.jinterface.rpc.RpcException;
-import org.erlide.utils.SystemUtils;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
@@ -47,8 +36,6 @@ import org.xml.sax.XMLReader;
 import com.rytong.template.editor.actions.IndentAction;
 
 
-import com.ericsson.otp.erlang.OtpErlangAtom;
-import com.ericsson.otp.erlang.OtpErlangInt;
 import com.ericsson.otp.erlang.OtpErlangList;
 import com.ericsson.otp.erlang.OtpErlangLong;
 import com.ericsson.otp.erlang.OtpErlangObject;
@@ -104,13 +91,11 @@ public class TemplateEditor extends ScriptEditor {
 
     @Override
     public String getEditorId() {
-        // TODO Auto-generated method stub
         return EDITOR_ID;
     }
 
     @Override
     public IDLTKLanguageToolkit getLanguageToolkit() {
-        // TODO Auto-generated method stub
         return LuaLanguageToolkit.getDefault();
     }
 
@@ -226,8 +211,10 @@ public class TemplateEditor extends ScriptEditor {
             		if (matcher.find(0) == true){
             			parser.parse(file.getContents(), reporter);
             		} else {
-            			StringBufferInputStream s1 = new StringBufferInputStream("<ewp_tmpl_root>");
-            			StringBufferInputStream s2 = new StringBufferInputStream("</ewp_tmpl_root>");
+//            			StringBufferInputStream s1 = new StringBufferInputStream("<ewp_tmpl_root>");
+//            			StringBufferInputStream s2 = new StringBufferInputStream("</ewp_tmpl_root>");
+							InputStream s1 = new ByteArrayInputStream("<ewp_tmpl_root>".getBytes());
+							InputStream s2 = new ByteArrayInputStream("</ewp_tmpl_root>".getBytes());
             			SequenceInputStream s = new SequenceInputStream(s1, file.getContents());
             			parser.parse(new SequenceInputStream(s, s2), reporter);
             		}
