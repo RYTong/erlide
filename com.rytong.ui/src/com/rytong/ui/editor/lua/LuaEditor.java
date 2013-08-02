@@ -5,7 +5,7 @@ import org.eclipse.ui.editors.text.TextEditor;
 import com.rytong.ui.editor.ColorManager;
 
 /**
- * Rewrite of LuaEditor, no DLTK API include now.
+ * Rewrite of LuaEditor without using DLTK API. 
  * @author lu.jingbo@rytong.com
  *
  */
@@ -18,11 +18,11 @@ public class LuaEditor extends TextEditor {
 		super();
       colorManager = new LuaColorManager();
 		setSourceViewerConfiguration(new LuaSourceViewerConfiguration(this));
-		//setDocumentProvider(new XMLDocumentProvider());
 	}
 
 	@Override
 	public void dispose() {
+    	colorManager.dispose();
 		super.dispose();
 	}
     

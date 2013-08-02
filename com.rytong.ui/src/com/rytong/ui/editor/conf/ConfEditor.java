@@ -25,7 +25,7 @@ import com.rytong.ui.internal.RytongUIPlugin;
 import com.rytong.ui.internal.preference.PreferenceConstants;
 
 /**
- * ConfEditor is the TextEditor instance used by the plugin.
+ * ConfEditor is the TextEditor to edit Erlang conf based conf file for ewp.
  * 
  * @author lu.jingbo@rytong.com
  * 
@@ -136,13 +136,16 @@ public class ConfEditor extends TextEditor {
 								.elementAt(1);
 						int lineno = ((OtpErlangLong) errdata.elementAt(0))
 								.intValue();
-						OtpErlangList errlist = (OtpErlangList) errdata
-								.elementAt(2);
+						Object errlist =  errdata.elementAt(2);
 						String errmsg = "";
-						for (final OtpErlangObject err : errlist) {
-							final OtpErlangString msg = (OtpErlangString) err;
-							errmsg += msg.stringValue();
-						}
+               	if (errlist instanceof OtpErlangString) {
+                   	errmsg = ((OtpErlangString)errlist).stringValue();
+           			} else {
+    						for (final OtpErlangObject err : (OtpErlangList)errlist) {
+    							final OtpErlangString msg = (OtpErlangString) err;
+    							errmsg += msg.stringValue();
+    						}
+               			}
 						rst = new Object[] { lineno, errmsg };
 					}
 				}
