@@ -8,7 +8,7 @@
             class="com.rytong.ui.internal.wizard.NewAppProjectWizard"
             finalPerspective="org.erlide.ui.perspectives.ErlangPerspective"
             hasPages="true"
-            icon="icons/sample.gif"
+            icon="icons/empapp.ico"
             id="com.rytong.ui.NewAppProjectWizard"
             name="EMP App Project"
             project="true">
@@ -18,9 +18,9 @@
             class="com.rytong.ui.internal.wizard.NewAdapterConfWizard"
             finalPerspective="org.erlide.ui.perspectives.ErlangPerspective"
             hasPages="true"
-            icon="icons/sample.gif"
+            icon="icons/econf.ico"
             id="com.rytong.ui.NewAdapterConfWizard"
-            name="EMP Adapter">
+            name="EMP Adapter Conf">
       </wizard>
    </extension>
    <extension
@@ -51,6 +51,28 @@
             id="com.rytong.ui.editor.lua"
             name="Lua Editor Pro">
       </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.navigator.navigatorContent">
+      <commonWizard
+            menuGroupId="com.rytong.ui.mgroup"
+            type="new"
+            wizardId="com.rytong.ui.NewAppProjectWizard">
+         <enablement></enablement>
+      </commonWizard>
+      <commonWizard
+            menuGroupId="com.rytong.ui.mgroup"
+            type="new"
+            wizardId="com.rytong.ui.NewAdapterConfWizard">
+         <enablement></enablement>
+      </commonWizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <group
+            id="com.rytong.ui.mgroup"
+            separatorsVisible="true">
+      </group>
    </extension>
 
 </plugin>
