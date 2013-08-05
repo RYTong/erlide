@@ -15,7 +15,6 @@ import org.erlide.backend.IBackend;
 import org.erlide.jinterface.ErlLogger;
 
 import com.ericsson.otp.erlang.OtpErlangAtom;
-import com.ericsson.otp.erlang.OtpErlangList;
 import com.ericsson.otp.erlang.OtpErlangLong;
 import com.ericsson.otp.erlang.OtpErlangObject;
 import com.ericsson.otp.erlang.OtpErlangString;
@@ -50,6 +49,7 @@ public class ConfEditor extends TextEditor {
 
 	@Override
 	public void doSaveAs() {
+      make_errors();
 		super.doSaveAs();
 	}
 
@@ -125,7 +125,7 @@ public class ConfEditor extends TextEditor {
 			ErlLogger.debug("call erlang backend to parse conf file");
 			OtpErlangObject res = null;
 			try {
-				res = ideBackend.call("file", "consult", "s", fn);
+				res = ideBackend.call("erlide_util", "consult", "s", fn);
 				if (res instanceof OtpErlangTuple) {
 					final OtpErlangTuple tuple = (OtpErlangTuple) res;
 					ErlLogger.debug("the tuple : " + tuple);
@@ -136,16 +136,7 @@ public class ConfEditor extends TextEditor {
 								.elementAt(1);
 						int lineno = ((OtpErlangLong) errdata.elementAt(0))
 								.intValue();
-						Object errlist =  errdata.elementAt(2);
-						String errmsg = "";
-               	if (errlist instanceof OtpErlangString) {
-                   	errmsg = ((OtpErlangString)errlist).stringValue();
-           			} else {
-    						for (final OtpErlangObject err : (OtpErlangList)errlist) {
-    							final OtpErlangString msg = (OtpErlangString) err;
-    							errmsg += msg.stringValue();
-    						}
-               			}
+						String errmsg =  ((OtpErlangString)errdata.elementAt(2)).stringValue();
 						rst = new Object[] { lineno, errmsg };
 					}
 				}
