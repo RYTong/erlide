@@ -18,7 +18,7 @@
             class="com.rytong.ui.internal.wizard.NewAdapterConfWizard"
             finalPerspective="org.erlide.ui.perspectives.ErlangPerspective"
             hasPages="true"
-            icon="icons/econf.ico"
+            icon="icons/adapterconf.ico"
             id="com.rytong.ui.NewAdapterConfWizard"
             name="EMP Adapter Conf">
       </wizard>
@@ -33,24 +33,29 @@
             id="com.rytong.ui.editor.conf"
             name="Erlang Conf Editor">
       </editor>
-   </extension>
-   <extension
-         point="org.eclipse.core.runtime.preferences">
-      <initializer
-            class="com.rytong.ui.internal.preference.PreferenceInitializer">
-      </initializer>
-   </extension>
-   <extension
-         point="org.eclipse.ui.editors">
       <editor
             class="com.rytong.ui.editor.lua.LuaEditor"
-            default="false"
+            default="true"
             extensions="lua"
             filenames="l"
             icon="icons/lua.ico"
             id="com.rytong.ui.editor.lua"
             name="Lua Editor Pro">
       </editor>
+      <editor
+            class="com.rytong.ui.editor.yaws.YawsEditor"
+            default="true"
+            filenames="yaws.conf"
+            icon="icons/yaws.ico"
+            id="com.rytong.ui.editor.yaws"
+            name="Yaws Conf Editor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.rytong.ui.internal.preference.PreferenceInitializer">
+      </initializer>
    </extension>
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">

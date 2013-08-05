@@ -7,6 +7,7 @@ import org.eclipse.swt.graphics.RGB;
 
 import com.rytong.ui.editor.conf.ConfColorManager;
 import com.rytong.ui.editor.lua.LuaColorManager;
+import com.rytong.ui.editor.yaws.YawsColorManager;
 import com.rytong.ui.internal.RytongUIPlugin;
 
 /**
@@ -27,13 +28,21 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		PreferenceConverter.setDefault(store, ConfColorManager.BOOLEAN, new RGB(0, 0, 128));
 		PreferenceConverter.setDefault(store, ConfColorManager.NUMBER, new RGB(128, 0, 128));
 		PreferenceConverter.setDefault(store, ConfColorManager.UNDEFINED, new RGB(128, 0, 0));
-		PreferenceConverter.setDefault(store, ConfColorManager.COMMENT, new RGB(128, 128, 128));
+		PreferenceConverter.setDefault(store, ConfColorManager.COMMENT, new RGB(160, 160, 160));
 		PreferenceConverter.setDefault(store, ConfColorManager.DEFAULT, new RGB(64, 64, 64));
+        
+		PreferenceConverter.setDefault(store, YawsColorManager.TAG, new RGB(0, 128, 0));
+		PreferenceConverter.setDefault(store, YawsColorManager.VALUE, new RGB(0, 128, 128));
+		PreferenceConverter.setDefault(store, YawsColorManager.BOOLEAN, new RGB(0, 0, 128));
+		PreferenceConverter.setDefault(store, YawsColorManager.NUMBER, new RGB(128, 0, 128));
+		PreferenceConverter.setDefault(store, YawsColorManager.UNDEFINED, new RGB(128, 0, 0));
+		PreferenceConverter.setDefault(store, YawsColorManager.COMMENT, new RGB(160, 160, 160));
+		PreferenceConverter.setDefault(store, YawsColorManager.DEFAULT, new RGB(64, 64, 64));
         
 		PreferenceConverter.setDefault(store, LuaColorManager.KEYWORD, new RGB(128, 128, 0));
 		PreferenceConverter.setDefault(store, LuaColorManager.STRING, new RGB(0, 128, 0));
 		PreferenceConverter.setDefault(store, LuaColorManager.NUMBER, new RGB(128, 0, 128));
-		PreferenceConverter.setDefault(store, LuaColorManager.COMMENT, new RGB(128, 128, 128));
+		PreferenceConverter.setDefault(store, LuaColorManager.COMMENT, new RGB(160, 160, 160));
 		PreferenceConverter.setDefault(store, LuaColorManager.DEFAULT, new RGB(64, 64, 64));
         
       store.setDefault(PreferenceConstants.VALIDATION, PreferenceConstants.SYNTAX_VALIDATION_ERROR);
