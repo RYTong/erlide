@@ -90,7 +90,7 @@ public class ConfEditor extends TextEditor {
 		}
 		Object[] rst = consult_conf(fn);
 		if (rst != null) {
-			int lineno = (int) rst[0];
+			int lineno = Integer.valueOf(rst[0].toString());
 			String errmsg = (String) rst[1];
 			IPreferenceStore prefs = RytongUIPlugin.getDefault() .getPreferenceStore();
 			String severity = prefs.getString(PreferenceConstants.VALIDATION);

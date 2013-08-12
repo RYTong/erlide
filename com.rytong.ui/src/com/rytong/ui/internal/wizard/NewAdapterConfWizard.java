@@ -74,7 +74,10 @@ public class NewAdapterConfWizard extends Wizard implements INewWizard {
 				file.create(stream, true, null);
 			}
 			stream.close();
-		} catch (final IOException | CoreException e) {
+		} catch (final IOException e){
+			ErlLogger.error("failed to create adapter conf file");
+			e.printStackTrace();
+		} catch (CoreException e)  {
 			ErlLogger.error("failed to create adapter conf file");
 			e.printStackTrace();
 		}

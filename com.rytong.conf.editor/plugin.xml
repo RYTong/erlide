@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="com.rytong.conf.editor.editors.MultiConfEditor"
+            default="true"
+            filenames="channel.conf"
+            icon="icons/conf.gif"
+            id="com.rytong.conf.editor"
+            name="Simple Conf Editor">
+      </editor>
+      <editor
+            class="com.rytong.conf.editor.form.ConfFormEditor"
+            default="false"
+            extensions="conf2"
+            icon="icons/conf.gif"
+            id="com.rytong.conf.editor.editor1"
+            name="Simple Conf Editor2">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="Sample Conf Wizards"
+            id="com.rytong.conf.editor">
+      </category>
+      <wizard
+            name="Add Conf"
+            icon="icons/conf.gif"
+            category="com.rytong.conf.editor"
+            class="com.rytong.conf.editor.wizards.AddConfWizard"
+            id="com.rytong.conf.editor.wizards.AddConfWizard">
+      </wizard>
+   </extension>
+
+</plugin>
