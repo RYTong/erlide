@@ -3,7 +3,14 @@ package com.rytong.conf.editor.pages;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 import org.erlide.jinterface.ErlLogger;
+
+import com.ericsson.otp.erlang.OtpErlangInt;
+import com.ericsson.otp.erlang.OtpErlangList;
+import com.ericsson.otp.erlang.OtpErlangObject;
+import com.ericsson.otp.erlang.OtpErlangTuple;
 
 public class EwpCollections {
 	public String coll_id="";
@@ -13,6 +20,7 @@ public class EwpCollections {
 	public String coll_userid="";
 	public String coll_type="";
 	public String coll_state="";
+
 
 	public String type="collections";
 
@@ -30,6 +38,19 @@ public class EwpCollections {
 		itemObj = itemObj.getItemObj();
 		return itemObj;
 	}
+
+	public boolean checkValue(){
+		if ((coll_id.isEmpty()||coll_id.replace(" ", "").isEmpty())||
+				(coll_app.isEmpty()||coll_app.replace(" ", "").isEmpty())||
+				(coll_name.isEmpty()||coll_name.replace(" ", "").isEmpty())||
+				(coll_type.isEmpty()||coll_type.replace(" ", "").isEmpty())||
+				(coll_state.isEmpty()||coll_state.replace(" ", "").isEmpty())
+				)
+			return false;
+		else
+			return true;
+	}
+
 
 	public void addItem(EwpCollectionItems itemObj){
 		if (itemObj.item_id !=null)
@@ -111,6 +132,89 @@ public class EwpCollections {
 	}
 
 
+	//-----------------@FIXME
+
+	public String[] must_input={"id", "app", "name", "type", "state"};
+	public String[] text={"id", "app", "name", "url", "user_id", "type", "state"};
+	private Table table;
+	HashMap<String, Integer> tableMap;
+
+
+	public HashMap<String, Boolean> initial_label_flag(){
+		HashMap<String, Boolean> labelMap = new HashMap<String, Boolean>();
+		for (int i=0; i<text.length;i++){
+			for(int f=0;f<must_input.length;f++){
+				if(text[i]==must_input[f])
+					labelMap.put(text[i], true);
+			}
+		}
+		return labelMap;
+	}
+
+
+	public HashMap<String, String> storeMap=null;
+	public void initial_store(){
+		storeMap=new HashMap<String, String>();
+	}
+
+	public void store_value(String id, String value){
+		if (storeMap.get(id)!=null){
+			storeMap.put(id, value);
+		}else {
+			ErlLogger.debug("ewp collection :"+id);
+		}
+	}
+
+	public void set_Wizard_Table(Table table,  HashMap<String, Integer> tableMap){
+		this.table=table;
+		this.tableMap=tableMap;
+	}
+
+	public OtpErlangList get_items_tuple(){
+
+		if (table==null){
+			ErlLogger.debug("table: null");
+			return null;
+		}
+		else {
+			ArrayList<OtpErlangObject> list = new ArrayList<OtpErlangObject>();
+			TableItem[] tmp = table.getItems();
+			//ErlLogger.debug("collection tmp.length:"+tmp.length);
+			for (int i=0;i<tmp.length;i++){
+				//ErlLogger.debug("collection tmp.length:"+tmp[i].getText());
+				OtpErlangTuple tmpRe = formParams(tmp[i], i+1);
+				if (tmpRe!=null)
+					list.add(tmpRe);
+			}
+			if (list.size()!=0){
+				OtpErlangObject[] result = new OtpErlangObject[list.size()];
+				for(int i=0; i<list.size();i++)
+					result[i]=list.get(i);
+				return new OtpErlangList(result);
+			}
+			else
+				return null;
+		}
+	}
+
+	public OtpErlangTuple formParams(TableItem item, int order){
+		if (item != null){
+			EwpCollectionItems tmpItem= initialItem();
+			String id = item.getText();
+			Integer Type = tableMap.get(id);
+			tmpItem.item_id=id;
+			tmpItem.item_type=String.valueOf(Type);
+			tmpItem.menu_order=String.valueOf(order);
+			addItem(tmpItem);
+			OtpErlangObject[] request = new OtpErlangObject[3];
+			request[0]=new OtpErlangList(id);
+			request[1]=new OtpErlangInt(Type);
+			request[2]=new OtpErlangInt(order);
+			return new OtpErlangTuple(request);
+		}
+		else
+			return null;
+	}
 
 
 }

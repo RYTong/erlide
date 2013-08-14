@@ -8,8 +8,6 @@ import org.erlide.jinterface.ErlLogger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
-
-import com.rytong.conf.editor.pages.CollectionsPage;
 import com.rytong.conf.editor.pages.EwpChannels;
 import com.rytong.conf.editor.pages.EwpCollectionItems;
 import com.rytong.conf.editor.pages.EwpCollections;
@@ -25,7 +23,6 @@ public class ConfErrorHandler extends DefaultHandler  {
 	private EwpCollectionItems itemsObj;
 	private EwpChannels chaObj;
 	private Object nowObj;
-	private CollectionsPage page;
 	private TreeItem ftree;
 	private static int flag=0;
 
@@ -37,16 +34,9 @@ public class ConfErrorHandler extends DefaultHandler  {
 	//目前节点所对应的值
 	private String currentValue = null;
 
-	public void setPage(CollectionsPage cpage){
-		page= cpage;
-	}
-
-	public HashMap<String, Object> getCollectionsMap() {
-		return collMap;
-	}
-
-	public HashMap<String, EwpChannels> getChannelsMap() {
-		return channelMap;
+	public void setResultMap(HashMap<String, Object> collMap, HashMap<String, EwpChannels> channelMap){
+		this.collMap = collMap;
+		this.channelMap = channelMap;
 	}
 
 	public void characters(char[] ch, int start, int length) throws SAXException {
@@ -91,9 +81,6 @@ public class ConfErrorHandler extends DefaultHandler  {
 				chaObj.set_value(currentElement, currentValue);
 			} else if(nowObj.equals(itemsObj)){
 				//ErlLogger.debug("item object!");
-				if (eName=="menu_order"){
-
-				}
 				itemsObj.set_value(currentElement, currentValue);
 			}
 		};

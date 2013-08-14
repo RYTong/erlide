@@ -1,17 +1,10 @@
 package com.rytong.conf.editor.pages;
 
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.GridData;
@@ -19,25 +12,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.editors.text.TextEditor;
-import org.eclipse.ui.part.FileEditorInput;
-import org.erlide.backend.BackendCore;
-import org.erlide.backend.IBackend;
-import org.erlide.jinterface.ErlLogger;
-import org.erlide.jinterface.rpc.RpcException;
 import org.erlide.utils.Util;
 
-import com.ericsson.otp.erlang.OtpErlangBinary;
-import com.ericsson.otp.erlang.OtpErlangList;
 import com.ericsson.otp.erlang.OtpErlangObject;
-import com.rytong.conf.editor.editors.MultiConfEditor;
 
 public class CollectionComposite {
-
-	private TextEditor editor;
-	private Composite pagecomposite;
 	private Composite composite_coll=null;
-    private IDocument document;
 	private CollectionsPage parent;
 
 	String cId = "id";
@@ -70,9 +50,6 @@ public class CollectionComposite {
 	private Label collStateLabel;
 	private Text collStateText;
 
-	private String filePath;
-	private OtpErlangBinary confCon=null;
-
 
 
 	public CollectionComposite CollectionComposite() {
@@ -88,24 +65,14 @@ public class CollectionComposite {
 	}
 
 
-	public void setParent(CollectionsPage obj) {
-		parent=obj;
-		editor = parent.editor;
-		filePath=parent.filePathStr;
-		confCon=parent.confCon;
-		document = editor.getDocumentProvider()
-				.getDocument(editor.getEditorInput());
-	}
 
-
-
-	public void initialCollectionsComposite(Composite maincomposite){
-		pagecomposite = maincomposite;
+	public void initialCollectionsComposite(CollectionsPage parent){
+		this.parent = parent;
 		//right composite
 		if (composite_coll != null ) {
 			composite_coll.dispose();
 		}
-		composite_coll = new Composite(pagecomposite, SWT.BORDER);
+		composite_coll = new Composite(parent.pagecomposite, SWT.BORDER);
 		FormData rightcomsite_form = new FormData();
 		rightcomsite_form.left = new FormAttachment(2,1);
 		rightcomsite_form.right = new FormAttachment(50);
@@ -178,7 +145,7 @@ public class CollectionComposite {
 				String reStr = Util.stringValue(re);
 				//ErlLogger.debug("Ll:"+document.getLength());
 				try {
-					document.replace(0, document.getLength(), reStr);
+					parent.document.replace(0, parent.document.getLength(), reStr);
 				} catch (BadLocationException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

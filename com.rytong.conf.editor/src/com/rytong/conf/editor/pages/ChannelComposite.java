@@ -27,11 +27,8 @@ import com.ericsson.otp.erlang.OtpErlangObject;
 
 public class ChannelComposite {
 
-	private TextEditor editor;
-	private Composite pagecomposite;
 	private Composite composite_channel=null;
 	private CollectionsPage parent;
-	private IDocument document;
 
 	private Label chaIdLabel;
 	private Text chaIdText;
@@ -50,8 +47,6 @@ public class ChannelComposite {
 
 	private Label chaStateLabel;
 	private Text chaStateText;
-	private String filePath;
-	private OtpErlangBinary confCon=null;
 
 	String cId = "id";
 	String cApp = "app";
@@ -77,23 +72,13 @@ public class ChannelComposite {
 		return composite_channel;
 	}
 
-
-	public void setParent(CollectionsPage obj) {
-		parent=obj;
-		editor = parent.editor;
-		filePath = parent.filePathStr;
-		confCon = parent.confCon;
-		document = editor.getDocumentProvider()
-				.getDocument(editor.getEditorInput());
-	}
-
-	public void initialChannelsComposite(Composite maincomposite){
-		pagecomposite=maincomposite;
+	public void initialChannelsComposite(CollectionsPage parent){
+		this.parent = parent;
 		//right composite
 		if (composite_channel != null ) {
 			composite_channel.dispose();
 		}
-		composite_channel = new Composite(pagecomposite, SWT.BORDER);
+		composite_channel = new Composite(parent.pagecomposite, SWT.BORDER);
 		FormData rightcomsite_form = new FormData();
 		rightcomsite_form.left = new FormAttachment(2,1);
 		rightcomsite_form.right = new FormAttachment(50);
@@ -162,7 +147,7 @@ public class ChannelComposite {
 				String reStr = Util.stringValue(re);
 				//ErlLogger.debug("Ll:"+document.getLength());
 				try {
-					document.replace(0, document.getLength(), reStr);
+					parent.document.replace(0, parent.document.getLength(), reStr);
 				} catch (BadLocationException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
