@@ -20,6 +20,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -35,6 +36,10 @@ public class CollectionTable {
 
 	private Composite coll_table;
 	private CollectionsPage parent;
+
+	private Button newbutton;
+	private Button editbutton;
+	private Button removebutton;
 
 	private Table table=null;
 	private HashMap<String, TableItem> tableMap=null;
@@ -62,27 +67,36 @@ public class CollectionTable {
 		FormData rightcomsite_form = new FormData();
 		rightcomsite_form.left = new FormAttachment(50,5);
 		rightcomsite_form.right = new FormAttachment(99);
-		rightcomsite_form.top = new FormAttachment(5);
+		rightcomsite_form.top = new FormAttachment(0,20);
 		rightcomsite_form.bottom = new FormAttachment(50, -2);
 		coll_table.setLayoutData(rightcomsite_form);
 
 		// set the layout of collection table composite
-		GridLayout layout_right = new GridLayout();
-		layout_right.numColumns = 10;
-		layout_right.verticalSpacing=10;
-		coll_table.setLayout(layout_right);
 
-		GridData label_gd = new GridData(GridData.BEGINNING);
-		label_gd.horizontalSpan = 10;
+
+		coll_table.setLayout(new FormLayout());
 
 		Label label_all = new Label(coll_table, 0);
 		label_all.setText("Collection Table");
-		label_all.setLayoutData(label_gd);
 
-		table = new Table(coll_table, SWT.NONE);
+		FormData labelcomsite_form = new FormData();
+		labelcomsite_form.left = new FormAttachment(0, 5);
+		labelcomsite_form.right = new FormAttachment(100, -5);
+		labelcomsite_form.top = new FormAttachment(0, 3);
+		//labelcomsite_form.bottom = new FormAttachment(100, -2);
+		label_all.setLayoutData(labelcomsite_form);
+
+
+		table = new Table(coll_table, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
-		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,8,9));
+		FormData tablecomsite_form = new FormData();
+		tablecomsite_form.left = new FormAttachment(0, 5);
+		tablecomsite_form.right = new FormAttachment(100, -106);
+		tablecomsite_form.top = new FormAttachment(0, 23);
+		tablecomsite_form.bottom = new FormAttachment(100, -5);
+		table.setLayoutData(tablecomsite_form);
+
 
 		Transfer[] Types = new Transfer[]{TextTransfer.getInstance()};
 		int operations = DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK;
@@ -94,20 +108,24 @@ public class CollectionTable {
 		collId.setWidth(200);
 		collId.setText("Collection Id");
 		TableColumn collName = new TableColumn(table, SWT.NONE);
-		collName.setWidth(100);
+		collName.setWidth(150);
 		collName.setText("Collection Name");
 
 
-		Button newbutton = new Button(coll_table, SWT.NONE);
-		newbutton.setText(" New...  ");
-		newbutton.setLayoutData(new GridData(SWT.END, SWT.TOP, false, false,2,1));
+		newbutton = new Button(coll_table, SWT.LEFT);
+		newbutton.setText(" New...");
+		newbutton.setLayoutData(setButtonLayout(0));
+
+		editbutton = new Button(coll_table, SWT.LEFT);
+		editbutton.setText(" Edit");
+		editbutton.setLayoutData(setButtonLayout(1));
 
 
-		Button removebutton = new Button(coll_table, SWT.NONE);
-		removebutton.setText("Remove");
-		removebutton.setLayoutData(new GridData(SWT.END, SWT.TOP, false, false,2,1));
+		removebutton = new Button(coll_table, SWT.LEFT);
+		removebutton.setText(" Remove");
+		removebutton.setLayoutData(setButtonLayout(2));
 		// add button listener
-		setButtonListener(newbutton, removebutton);
+		setButtonListener();
 
 		//collStateText.addModifyListener(listener);
 		//coll_table.setVisible(false);
@@ -115,7 +133,10 @@ public class CollectionTable {
 
 	}
 
+
 	public void refreshTable(){
+		editbutton.setEnabled(false);
+		removebutton.setEnabled(false);
 		table.removeAll();
 		tableMap = new HashMap<String, TableItem>();
 		tableMapStore = new HashMap<String, Object>();
@@ -155,20 +176,33 @@ public class CollectionTable {
 		tableId.setText(new String[]{id, name});
 	}
 
+
+	public FormData setButtonLayout(int i){
+		FormData tmp_form = new FormData();
+		tmp_form.left = new FormAttachment(100, -103);
+		tmp_form.right = new FormAttachment(100, -3);
+		tmp_form.top = new FormAttachment(0, 23+i*30);
+		return tmp_form;
+	}
+
+	// add table listener
+
 	public void setTableListener(final Table table) {
 		table.addMouseListener(new MouseAdapter(){
 			public void mouseDown(MouseEvent event) {
 				if (event.getSource() != null ){
 					setChaTableDeselect();
-					Table eventTab = (Table) event.getSource();
-					int Len = eventTab.getItemCount();
-					TableItem[] eventItem = eventTab.getSelection();
+					TableItem[] eventItem = table.getSelection();
 
-					ErlLogger.debug("len:"+eventItem.length+"  Y:"+event.y+"  H:"+Len*17);
-					if (eventItem.length==1 && (event.y < Len*17) ){
+					if (eventItem.length == 1){
 						selectionPage(eventItem[0].getText());
+						removebutton.setEnabled(true);
+						editbutton.setEnabled(true);
+					} else if (eventItem.length > 1){
+						removebutton.setEnabled(true);
+						editbutton.setEnabled(false);
 					} else {
-						eventTab.deselectAll();
+						setTableDeselect();
 						parent.setVisiable();
 					}
 				}else {
@@ -178,7 +212,7 @@ public class CollectionTable {
 		});
 		table.addSelectionListener(new SelectionAdapter(){
 			public void widgetDefaultSelected(SelectionEvent event) {
-				table.deselectAll();
+				setTableDeselect();
 				parent.setVisiable();
 			}
 		});
@@ -232,6 +266,8 @@ public class CollectionTable {
 
 	public void setTableDeselect(){
 		table.deselectAll();
+		removebutton.setEnabled(false);
+		editbutton.setEnabled(false);
 	}
 
 	public void selectionPage(String key){
@@ -244,29 +280,40 @@ public class CollectionTable {
 			parent.collPage.setText(coll);
 	}
 
-	public void setButtonListener(final Button nbutton, final Button rbutton){
-		nbutton.addSelectionListener(new SelectionAdapter(){
+	public void setButtonListener(){
+		newbutton.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
-				table.deselectAll();
-				ErlLogger.debug("button listener:"+nbutton.getText());
-				NewCollWizard wmain= new NewCollWizard(null, null);
+				setTableDeselect();
+				parent.setVisiable();
+				ErlLogger.debug("button listener:"+newbutton.getText());
+				NewCollWizard wmain= new NewCollWizard(null, null, null);
 				Set<String> tmpset = tableMapStore.keySet();
 				ErlLogger.debug("tmpset size"+tmpset.size());
-				wmain.initial(parent, tmpset);
-				parent.CollMap.put(parent.newWizardColl.coll_id, parent.newWizardColl);
-				parent.coll_table.refreshTable();
-				parent.setVisiable();
-				parent.refreshTreePage();
+				wmain.initial(parent, tableMapStore, null);
 
 			}
 		});
 
-		rbutton.addSelectionListener(new SelectionAdapter(){
+		editbutton.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e) {
+				TableItem[] tmpItem = table.getSelection();
+				if(tmpItem.length==1){
+					ErlLogger.debug("button listener:"+editbutton.getText());
+					NewCollWizard wmain= new NewCollWizard(null, null, null);
+					Set<String> tmpset = tableMapStore.keySet();
+					ErlLogger.debug("tmpset size"+tmpset.size());
+					wmain.initial(parent, tableMapStore, tmpItem[0].getText(0));
+				}
+			}
+		});
+
+		removebutton.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				TableItem[] items = table.getSelection();
 				ErlLogger.debug("button listener:"+items.length);
 				if(items.length==1){
-					table.deselectAll();
+					//table.deselectAll();
+					parent.setVisiable();
 					String tmpKey = items[0].getText();
 					ErlLogger.debug("button listener h:"+tmpKey);
 
@@ -274,7 +321,6 @@ public class CollectionTable {
 					parent.CollMap.remove(tmpKey);
 					// refresh the tree composite and coll table composite
 					parent.coll_table.refreshTable();
-					parent.setVisiable();
 					parent.refreshTreePage();
 				}
 			}

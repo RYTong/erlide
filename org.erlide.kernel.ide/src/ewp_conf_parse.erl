@@ -34,7 +34,9 @@
 		 change_index/2,
 		 edit_conf/5,
 		 add_collection/2,
-		 remove_collection/2]).
+		 remove_collection/2,
+		 remove_channel/2,
+		 add_channel/2]).
 
 %%
 %% API Functions
@@ -47,8 +49,154 @@
 -define(ID, 'id').
 -define(ITEMS, 'items').
 -define(ITEM_ID, 'item_id').
+-define(ITEM_TYPE, 'item_type').
 -define(MENU_ORDER, 'menu_order').
 -define(MAX_INDEX, 99999).
+
+-define(ITEM_CHA, 1).
+-define(ITEM_COLL, 0).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% @spec %% add a new channel
+%% @end
+%%--------------------------------------------------------------------
+add_channel(Key, Params) ->
+	?ewp_log({params, Params}),
+
+	%% {"testjc","ebank","test","channel_adapter","1",[{"encrypt_flag","1"},{"method","post"}]}
+	CKey = binary_to_term((Key)),
+
+	TmpChaList = proplists:get_value(?CHA, CKey),
+	NewChannel = do_add_cha(Params),
+
+	?ewp_log({newChannel, NewChannel}),
+	ChaList =
+		case erlang:element(1, Params) of
+			"" -> TmpChaList;
+			SId ->
+				[X||X<-TmpChaList, proplists:get_value(id, X)/=SId]
+		end,
+
+	NewKey = proplists:delete(?CHA, CKey)++[{?CHA, [NewChannel|ChaList]}],
+	[lists:flatten(io_lib:format("~p.~n~p.",NewKey)), term_to_binary(NewKey)].
+
+do_add_cha({_SId, Id, App, Name, Entry, Views, State, Props}=Params) ->
+	new_channel(Id, App, Name, Entry, Views, State, Props).
+
+new_channel(Id, App, Name, Entry, Views, State, Props)->
+	[{id, Id},
+	 {app, App},
+	 {name, Name},
+	 {entry, check_params(Entry)},
+	 {views, check_params(Views)},
+	 {props, check_props(Props)},
+	 {state, State}].
+
+check_params("") ->
+	undefined;
+check_params(Else) ->
+	Else.
+
+check_props([])->
+	[];
+check_props(Props) ->
+	check_props(Props, []).
+
+check_props([{Key, Value}|Next], Acc) ->
+	NV =
+		case Value of
+			"" -> undefined;
+			[$"|S]->
+				[X||X<-S, X/=$"];
+			[$<|B] ->
+				list_to_binary([X||X<-B, X/=$<, X/=$>]);
+			[T|L] when T ==$[ ,T == ${ ->
+				"";
+			AorI ->
+				Fun = fun(X)->
+							  if X >= $0 andalso X =< $9 ->
+									 true;
+								 X == $. ->
+									 float;
+								 true -> false
+							  end
+					  end,
+				FList = [Fun(X)||X<-AorI],
+				case lists:member(false, FList) of
+					true -> list_to_atom(AorI);
+					_ ->
+						case lists:member(float, FList) of
+							true ->
+								list_to_float(AorI);
+							_ ->
+								list_to_integer(AorI)
+						end
+				end
+
+		end,
+	check_props(Next, [{Key, NV}|Acc]);
+check_props([], Acc) ->
+	lists:reverse(Acc).
+
+
+
+%%--------------------------------------------------------------------
+%% @doc
+%% @spec %% remove a channel
+%% @end
+%%--------------------------------------------------------------------
+remove_channel(Key, Id)->
+    ?ewp_log({id, Id}),
+	CKey = binary_to_term((Key)),
+	ChaList = proplists:get_value(?CHA, CKey),
+	NewChannels = do_remove_coll(ChaList, Id),
+
+	CollList = proplists:get_value(?COLL, CKey),
+	NewCollections = case check_coll_item(CollList, Id) of
+						 CollList ->
+							 ?ewp_log({nochange, true}),
+							 CollList;
+						 Else ->
+							 ?ewp_log({nochange, false}),
+							 ewp_check_conf:check_item(Else)
+					 end,
+	?ewp_log({newChaList, NewChannels}),
+    ?ewp_log({newCollList, NewCollections}),
+	NewKey = [{?CHA, NewChannels},{?COLL, NewCollections}],
+	[lists:flatten(io_lib:format("~p.~n~p.",NewKey)), term_to_binary(NewKey)].
+
+do_remove_cha(ChaList, Id) ->
+	lists:foldr(fun(Cha, Acc) ->
+						case proplists:get_value(?ID, Cha) of
+							Id -> Acc;
+							_ -> [Cha|Acc]
+						end
+				end,
+				[], ChaList).
+check_coll_item(CollList, Id) ->
+	check_coll_item(CollList, Id, []).
+check_coll_item([Coll|Next], Id, Acc) ->
+	case proplists:get_value(?ITEMS, Coll) of
+		[] ->
+			check_coll_item(Next, Id, [Coll|Acc]);
+		Items ->
+			NewItems = lists:foldr(fun(Item, Acc) ->
+								ItemId = proplists:get_value(?ITEM_ID, Item),
+								ItemType = proplists:get_value(?ITEM_TYPE, Item),
+								if ItemId == Id andalso ItemType == ?ITEM_CHA ->
+									   Acc;
+								   true ->
+									   [Item|Acc]
+								end
+						end,
+						[], Items),
+			LeftCha = proplists:delete(?ITEMS, Coll),
+			check_coll_item(Next, Id, [LeftCha++[{?ITEMS, NewItems}]|Acc])
+	end;
+check_coll_item([], Id, Acc) ->
+	lists:reverse(Acc).
+
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -68,7 +216,7 @@ remove_collection(Key, Id)->
 
 do_remove_coll(CollList, Id) ->
 	lists:foldr(fun(Coll, Acc) ->
-						case proplists:get_value(id, Coll) of
+						case proplists:get_value(?ID, Coll) of
 							Id -> Acc;
 							_ -> [Coll|Acc]
 						end
@@ -84,15 +232,23 @@ add_collection(Key, Params)->
 	%%{"test","ebank",[27979,35797],[],[],"1","0",[]}
 	?ewp_log({params, Params}),
 	CKey = binary_to_term((Key)),
-	CollList = proplists:get_value(?COLL, CKey),
+	TmpCollList = proplists:get_value(?COLL, CKey),
 	NewCollection = do_add_coll(Params),
 	?ewp_log({newCollList, NewCollection}),
+
+	CollList =
+		case erlang:element(1, Params) of
+			"" -> TmpCollList;
+			SId ->
+				[X||X<-TmpCollList, proplists:get_value(id, X)/=SId]
+		end,
+
     SortCollList = ewp_check_conf:check_item([NewCollection|CollList]),
 	?ewp_log({newChannelList, SortCollList}),
 	NewKey = proplists:delete(?COLL, CKey)++[{?COLL, SortCollList}],
 	[lists:flatten(io_lib:format("~p.~n~p.",NewKey)), term_to_binary(NewKey)].
 
-do_add_coll({Id, App, Name, Url, Uid, Type, State, []=Item}=Params)->
+do_add_coll({_SId, Id, App, Name, Url, Uid, Type, State, []=Item}=Params)->
 	NewId = Id,
 	NewApp = check_coll_app(App),
 	NewName = check_coll_name(Name),
@@ -101,7 +257,7 @@ do_add_coll({Id, App, Name, Url, Uid, Type, State, []=Item}=Params)->
 	NewType = list_to_integer(Type),
 	NewState = list_to_integer(State),
 	new_collection(Id, NewApp, NewName, NewUrl, NewUid, NewType, NewState, Item);
-do_add_coll({Id, App, Name, Url, Uid, Type, State, Item}=Params)->
+do_add_coll({_SId, Id, App, Name, Url, Uid, Type, State, Item}=Params)->
 	%%Item = [{"ebank_home","1",1},{"yecx1","1",2},{"jydl","1",3}],
 	NewId = Id,
 	NewApp = check_coll_app(App),
@@ -409,20 +565,23 @@ convert(V1, V) when is_tuple(V1) ->
 -define(TYPE_TEXT, "text").
 -define(TYPE_PATH, "path").
 parse_channel_config(?TYPE_TEXT, Conf) ->
-	?ewp_log({test, Conf}),
+	%%?ewp_log({test, Conf}),
 	try
-		case ewp_check_conf:string_to_term(Conf) of
+		UtfConf = binary_to_list(unicode:characters_to_binary(Conf)),
+		case ewp_check_conf:string_to_term(UtfConf) of
 			error -> throw("String to term error");
 			Term ->
 				NewContent = ewp_check_conf:check_conf(Term),
 				Con = parse_conf(NewContent),
+				%%?ewp_log({parse_over, Con}),
 				Re = [unicode:characters_to_list(list_to_binary(Con)), term_to_binary(Term)],
-				?ewp_log({result_text, Re}),
+				%%?ewp_log({result_text, Re}),
 				Re
 		end
 
 	catch Type:Error ->
 			  ?ewp_log({error, Type,Error}),
+			  %%?ewp_log({error, erlang:get_stacktrace()}),
 			  [[],<<>>]
 	end;
 %%--------------------------------------------------------------------
@@ -450,15 +609,15 @@ parse_conf(TList)  ->
         Int when Int > 0 ->
             %% AllKeys = proplists:get_keys(TList),
             Result = do_parse(TList, ?XML),
-            ?ewp_log({result, Result}),
+            %%?ewp_log({result, Result}),
             to_xml(Result);
         _ -> [] %% FIXME
     end.
 
 do_parse([Params|Next], XML)->
-    ?ewp_log({params, Params}),
+    %%?ewp_log({params, Params}),
     Re = parse(Params),
-    ?ewp_log({re, Re}),
+    %%?ewp_log({re, Re}),
     case Re of
         [] ->
             do_parse(Next, XML);

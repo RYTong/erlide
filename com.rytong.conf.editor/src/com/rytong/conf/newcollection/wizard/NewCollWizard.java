@@ -31,25 +31,32 @@ import com.rytong.conf.editor.pages.EwpCollections;
 public class NewCollWizard extends Wizard {
 
 	private static String PAGE_TITLE="New Collection Wizard";
-	protected EwpCollections coll = null;
-	private CollectionsPage parent=null;
+	protected EwpCollections coll = new EwpCollections();
+	protected CollectionsPage parent=null;
 
 	protected Set<String> keySet = null;
+	protected HashMap<String, Object> keyMap;
+	protected String selectId;
 
 	public NewCollWizard NewCollWizard(){
 		return this;
 	}
 
 	//@FIXME Add dialogSettings to initial the text area
-	public void initial(CollectionsPage parent, Set<String> tmpset){
+	public void initial(CollectionsPage parent, HashMap<String, Object> tableMapStore, String selectId){
 		try{
-			ErlLogger.debug("initial size"+tmpset.size());
+			ErlLogger.debug("initial size"+tableMapStore.size());
 
 			//ErlLogger.debug("initial skeySet ize"+keySet.size());
-			WizardDialog newWizard= new WizardDialog(parent.pagecomposite.getShell(), new NewCollWizard(parent, tmpset));
-			newWizard.setBlockOnOpen(true);
-			newWizard.open();
+			WizardDialog newWizardDialog= new WizardDialog(parent.pagecomposite.getShell(), new NewCollWizard(parent, tableMapStore, selectId));
 
+			newWizardDialog.create();
+			Rectangle screenSize = Display.getDefault().getClientArea();
+			Shell shell =newWizardDialog.getShell();
+			shell.setSize(600, 600);
+			shell.setLocation((screenSize.width - newWizardDialog.getShell().getBounds().width) / 2,(
+					screenSize.height -newWizardDialog.getShell().getBounds().height) / 2);
+			newWizardDialog.open();
 
 		}catch (Exception e){
 			e.printStackTrace();
@@ -57,29 +64,40 @@ public class NewCollWizard extends Wizard {
 	}
 
 
-	public NewCollWizard(CollectionsPage parentPage, Set<String> tmpset){
+	public NewCollWizard(CollectionsPage parentPage, HashMap<String, Object> tmpMap, String selectId){
 		// add the wizard page
 		super();
 		setWindowTitle(PAGE_TITLE);
-		keySet = tmpset;
+		keyMap = tmpMap;
 		parent=parentPage;
-		if (parent != null)
-	    	coll = parent.newEwpCollections();
+		this.selectId = selectId;
 	}
 
-    public void addPages() {
-    	ErlLogger.debug("add page!");
-		addPage(new NewCollWizardDetailPage(coll, keySet));
-		addPage(new NewCollWizardItemsPage(parent, coll));
-    }
+	public void addPages() {
+		ErlLogger.debug("add page!");
+		if (selectId != null){
+			EwpCollections tmp = (EwpCollections) parent.CollMap.get(selectId);
+			coll = tmp.clone();
+			addPage(new NewCollWizardDetailPage(this));
+			addPage(new NewCollWizardItemsPage(this));
+		}else {
+			addPage(new NewCollWizardDetailPage(this));
+			addPage(new NewCollWizardItemsPage(this));
+		}
+	}
 
 	@Override
 	public boolean performFinish() {
 		// TODO Auto-generated method stub
+		if (selectId != null){
+			parent.erlBackend_addColl(selectId, coll);
+			parent.CollMap.remove(selectId);
+		} else
+			parent.erlBackend_addColl("", coll);
 
-
-		OtpErlangObject result = parent.erlBackend_addColl(coll);
-		parent.setDocument(result);
+		parent.CollMap.put(coll.coll_id, coll);
+		parent.coll_table.refreshTable();
+		parent.refreshTreePage();
 		return true;
 	}
 

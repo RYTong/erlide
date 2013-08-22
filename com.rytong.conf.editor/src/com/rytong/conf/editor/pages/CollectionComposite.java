@@ -74,9 +74,9 @@ public class CollectionComposite {
 		}
 		composite_coll = new Composite(parent.pagecomposite, SWT.BORDER);
 		FormData rightcomsite_form = new FormData();
-		rightcomsite_form.left = new FormAttachment(2,1);
+		rightcomsite_form.left = new FormAttachment(0,5);
 		rightcomsite_form.right = new FormAttachment(50);
-		rightcomsite_form.top = new FormAttachment(5);
+		rightcomsite_form.top = new FormAttachment(0,23);
 		rightcomsite_form.bottom = new FormAttachment(100);
 		composite_coll.setLayoutData(rightcomsite_form);
 
