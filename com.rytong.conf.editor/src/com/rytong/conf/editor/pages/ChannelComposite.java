@@ -9,10 +9,14 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.erlide.backend.BackendCore;
@@ -48,6 +52,8 @@ public class ChannelComposite {
 	private Label chaStateLabel;
 	private Text chaStateText;
 
+	private Table table ;
+
 	String cId = "id";
 	String cApp = "app";
 	String cName = "name";
@@ -80,55 +86,67 @@ public class ChannelComposite {
 		}
 		composite_channel = new Composite(parent.pagecomposite, SWT.BORDER);
 		FormData rightcomsite_form = new FormData();
-		rightcomsite_form.left = new FormAttachment(2,1);
+		rightcomsite_form.left = new FormAttachment(0,5);
 		rightcomsite_form.right = new FormAttachment(50);
-		rightcomsite_form.top = new FormAttachment(5);
+		rightcomsite_form.top = new FormAttachment(0, 23);
 		rightcomsite_form.bottom = new FormAttachment(100);
 		composite_channel.setLayoutData(rightcomsite_form);
 
-		GridLayout layout_right = new GridLayout();
-		layout_right.numColumns = 6;
-		layout_right.verticalSpacing=10;
-		composite_channel.setLayout(layout_right);
+		composite_channel.setLayout(new FormLayout());
 
-		GridData label_gd = new GridData(GridData.BEGINNING);
-		label_gd.horizontalSpan = 10;
+		Group composite_detial = new Group(composite_channel, SWT.BORDER);
+		FormData group_form = new FormData();
+		group_form.left = new FormAttachment(0,5);
+		group_form.right = new FormAttachment(100,-5);
+		group_form.top = new FormAttachment(0,3);
+		group_form.bottom = new FormAttachment(0,180);
+		composite_detial.setLayoutData(group_form);
+		composite_detial.setText("Channel detial:");
+		composite_detial.setLayout(new FormLayout());
 
-		Label label_all = new Label(composite_channel, 0);
-		label_all.setText("Channel Detail Editor");
-		label_all.setLayoutData(label_gd);
 
-
-		chaIdLabel = new Label(composite_channel, SWT.NONE);
+		chaIdLabel = new Label(composite_detial, SWT.NONE);
 		chaIdLabel.setText("Id:");
-		chaIdText = new Text(composite_channel, SWT.BORDER);
-		chaIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 5,1 ));
+		chaIdLabel.setLayoutData(setLabelLayout(0));
+		chaIdText = new Text(composite_detial, SWT.BORDER);
+		chaIdText.setLayoutData(setTextLayout(0));
 
-		chaAppLabel = new Label(composite_channel, SWT.NONE);
+
+		chaAppLabel = new Label(composite_detial, SWT.NONE);
 		chaAppLabel.setText("App:");
-		chaAppText = new Text(composite_channel, SWT.BORDER);
-		chaAppText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 5,1 ));
+		chaAppLabel.setLayoutData(setLabelLayout(1));
+		chaAppText = new Text(composite_detial, SWT.BORDER);
+		chaAppText.setLayoutData(setTextLayout(1));
 
-		chaNameLabel = new Label(composite_channel, SWT.NONE);
+		chaNameLabel = new Label(composite_detial, SWT.NONE);
 		chaNameLabel.setText("Name:");
-		chaNameText = new Text(composite_channel, SWT.BORDER);
-		chaNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 5,1 ));
+		chaNameLabel.setLayoutData(setLabelLayout(2));
+		chaNameText = new Text(composite_detial, SWT.BORDER);
+		chaNameText.setLayoutData(setTextLayout(2));
 
-		chaEntryLabel = new Label(composite_channel, SWT.NONE);
-		chaEntryLabel.setText("Url:");
-		chaEntryText = new Text(composite_channel, SWT.BORDER);
-		chaEntryText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 5,1 ));
+		chaEntryLabel = new Label(composite_detial, SWT.NONE);
+		chaEntryLabel.setText("Entry:");
+		chaEntryLabel.setLayoutData(setLabelLayout(3));
+		chaEntryText = new Text(composite_detial, SWT.BORDER);
+		chaEntryText.setLayoutData(setTextLayout(3));
 
-		chaViewsLabel = new Label(composite_channel, SWT.NONE);
-		chaViewsLabel.setText("User Id:");
-		chaViewsText = new Text(composite_channel, SWT.BORDER);
-		chaViewsText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 5,1 ));
+		chaViewsLabel = new Label(composite_detial, SWT.NONE);
+		chaViewsLabel.setText("Views:");
+		chaViewsLabel.setLayoutData(setLabelLayout(4));
+		chaViewsText = new Text(composite_detial, SWT.BORDER);
+		chaViewsText.setLayoutData(setTextLayout(4));
 
 
-		chaStateLabel = new Label(composite_channel, SWT.NONE);
+		chaStateLabel = new Label(composite_detial, SWT.NONE);
 		chaStateLabel.setText("State:");
-		chaStateText = new Text(composite_channel, SWT.BORDER);
-		chaStateText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 5,1 ));
+		chaStateLabel.setLayoutData(setLabelLayout(5));
+		chaStateText = new Text(composite_detial, SWT.BORDER);
+		chaStateText.setLayoutData(setTextLayout(5));
+
+
+
+
+
 		//chaStateText.addModifyListener(listener);
 		composite_channel.setVisible(false);
 
@@ -159,6 +177,22 @@ public class ChannelComposite {
 		else {
 			listenerMap.put(Key, listener);
 		};
+	}
+
+	private FormData setLabelLayout(int i){
+		FormData comsite_form = new FormData();
+		comsite_form.left = new FormAttachment(0,5);
+		comsite_form.right = new FormAttachment(0, 80);
+		comsite_form.top = new FormAttachment(0,5+i*25);
+		return comsite_form;
+	}
+
+	private FormData setTextLayout(int i){
+		FormData comsite_form = new FormData();
+		comsite_form.left = new FormAttachment(0,87);
+		comsite_form.right = new FormAttachment(100, -10);
+		comsite_form.top = new FormAttachment(0,5+i*25);
+		return comsite_form;
 	}
 
 	public void removeListener(String Key, final Text text){

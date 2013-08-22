@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 //import java.util.List;
 
@@ -19,6 +20,7 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
@@ -26,6 +28,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Table;
@@ -36,6 +39,7 @@ import org.erlide.jinterface.ErlLogger;
 
 import com.rytong.conf.editor.pages.CollectionsPage;
 import com.rytong.conf.editor.pages.EwpChannels;
+import com.rytong.conf.editor.pages.EwpCollectionItems;
 import com.rytong.conf.editor.pages.EwpCollections;
 
 
@@ -46,6 +50,7 @@ public class NewCollWizardItemsPage extends WizardPage{
 	private CollectionsPage parent;
 	protected EwpCollections collObj = null;
 	protected HashMap<String, Integer> tableMapStore;
+	protected HashMap<String, Object> keyMap;
 
 	private Table tablel;
 	private Table tabler;
@@ -57,22 +62,23 @@ public class NewCollWizardItemsPage extends WizardPage{
 	private Button swapBut ;
 
 
-	protected NewCollWizardItemsPage(CollectionsPage parent, EwpCollections coll) {
+	protected NewCollWizardItemsPage(NewCollWizard wizard) {
 
 		super(PAGE_NAME);
 		setDescription(PAGE_DESC);
-		collObj=coll;
-		this.parent=parent;
+		collObj=wizard.coll;
+		keyMap = wizard.keyMap;
+		this.parent=wizard.parent;
 		if(collObj==null)
 			ErlLogger.debug("collection null!");
 	}
 
 @Override
 public void createControl(Composite parent) {
-
 	Composite composite = new Composite(parent, SWT.NONE);
-	FormLayout layout = new FormLayout();
-	composite.setLayout(layout);
+	composite.setLayout(new FormLayout());
+	//Color color = new Color(Display.getCurrent(), 0,0,0);
+	//parent.setBackground(color);
 
 	FormData label_form = new FormData();
 	label_form.left = new FormAttachment(0,5);
@@ -94,7 +100,7 @@ public void createControl(Composite parent) {
 	lvl_form.top = new FormAttachment(0,20);
 	lvl_form.bottom = new FormAttachment(100,-2);
 	tablel.setLayoutData(lvl_form);
-	initial_items(tablel);
+
 
 
 	tabler = new Table(composite, SWT.BORDER|SWT.MULTI|SWT.FULL_SELECTION);
@@ -106,6 +112,8 @@ public void createControl(Composite parent) {
 	lvr_form.bottom = new FormAttachment(100,-2);
 	tabler.setLayoutData(lvr_form);
 	setSelectListener(tablel, tabler);
+
+	initial_items(tablel, tabler);
 
 	collObj.set_Wizard_Table(tabler, tableMapStore);
 
@@ -158,24 +166,65 @@ public void createControl(Composite parent) {
 	setPageComplete(true);
 }
 
+public void initial_editItems(){
+
+}
+
 //@FIXME add icons
-public void initial_items(Table table){
+// initial the items table,
+//the table item only is channels and collections.(collection type is not 1).
+
+public void initial_items(Table tablel, Table tabler){
 	HashMap<String, Object> collMap = parent.CollMap;
 	HashMap<String, EwpChannels> chaMap = parent.ChaMap;
 	tableMapStore = new HashMap<String, Integer>();
+	EwpCollections tmpObj = (EwpCollections) keyMap.get(collObj.coll_id);
+	//initial the exist items table
+	LinkedHashMap<String, EwpCollectionItems> itemsMap = null;
+	boolean flag = false;
+	//ErlLogger.debug("tmpObj.coll_type:"+tmpObj.coll_type+"|"+collObj.coll_type);
+	if (tmpObj != null && tmpObj.coll_type.equalsIgnoreCase(collObj.coll_type)){
+		itemsMap = collObj.itemsMap;
+		ErlLogger.debug("initial edit table:"+itemsMap.size());
+		if (itemsMap != null && itemsMap.size() != 0){
+			ErlLogger.debug("initial edit table!");
+			flag = true;
+			Map<String, EwpCollectionItems> map = itemsMap;
+			Iterator iter = map.entrySet().iterator();
+			while (iter.hasNext()) {
+				Map.Entry entry = (Map.Entry) iter.next();
+				String key = (String) entry.getKey();
+				EwpCollectionItems tmpItem = (EwpCollectionItems) entry.getValue();
+				ErlLogger.debug("item id:"+tmpItem.item_id);
+
+				tableMapStore.put(tmpItem.item_id, Integer.valueOf(tmpItem.item_type));
+				ErlLogger.debug("Integer.parseInt(tmpItem.menu_order):"+(Integer.parseInt(tmpItem.menu_order)-1));
+				TableItem item = new TableItem(tabler, SWT.NONE);
+				item.setText(tmpItem.item_id);
+			}
+		}
+	}
 
 	Map<String, Object> map = collMap;
 	Iterator iter = map.entrySet().iterator();
 	while (iter.hasNext()) {
 		Map.Entry entry = (Map.Entry) iter.next();
-		Object key = entry.getKey();
-		Object obj = entry.getValue();
-		EwpCollections collObj = (EwpCollections) obj;
+		String key = (String) entry.getKey();
+		EwpCollections tmpcollObj = (EwpCollections) entry.getValue();
 
-		if (!(collObj.coll_type.equalsIgnoreCase("1"))){
-			tableMapStore.put(collObj.coll_id, 0);
-			TableItem item = new TableItem(table, SWT.NONE);
-			item.setText(collObj.coll_id);
+		if (!(tmpcollObj.coll_type.equalsIgnoreCase("1"))){
+			if (flag && itemsMap.get(key) != null){
+				EwpCollectionItems tmpItem = itemsMap.get(key);
+				if ( tmpItem.item_type.equalsIgnoreCase("1")){
+					tableMapStore.put(tmpcollObj.coll_id, 0);
+					TableItem item = new TableItem(tablel, SWT.NONE);
+					item.setText(tmpcollObj.coll_id);
+				}
+			} else {
+				tableMapStore.put(tmpcollObj.coll_id, 0);
+				TableItem item = new TableItem(tablel, SWT.NONE);
+				item.setText(tmpcollObj.coll_id);
+			}
 		}
 	}
 
@@ -184,14 +233,22 @@ public void initial_items(Table table){
 
 	while (iter.hasNext()) {
 		Map.Entry entry = (Map.Entry) iter.next();
-		Object key = entry.getKey();
-		Object obj = entry.getValue();
-		ErlLogger.debug("cha key:"+key);
-		EwpChannels chaObj = (EwpChannels) obj;
-		tableMapStore.put(chaObj.cha_id, 1);
-		TableItem item = new TableItem(table, SWT.NONE);
-		item.setText(chaObj.cha_id);
+		String key = (String) entry.getKey();
+		EwpChannels chaObj = (EwpChannels) entry.getValue();
+		//ErlLogger.debug("cha key:"+key);
 
+		if (flag && itemsMap.get(key) != null){
+			EwpCollectionItems tmpItem = itemsMap.get(key);
+			if ( tmpItem.item_type.equalsIgnoreCase("0")){
+				tableMapStore.put(chaObj.cha_id, 1);
+				TableItem item = new TableItem(tablel, SWT.NONE);
+				item.setText(chaObj.cha_id);
+			}
+		} else {
+			tableMapStore.put(chaObj.cha_id, 1);
+			TableItem item = new TableItem(tablel, SWT.NONE);
+			item.setText(chaObj.cha_id);
+		}
 	}
 }
 
@@ -364,10 +421,12 @@ public void removeEvent(int index){
 		addAllBut.setEnabled(true);
 
 	int len = tabler.getItemCount();
+
 	if (len==0){
 		removeBut.setEnabled(false);
 		removeAllBut.setEnabled(false);
-	}else if (tabler.getItem(index) != null) {
+	}else if ((tabler.getItemCount() > index) && tabler.getItem(index) != null) {
+		ErlLogger.debug("index:"+index);
 		tabler.select(index);
 	} else {
 		tabler.select(len-1);

@@ -88,11 +88,9 @@ public class CollectionsPage {
 	public SelectedItem selectedObj;
 
 
-	protected CollectionTable coll_table = new CollectionTable();
-	protected ChannelTable cha_table = new ChannelTable();
+	public CollectionTable coll_table = new CollectionTable();
+	public ChannelTable cha_table = new ChannelTable();
 	protected IBackend ideBackend = null;
-	public EwpCollections newWizardColl = null;
-	public EwpChannels newWizardCha = null;
 
 	protected IDocument document;
 	private Composite composite_left;
@@ -151,7 +149,7 @@ public class CollectionsPage {
 			confCon = (OtpErlangBinary)resultList.elementAt(1);
 
 			String resultStr = Util.stringValue(resultConf);
-			ErlLogger.debug("resultStr:"+resultStr);
+			//ErlLogger.debug("resultStr:"+resultStr);
 			document.replace(0, document.getLength(), resultStr);
 		} catch (BadLocationException e) {
 			// TODO Auto-generated catch block
@@ -166,16 +164,6 @@ public class CollectionsPage {
 			ideBackend = BackendCore.getBackendManager().getIdeBackend();
 			return ideBackend;
 		}
-	}
-
-	public EwpCollections newEwpCollections(){
-		newWizardColl = new EwpCollections();
-		return newWizardColl;
-	}
-
-	public EwpChannels newEwpChannels(){
-		newWizardCha = new EwpChannels();
-		return newWizardCha;
 	}
 
 	/**
@@ -199,7 +187,7 @@ public class CollectionsPage {
 		FormData label_form = new FormData();
 		label_form.left = new FormAttachment(0,6);
 		label_form.right = new FormAttachment(30);
-		label_form.top = new FormAttachment(0,6);
+		label_form.top = new FormAttachment(0,5);
 		label_overview.setLayoutData(label_form);
 
 		// initial right composite
@@ -215,6 +203,7 @@ public class CollectionsPage {
 
 	public void paintPage(){
 		String channelxml = getContent();
+		ErlLogger.debug("channelxml:"+channelxml);
 		doParse(channelxml);
 
 		refreshTreePage();
@@ -256,6 +245,13 @@ public class CollectionsPage {
 	}
 
 
+	public void refreshTreeItemPage(String ChaId){
+		Object tmpObj = treeMapStore.get(ChaId);
+		if (util.checkObjectType(tmpObj) == "1"){
+			TreeItem tmpitem = treeMap.get(ChaId);
+			tmpitem.dispose();
+		}
+	}
 	// paint the channel tree
 	public void refreshTreePage(){
 		refreshTree();
@@ -387,7 +383,7 @@ public class CollectionsPage {
 		FormData leftcomsite_form = new FormData();
 		leftcomsite_form.left = new FormAttachment(0,5);
 		leftcomsite_form.right = new FormAttachment(50);
-		leftcomsite_form.top = new FormAttachment(3,6);
+		leftcomsite_form.top = new FormAttachment(0,23);
 		leftcomsite_form.bottom = new FormAttachment(100);
 		composite_left.setLayoutData(leftcomsite_form);
 
@@ -429,7 +425,7 @@ public class CollectionsPage {
 		idColumn.setText("ChannelId");
 
 		TreeColumn nameColumn = new TreeColumn(tree, SWT.NONE);
-		nameColumn.setWidth(80);
+		nameColumn.setWidth(150);
 		nameColumn.setText("Name");
 		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,10,9));
 
@@ -826,6 +822,39 @@ public class CollectionsPage {
 		return result;
 	}
 
+	public void erlBackend_addCha(String selectId, EwpChannels cha){
+		OtpErlangTuple params = util.formAddChaParams(selectId, cha);
+		OtpErlangObject res = null;
+
+		if(ideBackend == null) {
+			ideBackend = BackendCore.getBackendManager().getIdeBackend();
+		};
+		ErlLogger.debug("call ewp backend to add a new channel");
+		try {
+			res = ideBackend.call(15000, "ewp_conf_parse", "add_channel", "1b1s", confCon, params);
+		} catch (RpcException e) {
+			e.printStackTrace();
+		}
+		//ErlLogger.debug("the rpc call result : " + result);
+		setDocument(res);
+	}
+
+
+	public void erlBackend_removeCha(String Id){
+		OtpErlangObject res = null;
+		if(ideBackend == null) {
+			ideBackend = BackendCore.getBackendManager().getIdeBackend();
+		};
+		ErlLogger.debug("call ewp backend to remove the selected channel");
+		try {
+			res = ideBackend.call(15000, "ewp_conf_parse", "remove_channel", "bs", confCon, Id);
+		} catch (RpcException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		setDocument(res);
+	}
+
 	public void erlBackend_removeColl(String Id){
 		OtpErlangObject res = null;
 		if(ideBackend == null) {
@@ -841,21 +870,21 @@ public class CollectionsPage {
 		setDocument(res);
 	}
 
-	public OtpErlangObject erlBackend_addColl(EwpCollections coll){
-		OtpErlangTuple params = util.formAddCollParams(coll);
+	public void erlBackend_addColl(String selectId, EwpCollections coll){
+		OtpErlangTuple params = util.formAddCollParams(selectId, coll);
 		OtpErlangObject res = null;
 
 		if(ideBackend == null) {
 			ideBackend = BackendCore.getBackendManager().getIdeBackend();
 		};
-		ErlLogger.debug("call ewp backend to edit the conf file");
+		ErlLogger.debug("call ewp backend to add a new collection.");
 		try {
 			res = ideBackend.call(15000, "ewp_conf_parse", "add_collection", "1b1s", confCon, params);
 		} catch (RpcException e) {
 			e.printStackTrace();
 		}
 		//ErlLogger.debug("the rpc call result : " + result);
-		return res;
+		setDocument(res);
 	}
 
 

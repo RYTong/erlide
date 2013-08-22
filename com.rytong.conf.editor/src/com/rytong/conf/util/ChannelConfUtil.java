@@ -2,6 +2,8 @@ package com.rytong.conf.util;
 
 import org.erlide.jinterface.ErlLogger;
 
+import com.ericsson.otp.erlang.OtpErlangAtom;
+import com.ericsson.otp.erlang.OtpErlangInt;
 import com.ericsson.otp.erlang.OtpErlangList;
 import com.ericsson.otp.erlang.OtpErlangObject;
 import com.ericsson.otp.erlang.OtpErlangTuple;
@@ -57,20 +59,40 @@ public class ChannelConfUtil {
 		}
 	}
 
-	public OtpErlangTuple formAddCollParams(EwpCollections collobj){
+	public OtpErlangTuple formAddCollParams(String selectId, EwpCollections collobj){
+		OtpErlangObject[] request = new OtpErlangObject[9];
+		request[0] = new OtpErlangList(selectId);
+		request[1]=new OtpErlangList(collobj.coll_id);
+		request[2]=new OtpErlangList(collobj.coll_app);
+		request[3]=new OtpErlangList(collobj.coll_name);
+		request[4]=new OtpErlangList(collobj.coll_url);
 
-		OtpErlangObject[] request = new OtpErlangObject[8];
-		request[0]=new OtpErlangList(collobj.coll_id);
-		request[1]=new OtpErlangList(collobj.coll_app);
-		request[2]=new OtpErlangList(collobj.coll_name);
-		request[3]=new OtpErlangList(collobj.coll_url);
-
-		request[4]=new OtpErlangList(collobj.coll_userid);
-		request[5]=new OtpErlangList(collobj.coll_type);
-		request[6]=new OtpErlangList(collobj.coll_state);
+		request[5]=new OtpErlangList(collobj.coll_userid);
+		request[6]=new OtpErlangList(collobj.coll_type);
+		request[7]=new OtpErlangList(collobj.coll_state);
 		OtpErlangList items = collobj.get_items_tuple();
 		if (items!=null)
-			request[7]=items;
+			request[8]=items;
+		else
+			request[8]=new OtpErlangList();
+		return new OtpErlangTuple(request);
+	}
+
+	public OtpErlangTuple formAddChaParams(String selectId, EwpChannels cha){
+
+		//Id, App, Name, Entry, Views, Props, State
+		OtpErlangObject[] request = new OtpErlangObject[8];
+		request[0] = new OtpErlangList(selectId);
+		request[1]=new OtpErlangList(cha.cha_id);
+		request[2]=new OtpErlangList(cha.cha_app);
+		request[3]=new OtpErlangList(cha.cha_name);
+		request[4]=new OtpErlangAtom(cha.cha_entry);
+		request[5]=new OtpErlangList("");
+		request[6]=new OtpErlangInt(Integer.valueOf(cha.cha_state));
+
+		OtpErlangList props = cha.get_props_tuple();
+		if (props!=null)
+			request[7]=props;
 		else
 			request[7]=new OtpErlangList();
 		return new OtpErlangTuple(request);

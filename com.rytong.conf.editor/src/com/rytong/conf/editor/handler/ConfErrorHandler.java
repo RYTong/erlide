@@ -93,6 +93,7 @@ public class ConfErrorHandler extends DefaultHandler  {
 			channelMap.put(chaObj.cha_id,  chaObj);
 		}else if(eName.equalsIgnoreCase("items")){
 			collObj.addItem(itemsObj);
+
 		}
 	}
 

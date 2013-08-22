@@ -27,8 +27,10 @@
 %%%===================================================================
 %%% API
 %%%===================================================================
+check_conf(C) when is_list(C)->
+	check_items(C);
 check_conf(C) ->
-	check_items(C).
+	check_items([C]).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -112,19 +114,22 @@ check_item(CollList) ->
 				end, [], CollList).
 
 check_items(Conf) ->
-	CollList = proplists:get_value('collections', Conf),
-	NewCollList= lists:foldr(fun(Coll, Acc) ->
-									 ItemList = proplists:get_value('items', Coll),
-									 case ItemList of
-										 undefined -> [Coll|Acc];
-										 _ ->
-											 NewItem = check_order(ItemList),
-											 NewColl = proplists:delete('items', Coll),
-											 [NewColl++[{'items', NewItem}]|Acc]
-									 end
-							 end, [], CollList),
-	DelConf = proplists:delete('collections', Conf),
-	DelConf++[{collections, NewCollList}].
+	case proplists:get_value('collections', Conf) of
+		undefined -> Conf;
+		CollList ->
+			NewCollList= lists:foldr(fun(Coll, Acc) ->
+											 ItemList = proplists:get_value('items', Coll),
+											 case ItemList of
+												 undefined -> [Coll|Acc];
+												 _ ->
+													 NewItem = check_order(ItemList),
+													 NewColl = proplists:delete('items', Coll),
+													 [NewColl++[{'items', NewItem}]|Acc]
+											 end
+									 end, [], CollList),
+			DelConf = proplists:delete('collections', Conf),
+			DelConf++[{collections, NewCollList}]
+	end.
 
 
 

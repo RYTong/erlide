@@ -2,6 +2,7 @@ package com.rytong.conf.editor.pages;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
@@ -12,7 +13,7 @@ import com.ericsson.otp.erlang.OtpErlangList;
 import com.ericsson.otp.erlang.OtpErlangObject;
 import com.ericsson.otp.erlang.OtpErlangTuple;
 
-public class EwpCollections {
+public class EwpCollections implements Cloneable{
 	public String coll_id="";
 	public String coll_app="";
 	public String coll_name="";
@@ -26,11 +27,22 @@ public class EwpCollections {
 
 	public EwpCollectionItems itemObj;
 	public ArrayList<EwpCollectionItems> itemList=new ArrayList();
-	public HashMap<String, EwpCollectionItems> itemsMap=new HashMap<String, EwpCollectionItems>();
+	public LinkedHashMap<String, EwpCollectionItems> itemsMap=new LinkedHashMap<String, EwpCollectionItems>();
 
 	public EwpCollections EwpCollections(){
 		ErlLogger.debug("EwpCollections new!");
 		return this;
+	}
+
+	public EwpCollections clone(){
+		EwpCollections coll = null;
+		try {
+			coll =(EwpCollections) super.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return coll;
 	}
 
 	public EwpCollectionItems initialItem(){
@@ -42,10 +54,7 @@ public class EwpCollections {
 	public boolean checkValue(){
 		if ((coll_id.isEmpty()||coll_id.replace(" ", "").isEmpty())||
 				(coll_app.isEmpty()||coll_app.replace(" ", "").isEmpty())||
-				(coll_name.isEmpty()||coll_name.replace(" ", "").isEmpty())||
-				(coll_type.isEmpty()||coll_type.replace(" ", "").isEmpty())||
-				(coll_state.isEmpty()||coll_state.replace(" ", "").isEmpty())
-				)
+				(coll_name.isEmpty()||coll_name.replace(" ", "").isEmpty()))
 			return false;
 		else
 			return true;
@@ -53,8 +62,10 @@ public class EwpCollections {
 
 
 	public void addItem(EwpCollectionItems itemObj){
-		if (itemObj.item_id !=null)
+		if (itemObj.item_id !=null){
 			itemList.add(itemObj);
+			itemsMap.put(itemObj.item_id, itemObj);
+		}
 	}
 
 
@@ -177,6 +188,9 @@ public class EwpCollections {
 			return null;
 		}
 		else {
+			itemList=new ArrayList<EwpCollectionItems>();
+			itemsMap=new LinkedHashMap<String, EwpCollectionItems>();
+
 			ArrayList<OtpErlangObject> list = new ArrayList<OtpErlangObject>();
 			TableItem[] tmp = table.getItems();
 			//ErlLogger.debug("collection tmp.length:"+tmp.length);
