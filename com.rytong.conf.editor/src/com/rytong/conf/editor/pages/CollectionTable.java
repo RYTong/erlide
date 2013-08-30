@@ -1,5 +1,6 @@
 package com.rytong.conf.editor.pages;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -30,6 +31,9 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.erlide.jinterface.ErlLogger;
+
+import com.ericsson.otp.erlang.OtpErlangList;
+import com.ericsson.otp.erlang.OtpErlangObject;
 import com.rytong.conf.newcollection.wizard.NewCollWizard;
 
 public class CollectionTable {
@@ -287,8 +291,8 @@ public class CollectionTable {
 				parent.setVisiable();
 				ErlLogger.debug("button listener:"+newbutton.getText());
 				NewCollWizard wmain= new NewCollWizard(null, null, null);
-				Set<String> tmpset = tableMapStore.keySet();
-				ErlLogger.debug("tmpset size"+tmpset.size());
+				//Set<String> tmpset = tableMapStore.keySet();
+				//ErlLogger.debug("tmpset size"+tmpset.size());
 				wmain.initial(parent, tableMapStore, null);
 
 			}
@@ -300,8 +304,8 @@ public class CollectionTable {
 				if(tmpItem.length==1){
 					ErlLogger.debug("button listener:"+editbutton.getText());
 					NewCollWizard wmain= new NewCollWizard(null, null, null);
-					Set<String> tmpset = tableMapStore.keySet();
-					ErlLogger.debug("tmpset size"+tmpset.size());
+					//Set<String> tmpset = tableMapStore.keySet();
+					//ErlLogger.debug("tmpset size"+tmpset.size());
 					wmain.initial(parent, tableMapStore, tmpItem[0].getText(0));
 				}
 			}
@@ -311,14 +315,30 @@ public class CollectionTable {
 			public void widgetSelected(SelectionEvent e) {
 				TableItem[] items = table.getSelection();
 				ErlLogger.debug("button listener:"+items.length);
-				if(items.length==1){
-					//table.deselectAll();
-					parent.setVisiable();
-					String tmpKey = items[0].getText();
-					ErlLogger.debug("button listener h:"+tmpKey);
+				int len = items.length;
+				if(len > 0){
 
-					parent.erlBackend_removeColl(tmpKey);
-					parent.CollMap.remove(tmpKey);
+					table.deselectAll();
+					String tmpKey;
+
+					ArrayList<String> tmpList = new ArrayList<String>();
+					OtpErlangObject[] result = new OtpErlangObject[len];
+
+					for(int i =0; i< len; i++){
+						tmpKey = items[i].getText();
+						tmpList.add(tmpKey);
+						result[i]=new OtpErlangList(items[i].getText());
+					}
+					parent.erlBackend_removeColl(new OtpErlangList(result));
+					// refresh the tree composite and cha table composite
+					for(int i =0; i< len; i++){
+						tmpKey = tmpList.get(i);
+						parent.CollMap.remove(tmpKey);
+						// @FIXME
+						//parent.refreshTreeItemPage(tmpKey);
+					}
+					parent.setVisiable();
+
 					// refresh the tree composite and coll table composite
 					parent.coll_table.refreshTable();
 					parent.refreshTreePage();

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -20,7 +21,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -38,12 +38,16 @@ import org.eclipse.swt.widgets.Text;
 import org.erlide.jinterface.ErlLogger;
 
 import com.rytong.conf.editor.pages.EwpChannels;
+import com.rytong.conf.editor.pages.EwpCollections;
 
 public class NewChaWizardDetailPage extends WizardPage {
 	private static String PAGE_NAME = "Create a Channel";
 	private static String PAGE_DESC = "创建一个新的Channel.";
+
 	private EwpChannels cha;
-	private Set<String> keySet;
+	private HashMap<String, EwpChannels>  keyMap;
+	private String selectId=null;
+	private static String msg=null;
 
 	private Label idLabel;
 	private Label appLabel;
@@ -58,9 +62,6 @@ public class NewChaWizardDetailPage extends WizardPage {
 	private Button chaStateBut;
 
 	private Table table ;
-	private TableItem method;
-	private TableItem encrypt_flag;
-
 	private Button addBut ;
 	private Button editBut ;
 	private Button removeBut ;
@@ -73,12 +74,13 @@ public class NewChaWizardDetailPage extends WizardPage {
 	private static TableItem[] selectItem;
 
 
-	protected NewChaWizardDetailPage(EwpChannels cha, Set<String> keySet) {
+	protected NewChaWizardDetailPage(NewChaWizard wizard) {
 		super(PAGE_NAME);
 		setTitle(PAGE_NAME);
 		setDescription(PAGE_DESC);
-		this.cha = cha;
-		this.keySet = keySet;
+		this.cha = wizard.cha;
+		this.keyMap = wizard.keyMap;
+		this.selectId = wizard.selectId;
 		// TODO Auto-generated constructor stub
 	}
 
@@ -146,12 +148,12 @@ public class NewChaWizardDetailPage extends WizardPage {
 
 
 
-		ErlLogger.debug("shell:"+parent.getShell().getLocation());
+		//ErlLogger.debug("shell:"+parent.getShell().getLocation());
 		//Point point = parent.getShell().getLocation();
 		//parent.getShell().setSize(500, 600);
 		//parent.getShell().setLocation(point.x, point.y);
 		setControl(parentcomposite);
-		if (cha.cha_id !=""){
+		if (selectId !=null){
 			initial_text();
 			draw_props(parentcomposite);
 			setPageComplete(true);
@@ -183,10 +185,10 @@ public class NewChaWizardDetailPage extends WizardPage {
 
 		TableColumn keyColumn = new TableColumn(table, SWT.BORDER);
 		keyColumn.setText("Key");
-		keyColumn.setWidth(150);
+		keyColumn.setWidth(200);
 		TableColumn valueColumn = new TableColumn(table, SWT.BORDER);
 		valueColumn.setText("Value");
-		valueColumn.setWidth(150);
+		valueColumn.setWidth(200);
 
 		FormData table_form = new FormData();
 		table_form.left = new FormAttachment(0,5);
@@ -246,7 +248,7 @@ public class NewChaWizardDetailPage extends WizardPage {
 		chaIdText.setText(cha.cha_id);
 		chaAppText.setText(cha.cha_app);
 		chaNameText.setText(cha.cha_name);
-		chaEntryCom.select(get_entry_index(cha.cha_entry));
+		chaEntryCom.select(EwpChannels.get_entry_index(cha.cha_entry));
 		if (get_state_type(cha.cha_state)){
 			chaStateBut.setSelection(true);
 			chaStateBut.setText("开启");
@@ -258,18 +260,10 @@ public class NewChaWizardDetailPage extends WizardPage {
 
 	public void initial_default(){
 		cha.initial_props();
-		cha.cha_entry = "channel_adapter";
+		cha.cha_entry = EwpChannels.CHANNEL_ADAPTER;
 		cha.cha_state = "1";
 	}
 
-	private int get_entry_index(String flag){
-		if (flag .equalsIgnoreCase("channel_adapter"))
-			return 0;
-		else if(flag.equalsIgnoreCase("new_callback"))
-			return 1;
-		else
-			return 2;
-	}
 
 	private boolean get_state_type(String state){
 		if (state.equalsIgnoreCase("1"))
@@ -309,13 +303,15 @@ public class NewChaWizardDetailPage extends WizardPage {
 				String tmpstr = string.replace(" ", "");
 				if(event.widget==chaIdText){
 					//ErlLogger.debug("id");
-					if (keySet.contains(tmpstr)) {
-						cha.cha_id = "";
-						setErrorMessage("Input ID already exists.");
+					msg = null;
+					if (tmpstr.equalsIgnoreCase(selectId)){
+						cha.cha_id=string;
+					} else if (keyMap.containsKey(tmpstr)) {
+						msg = "Input ID already exists.";
 					} else {
-						setErrorMessage(null);
-						cha.cha_id = string;
+						cha.cha_id=string;
 					}
+
 				}else if(event.widget==chaAppText){
 					//ErlLogger.debug("app");
 					cha.cha_app=string;
@@ -323,14 +319,22 @@ public class NewChaWizardDetailPage extends WizardPage {
 					//ErlLogger.debug("name");
 					cha.cha_name=string;
 				}
-				if (cha.checkValue())
-					setPageComplete(true);
-				else
-					setPageComplete(false);
+				setErrorNotice(msg);
 			}
 		};
 		return listener;
 	}
+
+	private void setErrorNotice(String msg){
+		setErrorMessage(msg);
+		if (msg != null){
+			setPageComplete(false);
+		} else if(cha.checkValue())
+			setPageComplete(true);
+		else
+			setPageComplete(false);
+	}
+
 
 	private void setCheckButtonListener(final Button button){
 		button.addSelectionListener(new SelectionAdapter(){
@@ -346,17 +350,18 @@ public class NewChaWizardDetailPage extends WizardPage {
 		});
 	}
 
+
 	private void setComboListener(final Combo combo){
 		combo.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				ErlLogger.debug("selection :"+chaEntryCom.getSelectionIndex());
 				int index = chaEntryCom.getSelectionIndex();
 				if (index == 0)
-					cha.cha_entry = "channel_adapter";
+					cha.cha_entry = EwpChannels.CHANNEL_ADAPTER;
 				else if(index == 1)
-					cha.cha_entry = "new_callback";
+					cha.cha_entry = EwpChannels.NEW_CALLBACK;
 				else
-					cha.cha_entry = "channel_callback";
+					cha.cha_entry = EwpChannels.CHANNEL_CALLBACK;
 			}
 		});
 	}
@@ -367,13 +372,13 @@ public class NewChaWizardDetailPage extends WizardPage {
 				ErlLogger.debug("table event.");
 				if (event.getSource() != null){
 					selectItem = table.getSelection();
-					ErlLogger.debug("table event:"+selectItem[0].getText());
 					ErlLogger.debug("table event:"+selectItem.length);
+					//ErlLogger.debug("table event:"+selectItem[0].getText());
 
 					if (selectItem.length == 1){
 						if (cha.check_props(selectItem[0].getText(0))){
 							editBut.setEnabled(true);
-							removeBut.setEnabled(true);
+							removeBut.setEnabled(false);
 						}else{
 							editBut.setEnabled(true);
 							removeBut.setEnabled(true);
@@ -407,7 +412,7 @@ public class NewChaWizardDetailPage extends WizardPage {
 				AddDiaolog newDialog = new AddDiaolog(parent.getShell(), addBut);
 				newDialog.open();
 				ErlLogger.debug("dialog result :"+newDialog.getReturnCode());
-				if (newDialog.getReturnCode()==newDialog.OK){
+				if (newDialog.getReturnCode()==Window.OK){
 					TableItem tmpItem = new TableItem(table, SWT.BORDER);
 					dialogValueStr = dialogValueStr.replace(" ", "");
 					tmpItem.setText(new String[]{dialogKeyStr, dialogValueStr});
@@ -424,7 +429,7 @@ public class NewChaWizardDetailPage extends WizardPage {
 				AddDiaolog newDialog = new AddDiaolog(parent.getShell(), editBut);
 				newDialog.open();
 				ErlLogger.debug("dialog result :"+newDialog.getReturnCode());
-				if (newDialog.getReturnCode()==newDialog.OK){
+				if (newDialog.getReturnCode()==Window.OK){
 					//table.get
 					dialogValueStr = dialogValueStr.replace(" ", "");
 					selectItem[0].setText(new String[] {dialogKeyStr, dialogValueStr});
@@ -441,6 +446,9 @@ public class NewChaWizardDetailPage extends WizardPage {
 				// @FIXME check_props is false,the item should be removed.
 				//cha.check_props(selectItem[0].getText(0))
 				cha.cha_props.remove(selectItem[0].getText(0));
+				int[] indeces= table.getSelectionIndices();
+				table.remove(indeces);
+				//table
 			}
 		});
 	}
@@ -487,8 +495,6 @@ public class NewChaWizardDetailPage extends WizardPage {
 		protected Control createDialogArea(Composite parent){
 			ErlLogger.debug("createDialogArea ok!");
 			super.createDialogArea(parent);
-
-
 
 
 			Composite composite = new Composite(parent, SWT.NONE);

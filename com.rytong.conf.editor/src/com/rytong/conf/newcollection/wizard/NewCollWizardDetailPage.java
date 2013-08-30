@@ -30,6 +30,7 @@ import com.rytong.conf.editor.pages.EwpCollections;
 public class NewCollWizardDetailPage extends WizardPage{
 	private static String PAGE_NAME="Create a Collection";
 	private static String PAGE_DESC="创建一个新的Collection，并输入详细信息.";
+	private static String msg=null;
 
 	protected EwpCollections collObj = null;
 
@@ -59,8 +60,8 @@ public class NewCollWizardDetailPage extends WizardPage{
 		setDescription(PAGE_DESC);
 		collObj=wizard.coll;
 		//ErlLogger.debug("keySet"+keySet.size());
-		keyMap = wizard.keyMap;
-		selectId = wizard.selectId;
+		this.keyMap = wizard.keyMap;
+		this.selectId = wizard.selectId;
 		if(collObj==null)
 			ErlLogger.debug("collection null!");
 	}
@@ -254,8 +255,8 @@ public class NewCollWizardDetailPage extends WizardPage{
 
 				String string = ((Text) event.widget).getText();
 				String tmpstr = string.replace(" ", "");
-				String msg =null;
 				if(event.widget==idText){
+					msg =null;
 					//ErlLogger.debug("id:"+tmpstr +"|selectId:" +selectId);
 					if (tmpstr.equalsIgnoreCase(selectId)){
 						collObj.coll_id=string;
