@@ -1,5 +1,6 @@
 package com.rytong.conf.editor.pages;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -41,6 +42,8 @@ import org.eclipse.ui.editors.text.TextEditor;
 import org.erlide.jinterface.ErlLogger;
 
 import com.ericsson.otp.erlang.OtpErlangBinary;
+import com.ericsson.otp.erlang.OtpErlangList;
+import com.ericsson.otp.erlang.OtpErlangObject;
 import com.rytong.conf.newchannel.wizard.NewChaWizard;
 import com.rytong.conf.newcollection.wizard.NewCollWizard;
 
@@ -299,7 +302,7 @@ public class ChannelTable {
 				NewChaWizard wmain= new NewChaWizard(null, null, null);
 				Set<String> tmpset = tableMapStore.keySet();
 				ErlLogger.debug("tmpset size"+tmpset.size());
-				wmain.initial(parent, tmpset, null);
+				wmain.initial(parent, tableMapStore, null);
 				//parent.refreshTreePage();
 
 			}
@@ -314,7 +317,7 @@ public class ChannelTable {
 					NewChaWizard wmain= new NewChaWizard(null, null, null);
 					Set<String> tmpset = tableMapStore.keySet();
 					ErlLogger.debug("tmpset size"+tmpset.size());
-					wmain.initial(parent, tmpset, tmpItem[0].getText(0));
+					wmain.initial(parent, tableMapStore, tmpItem[0].getText(0));
 				}
 				//parent.refreshTreePage();
 
@@ -325,21 +328,32 @@ public class ChannelTable {
 			public void widgetSelected(SelectionEvent e) {
 				TableItem[] items = table.getSelection();
 				ErlLogger.debug("button listener:"+items.length);
-				if(items.length==1){
+				int len = items.length;
+				if(len > 0){
 					table.deselectAll();
-					String tmpKey = items[0].getText();
-					ErlLogger.debug("button listener h:"+tmpKey);
+					String tmpKey;
 
-					parent.erlBackend_removeCha(tmpKey);
-					parent.ChaMap.remove(tmpKey);
+					ArrayList<String> tmpList = new ArrayList<String>();
+					OtpErlangObject[] result = new OtpErlangObject[len];
+
+					for(int i =0; i< len; i++){
+						tmpKey = items[i].getText();
+						tmpList.add(tmpKey);
+						result[i]=new OtpErlangList(items[i].getText());
+					}
+					parent.erlBackend_removeCha(new OtpErlangList(result));
 					// refresh the tree composite and cha table composite
+					for(int i =0; i< len; i++){
+						tmpKey = tmpList.get(i);
+						parent.ChaMap.remove(tmpKey);
+						parent.refreshTreeItemPage(tmpKey);
+					}
 					parent.setVisiable();
 					parent.cha_table.refreshTable();
-					parent.refreshTreeItemPage(tmpKey);
 				}
 			}
-		});
-	}
+	});
+}
 
 
 }

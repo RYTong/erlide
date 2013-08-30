@@ -1,5 +1,6 @@
 package com.rytong.conf.newchannel.wizard;
 
+import java.util.HashMap;
 import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -21,7 +22,7 @@ public class NewChaWizard extends Wizard {
 	protected EwpChannels cha = new EwpChannels();
 	private CollectionsPage parent=null;
 
-	protected Set<String> keySet = null;
+	protected HashMap<String, EwpChannels>  keyMap;
 	protected String selectId;
 
 	public NewChaWizard NewChaWizard(){
@@ -29,11 +30,11 @@ public class NewChaWizard extends Wizard {
 	}
 
 	//@FIXME Add dialogSettings to initial the text area
-	public void initial(CollectionsPage parent, Set<String> tmpset, String selectId){
+	public void initial(CollectionsPage parent, HashMap<String, EwpChannels>  keyMap, String selectId){
 		try{
 			//ErlLogger.debug("initial size"+tmpset.size());
 			//ErlLogger.debug("initial skeySet ize"+keySet.size());
-			WizardDialog newWizardDialog= new WizardDialog(parent.pagecomposite.getShell(), new NewChaWizard(parent, tmpset, selectId));
+			WizardDialog newWizardDialog= new WizardDialog(parent.pagecomposite.getShell(), new NewChaWizard(parent, keyMap, selectId));
 /*			WizardDialog newWizardDialog= new WizardDialog(parent.pagecomposite.getShell(), new NewChaWizard(parent, tmpset)){
 		        protected void configureShell(Shell newShell) {
 
@@ -53,7 +54,7 @@ public class NewChaWizard extends Wizard {
 			newWizardDialog.create();
 			Rectangle screenSize = Display.getDefault().getClientArea();
 			Shell shell =newWizardDialog.getShell();
-			shell.setSize(500, 600);
+			shell.setSize(850, 600);
 			shell.setLocation((screenSize.width - newWizardDialog.getShell().getBounds().width) / 2,(
 					screenSize.height -newWizardDialog.getShell().getBounds().height) / 2);
 			newWizardDialog.open();
@@ -63,11 +64,11 @@ public class NewChaWizard extends Wizard {
 	}
 
 
-	public NewChaWizard(CollectionsPage parentPage, Set<String> tmpset, String selectId){
+	public NewChaWizard(CollectionsPage parentPage, HashMap<String, EwpChannels>  tmpMap, String selectId){
 		// add the wizard page
 		super();
 		setWindowTitle(PAGE_TITLE);
-		keySet = tmpset;
+		keyMap = tmpMap;
 		parent=parentPage;
 		this.selectId = selectId;
 
@@ -77,10 +78,12 @@ public class NewChaWizard extends Wizard {
     	ErlLogger.debug("add page!");
     	if (selectId != null){
 			cha = parent.ChaMap.get(selectId).clone();
-			addPage(new NewChaWizardDetailPage(cha, keySet));
+			addPage(new NewChaWizardDetailPage(this));
+			addPage(new NewChaWizardViewPage(this));
 
 		} else {
-			addPage(new NewChaWizardDetailPage(cha, keySet));
+			addPage(new NewChaWizardDetailPage(this));
+			addPage(new NewChaWizardViewPage(this));
 		}
 		//addPage(new NewCollWizardItemsPage(parent, coll));
     }

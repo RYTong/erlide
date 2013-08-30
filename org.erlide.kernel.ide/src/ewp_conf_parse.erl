@@ -150,7 +150,7 @@ remove_channel(Key, Id)->
     ?ewp_log({id, Id}),
 	CKey = binary_to_term((Key)),
 	ChaList = proplists:get_value(?CHA, CKey),
-	NewChannels = do_remove_coll(ChaList, Id),
+	NewChannels = do_remove_cha(ChaList, Id),
 
 	CollList = proplists:get_value(?COLL, CKey),
 	NewCollections = case check_coll_item(CollList, Id) of
@@ -168,12 +168,14 @@ remove_channel(Key, Id)->
 
 do_remove_cha(ChaList, Id) ->
 	lists:foldr(fun(Cha, Acc) ->
-						case proplists:get_value(?ID, Cha) of
-							Id -> Acc;
+						ItemId = proplists:get_value(?ID, Cha),
+						case lists:member(ItemId, Id) of
+							true -> Acc;
 							_ -> [Cha|Acc]
 						end
 				end,
 				[], ChaList).
+
 check_coll_item(CollList, Id) ->
 	check_coll_item(CollList, Id, []).
 check_coll_item([Coll|Next], Id, Acc) ->
@@ -184,7 +186,8 @@ check_coll_item([Coll|Next], Id, Acc) ->
 			NewItems = lists:foldr(fun(Item, Acc) ->
 								ItemId = proplists:get_value(?ITEM_ID, Item),
 								ItemType = proplists:get_value(?ITEM_TYPE, Item),
-								if ItemId == Id andalso ItemType == ?ITEM_CHA ->
+								Flag = lists:member(ItemId, Id),
+								if Flag andalso ItemType == ?ITEM_CHA ->
 									   Acc;
 								   true ->
 									   [Item|Acc]
@@ -207,21 +210,21 @@ remove_collection(Key, Id)->
     ?ewp_log({id, Id}),
 	CKey = binary_to_term((Key)),
 	CollList = proplists:get_value(?COLL, CKey),
-	NewCollections = do_remove_coll(CollList, Id),
+	NewCollections = do_remove_cha(CollList, Id),
 	?ewp_log({newCollList, NewCollections}),
     SortCollList = ewp_check_conf:check_item(NewCollections),
 	?ewp_log({newChannelList, SortCollList}),
 	NewKey = proplists:delete(?COLL, CKey)++[{?COLL, SortCollList}],
 	[lists:flatten(io_lib:format("~p.~n~p.",NewKey)), term_to_binary(NewKey)].
 
-do_remove_coll(CollList, Id) ->
-	lists:foldr(fun(Coll, Acc) ->
-						case proplists:get_value(?ID, Coll) of
-							Id -> Acc;
-							_ -> [Coll|Acc]
-						end
-				end,
-				[], CollList).
+%% do_remove_coll(CollList, Id) ->
+%% 	lists:foldr(fun(Coll, Acc) ->
+%% 						case proplists:get_value(?ID, Coll) of
+%% 							Id -> Acc;
+%% 							_ -> [Coll|Acc]
+%% 						end
+%% 				end,
+%% 				[], CollList).
 
 %%--------------------------------------------------------------------
 %% @doc

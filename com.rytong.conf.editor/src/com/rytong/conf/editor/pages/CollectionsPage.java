@@ -840,14 +840,14 @@ public class CollectionsPage {
 	}
 
 
-	public void erlBackend_removeCha(String Id){
+	public void erlBackend_removeCha(OtpErlangList itemList){
 		OtpErlangObject res = null;
 		if(ideBackend == null) {
 			ideBackend = BackendCore.getBackendManager().getIdeBackend();
 		};
 		ErlLogger.debug("call ewp backend to remove the selected channel");
 		try {
-			res = ideBackend.call(15000, "ewp_conf_parse", "remove_channel", "bs", confCon, Id);
+			res = ideBackend.call(15000, "ewp_conf_parse", "remove_channel", "bs", confCon, itemList);
 		} catch (RpcException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -855,14 +855,14 @@ public class CollectionsPage {
 		setDocument(res);
 	}
 
-	public void erlBackend_removeColl(String Id){
+	public void erlBackend_removeColl(OtpErlangList collList){
 		OtpErlangObject res = null;
 		if(ideBackend == null) {
 			ideBackend = BackendCore.getBackendManager().getIdeBackend();
 		};
 		ErlLogger.debug("call ewp backend to remove the selected collection");
 		try {
-			res = ideBackend.call(15000, "ewp_conf_parse", "remove_collection", "bs", confCon, Id);
+			res = ideBackend.call(15000, "ewp_conf_parse", "remove_collection", "bs", confCon, collList);
 		} catch (RpcException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

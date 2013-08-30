@@ -87,7 +87,11 @@ public class ChannelConfUtil {
 		request[2]=new OtpErlangList(cha.cha_app);
 		request[3]=new OtpErlangList(cha.cha_name);
 		request[4]=new OtpErlangAtom(cha.cha_entry);
-		request[5]=new OtpErlangList("");
+		OtpErlangList Views = cha.get_views_list();
+		if (Views!=null)
+			request[5]=Views;
+		else
+			request[5]=new OtpErlangList();
 		request[6]=new OtpErlangInt(Integer.valueOf(cha.cha_state));
 
 		OtpErlangList props = cha.get_props_tuple();

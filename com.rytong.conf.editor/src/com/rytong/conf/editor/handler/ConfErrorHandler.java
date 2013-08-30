@@ -11,6 +11,8 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.rytong.conf.editor.pages.EwpChannels;
 import com.rytong.conf.editor.pages.EwpCollectionItems;
 import com.rytong.conf.editor.pages.EwpCollections;
+import com.rytong.conf.newchannel.wizard.AdapterView;
+import com.rytong.conf.newchannel.wizard.WizarParams;
 
 public class ConfErrorHandler extends DefaultHandler  {
 
@@ -22,8 +24,8 @@ public class ConfErrorHandler extends DefaultHandler  {
 	private EwpCollections collObj;
 	private EwpCollectionItems itemsObj;
 	private EwpChannels chaObj;
+	private WizarParams viewsObj;
 	private Object nowObj;
-	private TreeItem ftree;
 	private static int flag=0;
 
 	//存放所有的节点（这里的节点等于原来的节点+编号）以及它所对应的值
@@ -31,6 +33,7 @@ public class ConfErrorHandler extends DefaultHandler  {
 	private HashMap<String,EwpChannels> channelMap = new HashMap<String,EwpChannels>();
 	//目前的节点
 	private String currentElement = null;
+	private Object beforeObj = null;
 	//目前节点所对应的值
 	private String currentValue = null;
 
@@ -52,18 +55,30 @@ public class ConfErrorHandler extends DefaultHandler  {
 			flag=0;
 			//currentElement= "";
 		} else if(eName.equalsIgnoreCase("collections")){
+			//ErlLogger.debug("collections:");
 			collObj=new EwpCollections();
 			nowObj = collObj;
 			currentElement= eName;
 			//newCollections();
 		} else if(eName.equalsIgnoreCase("channels")){
+			//ErlLogger.debug("channel:");
 			chaObj=new EwpChannels();
 			nowObj=chaObj;
-		} else if(eName.equalsIgnoreCase("items")){
-				ErlLogger.debug("coll item:"+collObj.coll_id);
-				itemsObj= collObj.initialItem();
-				nowObj=itemsObj;
+		} else if(eName.equalsIgnoreCase("views")&&nowObj.equals(chaObj)){
+			//ErlLogger.debug("channel view:"+currentElement);
+			beforeObj  = nowObj;
+			viewsObj = chaObj.add_view;
+			nowObj=chaObj.add_view;
+			currentElement= eName;
+		}else if(eName.equalsIgnoreCase("items")&&nowObj.equals(collObj)){
+			//ErlLogger.debug("coll item:"+collObj.coll_id);
+			beforeObj= nowObj;
+			itemsObj= collObj.initialItem();
+			nowObj=itemsObj;
+			currentElement= eName;
 		} else{
+			//ErlLogger.debug("else:"+currentElement);
+			//ErlLogger.debug("else to:"+eName);
 			currentElement= eName;
 		}
 
@@ -82,18 +97,25 @@ public class ConfErrorHandler extends DefaultHandler  {
 			} else if(nowObj.equals(itemsObj)){
 				//ErlLogger.debug("item object!");
 				itemsObj.set_value(currentElement, currentValue);
+			}else if(nowObj.equals(viewsObj)){
+				//ErlLogger.debug("item object!");
+				if	(!eName.equals("views")){
+					//ErlLogger.debug("views equal:"+currentElement+"}:"+currentValue);
+					viewsObj.addView(currentElement, currentValue);
+				}
 			}
 		};
 
 		if(eName.equalsIgnoreCase("collections")){
 			//ErlLogger.debug("hashmap currentValue:"+collObj.coll_id);
 			collMap.put(collObj.coll_id,  collObj);
-
 		}else if(eName.equalsIgnoreCase("channels")){
 			channelMap.put(chaObj.cha_id,  chaObj);
 		}else if(eName.equalsIgnoreCase("items")){
 			collObj.addItem(itemsObj);
-
+			nowObj = beforeObj;
+		}else if(eName.equalsIgnoreCase("views")){
+			nowObj = beforeObj;
 		}
 	}
 
