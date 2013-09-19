@@ -94,7 +94,7 @@ public class TemplateListSelectionPage extends WizardPage implements ISelectionC
 				if (!fUseTemplate.getSelection()) {
             	fUseTemplate.setSelection(true);
 					setDescription("");
-               String Body = "“Knock, knock.”\n\n“Who’s there?”\n\nvery long pause….\n\n“Java.”\n\n:-o";
+               String Body = "\"Knock, knock.\"\n\n\"Who's there?\"\n\nvery long pause….\n\n\"Java.\"\n\n:-o";
     				new MessageDialog(getShell(), "Work in progress", null,
     					    Body, MessageDialog.INFORMATION, new String[] {"Later"}, 0).open();
 				}

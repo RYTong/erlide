@@ -21,3 +21,6 @@ Bundle-ActivationPolicy: lazy
 Export-Package: com.rytong.ui,
  com.rytong.ui.editor.conf,
  com.rytong.ui.internal.wizard
+Bundle-ClassPath: lib/stringtemplate-3.0.jar,
+ lib/antlr-3.0b5.jar,
+ .

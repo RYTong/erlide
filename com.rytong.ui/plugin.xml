@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
-<plugin>
-   <extension
-         point="org.eclipse.ui.newWizards">
+<plugin><extension
+   point="org.eclipse.ui.newWizards">
       <wizard
             category="org.erlide.ui.wizards.newWizards"
             class="com.rytong.ui.internal.wizard.NewAppProjectWizard"
@@ -78,6 +77,40 @@
             id="com.rytong.ui.mgroup"
             separatorsVisible="true">
       </group>
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu">
+         <command
+               commandId="com.rytong.ui.form.command"
+               style="push">
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="com.rytong.ui.form.category"
+            name="Forms Test">
+      </category>
+      <command
+            categoryId="com.rytong.ui.form.category"
+            defaultHandler="com.rytong.ui.editor.conf.OpenSimpleFormEditorAction"
+            id="com.rytong.ui.form.command"
+            name="Simple Form Editor">
+      </command>
+      <command
+            defaultHandler="com.rytong.ui.editor.FormatHandler"
+            description="Conf Formatter"
+            id="com.rytong.ui.editor.conf.FormatAction"
+            name="Conf Formatter">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.rytong.ui.editor.conf.FormatAction"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="CTRL+SHIFT+F">
+      </key>
    </extension>
 
 </plugin>

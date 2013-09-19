@@ -18,9 +18,9 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
  */
 public class ConfSourceViewerConfiguration extends SourceViewerConfiguration {
 
-	private ConfEditor editor;
+	private SourceEditor editor;
 
-	public ConfSourceViewerConfiguration(ConfEditor editor) {
+	public ConfSourceViewerConfiguration(SourceEditor editor) {
 		super();
       this.editor = editor;
 	}

@@ -8,6 +8,9 @@ import java.util.ResourceBundle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.forms.FormColors;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -31,6 +34,12 @@ public class RytongUIPlugin extends AbstractUIPlugin {
     * Resource bundle.
     */
    private ResourceBundle resourceBundle;
+   
+   /**
+    * Shared Form colors
+    */
+   private FormColors formColors;
+   
 	
 	/**
 	 * The constructor
@@ -116,6 +125,10 @@ public class RytongUIPlugin extends AbstractUIPlugin {
 		        .getDescriptor(id);
 		return returnImageDescriptor;
 	}
+    
+	public Image getImage(String key) {
+		return getImageRegistry().get(key);
+	}
 	
     /**
      * Returns the string from the plugin's resource bundle, or 'key' if not
@@ -169,5 +182,13 @@ public class RytongUIPlugin extends AbstractUIPlugin {
 	 */
 	public static IPreferenceStore getRytongPreferenceStore() {
 		return getDefault().getPreferenceStore();
+	}
+    
+	public FormColors getFormColors(Display display) {
+		if (formColors == null) {
+			formColors = new FormColors(display);
+			formColors.markShared();
+		}
+		return formColors;
 	}
 }

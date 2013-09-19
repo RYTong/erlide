@@ -17,7 +17,7 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.ide.IDE;
 import org.erlide.jinterface.ErlLogger;
 import com.rytong.conf.editor.pages.CollectionsPage;
-import com.rytong.ui.editor.conf.ConfEditor;
+import com.rytong.ui.editor.conf.SourceEditor;
 
 /**
  * An example showing how to create a multi-page editor.
@@ -31,7 +31,7 @@ import com.rytong.ui.editor.conf.ConfEditor;
 public class MultiConfEditor extends MultiPageEditorPart implements IResourceChangeListener{
 
 	/** The text editor used in page 0. */
-	private ConfEditor editor = new ConfEditor();
+	private SourceEditor editor = new SourceEditor();
 
 	/** The editor show a tree.  */
 	private CollectionsPage collectionPage = new CollectionsPage();

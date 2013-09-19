@@ -16,6 +16,10 @@ public final class RytongUIConstants {
      * the adapter wizard
      */
 	 public static final String IMG_NEW_ADAPTER_WIZARD = "adapter_wizard.ico";
+     
+    public static final String IMG_HORIZONTAL = "";
+    
+    public static final String IMG_VERTICAL = "";
     
     /**
      * The bin dir 
@@ -76,6 +80,8 @@ public final class RytongUIConstants {
      * template properties file name
      */
     public static final String TEMPLATE_PROPFILE = "template.properties";
+    
+    public static boolean s = true;
 
     
 
