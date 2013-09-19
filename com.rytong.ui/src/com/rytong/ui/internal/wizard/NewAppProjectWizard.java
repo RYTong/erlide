@@ -116,7 +116,7 @@ public class NewAppProjectWizard extends Wizard implements INewWizard {
 				}
 			}
 		}
-		
+
 	}
 
 //	private IFolder generateSubFolder(IFolder curFolder, IPath path) {
@@ -151,11 +151,13 @@ public class NewAppProjectWizard extends Wizard implements INewWizard {
 			}
 			stream.close();
 
-		} catch (IOException | CoreException e) {
+		} catch (IOException e) {
         	e.printStackTrace();
+		} catch (CoreException e){
+			e.printStackTrace();
 		}
 	}
-    
+
 	private String getProcessedString(String fileName, String source) {
 		if (source.indexOf('$') == -1)
 			return source;

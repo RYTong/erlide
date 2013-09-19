@@ -39,7 +39,10 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TreeEvent;
 import org.eclipse.swt.events.TreeListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -49,6 +52,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FontDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
@@ -71,6 +75,7 @@ import com.ericsson.otp.erlang.OtpErlangObject;
 import com.ericsson.otp.erlang.OtpErlangTuple;
 import com.rytong.conf.editor.editors.MultiConfEditor;
 import com.rytong.conf.editor.handler.ConfErrorHandler;
+import com.rytong.conf.util.ChannelConfUtil;
 
 public class CollectionsPage {
 
@@ -78,34 +83,29 @@ public class CollectionsPage {
 	public String filePathStr="";
 	public OtpErlangBinary confCon=null;
 	public Composite pagecomposite;
-
-	private IDocument document;
-	private IProject fproject;
-
-	private Composite composite_left;
-
-
-	private IBackend ideBackend = null;
-
-	private CollectionTable coll_table = new CollectionTable();
-	private ChannelTable cha_table = new ChannelTable();
-
 	public CollectionComposite collPage = new CollectionComposite();
 	public ChannelComposite chaPage = new ChannelComposite();
+	public SelectedItem selectedObj;
 
+
+	public CollectionTable coll_table = new CollectionTable();
+	public ChannelTable cha_table = new ChannelTable();
+	protected IBackend ideBackend = null;
+
+	protected IDocument document;
+	private Composite composite_left;
+
+	private ChannelConfUtil util= new ChannelConfUtil();
 
 	private Tree tree=null;
-	private TreeItem maintree=null;
 	private HashMap<String, TreeItem> treeMap = new HashMap<String, TreeItem>();
 	private HashMap<String, Object> treeMapStore = new HashMap<String, Object>();
-	private String channelxml;
 	private ConfErrorHandler confPaser = new ConfErrorHandler();
 
-	private HashMap<String,Object> CollMap = null;
-	private HashMap<String,EwpChannels> ChaMap = null;
+	public HashMap<String,Object> CollMap = null;
+	public HashMap<String,EwpChannels> ChaMap = null;
 	private	final TreeItem[] dragSourceItem = new TreeItem[1];
-	private Object selectedObj = null;
-	private TreeItem selectedparent = null;
+
 
 
 	public CollectionsPage CollectionsPage() {
@@ -142,17 +142,28 @@ public class CollectionsPage {
 		composite_left.setVisible(true);
 	}
 
-	public void setSelectParentNull(){
-		selectedparent=null;
+	public void setDocument(OtpErlangObject result){
+		try {
+			OtpErlangList resultList = (OtpErlangList) result;
+			OtpErlangObject resultConf = (OtpErlangObject)resultList.elementAt(0);
+			confCon = (OtpErlangBinary)resultList.elementAt(1);
+
+			String resultStr = Util.stringValue(resultConf);
+			//ErlLogger.debug("resultStr:"+resultStr);
+			document.replace(0, document.getLength(), resultStr);
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
-	public void setTableDeselect(int index){
-		if (index ==0 ){
-			cha_table.setTableDeSelect();
-		} else {
-			coll_table.setTableDeSelect();
+	public IBackend getIdeBackEnd(){
+		if(ideBackend!=null)
+			return ideBackend;
+		else {
+			ideBackend = BackendCore.getBackendManager().getIdeBackend();
+			return ideBackend;
 		}
-
 	}
 
 	/**
@@ -170,45 +181,34 @@ public class CollectionsPage {
 
 		// overview label sets
 		Label label_overview = new Label(pagecomposite, 0);
-		label_overview.setText("overview");
+		// @FIXME Set the font style of this label
+		label_overview.setText("Overview");
 
 		FormData label_form = new FormData();
-		label_form.left = new FormAttachment(2,1);
+		label_form.left = new FormAttachment(0,6);
 		label_form.right = new FormAttachment(30);
-		label_form.top = new FormAttachment(1);
+		label_form.top = new FormAttachment(0,5);
 		label_overview.setLayoutData(label_form);
 
 		// initial right composite
 
-
-		coll_table.initialCollectionsComposite(pagecomposite);
-		cha_table.initialCollectionsComposite(pagecomposite);
-		collPage.initialCollectionsComposite(pagecomposite);
-		chaPage.initialChannelsComposite(pagecomposite);
+		coll_table.initialCollectionsComposite(this);
+		cha_table.initialCollectionsComposite(this);
+		collPage.initialCollectionsComposite(this);
+		chaPage.initialChannelsComposite(this);
 
 		initialLeftComposite();
 	}
 
 
 	public void paintPage(){
-		channelxml = getContent();
-		coll_table.setParent(this);
-		cha_table.setParent(this);
-
-		chaPage.setParent(this);
-		collPage.setParent(this);
-
-		ErlLogger.debug("Channel xml:"+channelxml);
-		//ErlLogger.debug("document:"+document.get());
-
-		refreshTree();
-		confPaser.setPage(this);
-
+		String channelxml = getContent();
+		ErlLogger.debug("channelxml:"+channelxml);
 		doParse(channelxml);
-		CollMap = confPaser.getCollectionsMap();
-		ChaMap = confPaser.getChannelsMap();
-		setTreePage(CollMap, ChaMap);
 
+		refreshTreePage();
+		coll_table.refreshTable();
+		cha_table.refreshTable();
 	}
 
 	public TreeItem setTreeItem(String id, String name){
@@ -245,12 +245,20 @@ public class CollectionsPage {
 	}
 
 
+	public void refreshTreeItemPage(String ChaId){
+		Object tmpObj = treeMapStore.get(ChaId);
+		if (util.checkObjectType(tmpObj) == "1"){
+			TreeItem tmpitem = treeMap.get(ChaId);
+			tmpitem.dispose();
+		}
+	}
 	// paint the channel tree
-	public void setTreePage(HashMap<String,Object> collMap, HashMap<String, EwpChannels> chaMap){
-
+	public void refreshTreePage(){
+		refreshTree();
 		treeMap = new HashMap<String, TreeItem>();
 		treeMapStore = new HashMap<String, Object>();
-		Map<String, Object> map = collMap;
+
+		Map<String, Object> map = CollMap;
 		Iterator iter = map.entrySet().iterator();
 		while (iter.hasNext()) {
 			Map.Entry entry = (Map.Entry) iter.next();
@@ -317,8 +325,6 @@ public class CollectionsPage {
 			}
 		}*/
 
-		coll_table.setTable(collMap);
-		cha_table.setTable(chaMap);
 	}
 
 	public void setTreeChildPage(EwpCollections collObj, TreeItem treeId){
@@ -373,19 +379,20 @@ public class CollectionsPage {
 	}
 
 	public void initialLeftComposite(){
-		// left composite
+		// set the layout of left composite in main composite
+		FormData leftcomsite_form = new FormData();
+		leftcomsite_form.left = new FormAttachment(0,5);
+		leftcomsite_form.right = new FormAttachment(50);
+		leftcomsite_form.top = new FormAttachment(0,23);
+		leftcomsite_form.bottom = new FormAttachment(100);
+		composite_left.setLayoutData(leftcomsite_form);
 
+		// set the layout of left composite
 		GridLayout layout_left = new GridLayout();
 		layout_left.numColumns = 10;
 		composite_left.setLayout(layout_left);
 
-		FormData leftcomsite_form = new FormData();
-		leftcomsite_form.left = new FormAttachment(2,1);
-		leftcomsite_form.right = new FormAttachment(50);
-		leftcomsite_form.top = new FormAttachment(5);
-		leftcomsite_form.bottom = new FormAttachment(100);
-		composite_left.setLayoutData(leftcomsite_form);
-
+		ErlLogger.debug("composite_left x:"+composite_left.getBounds().x);
 
 		GridData label_gd = new GridData(GridData.BEGINNING);
 		label_gd.horizontalSpan = 10;
@@ -409,33 +416,19 @@ public class CollectionsPage {
 		target.setTransfer(Types);
 		setDropListener(target);
 
-
 		setTreeListener(tree);
-
 		tree.setHeaderVisible(true);
 		tree.setLinesVisible(true);
-
 
 		TreeColumn idColumn = new TreeColumn(tree, SWT.NONE);
 		idColumn.setWidth(200);
 		idColumn.setText("ChannelId");
 
 		TreeColumn nameColumn = new TreeColumn(tree, SWT.NONE);
-		nameColumn.setWidth(80);
+		nameColumn.setWidth(150);
 		nameColumn.setText("Name");
-		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,8,9));
+		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,10,9));
 
-		Button addbutton = new Button(composite_left, SWT.NONE);
-		addbutton.setText(" Add...  ");
-		addbutton.setSize(120, 30);
-
-		addbutton.setLayoutData(new GridData(SWT.END, SWT.TOP, true, false,2,1));
-
-
-		Button removebutton = new Button(composite_left, SWT.NONE);
-		removebutton.setText("Remove");
-		removebutton.setSize(120, 30);
-		removebutton.setLayoutData(new GridData(SWT.END, SWT.TOP, true, false,2,1));
 	}
 
 
@@ -475,6 +468,9 @@ public class CollectionsPage {
 		try {
 			//ErlLogger.debug("input:"+xml);
 			String newxml = xml.replace("&", "&amp;");
+			CollMap = new HashMap<String,Object>();
+			ChaMap = new HashMap<String,EwpChannels>();
+			confPaser.setResultMap(CollMap, ChaMap);
 			SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
 			parser.parse(new ByteArrayInputStream(newxml.getBytes()), confPaser);
 
@@ -508,6 +504,7 @@ public class CollectionsPage {
 				// TODO Auto-generated method stub
 
 				TreeItem[] selection = tree.getSelection();
+
 				//ErlLogger.debug("dragStart------:"+selection.length+"----:"+selection[0].getItemCount());
 				if (selection.length > 0 && selection[0].getItemCount() == 0){
 					event.doit = true;
@@ -577,21 +574,21 @@ public class CollectionsPage {
 					event.detail = DND.DROP_NONE;
 					return;
 				}
-				int selectflag = checkObjectType(selectedObj) ;
-				String[] text = returnText(selectflag);
-				int removeflag = checkObjectType(treeMapStore.get(text[0]));
+				String selectflag = selectedObj.type;
+				String[] text = util.returnText(selectedObj);
+				String removeflag = util.checkObjectType(treeMapStore.get(text[0]));
 
-				ErlLogger.debug("drap :"+text[0]);
+				ErlLogger.debug("drop :"+text[0]);
 				if(event.item == null) {
 					ErlLogger.debug("event null:");
 
-					if (selectedparent!=null) {
-						ErlLogger.debug("old parent text:"+selectedparent.getText());
-						editIndex(selectedparent, null, text[0], "");
+					if (selectedObj.parent!=null) {
+						ErlLogger.debug("old parent text:"+selectedObj.parent.getText());
+						editIndex(selectedObj.parent, null, text[0], "");
 					} else {
 						ErlLogger.debug("null parent!");
 					}
-					if (removeflag==0){
+					if (removeflag=="0"){
 						TreeItem newItem = new TreeItem(tree, SWT.NONE);
 						newItem.setText(text);
 					}
@@ -603,7 +600,7 @@ public class CollectionsPage {
 					Rectangle bounds = item.getBounds();
 					Display display = composite_left.getDisplay();
 					Point pt = display.map(null, tree, event.x, event.y);
-					int event_flag = checkObjectType(treeMapStore.get(item.getText()));
+					String event_flag = util.checkObjectType(treeMapStore.get(item.getText()));
 					if (parent !=null) {
 						ErlLogger.debug("parent item:"+parent.getText());
 						TreeItem[] items = parent.getItems();
@@ -619,27 +616,27 @@ public class CollectionsPage {
 						if (pt.y < bounds.y + bounds.height / 3) {
 							ErlLogger.debug("pelse 1:");
 							ErlLogger.debug("parents is not null event text:"+item.getText());
-							editIndex(selectedparent, parent, text[0], String.valueOf(index));
+							editIndex(selectedObj.parent, parent, text[0], String.valueOf(index));
 							TreeItem newItem = new TreeItem(parent, SWT.NONE, index);
 							newItem.setText(text);
 						} else if (pt.y > bounds.y + 2*bounds.height/3) {
 							ErlLogger.debug("pelse 2:");
 							ErlLogger.debug("parents is not null new parent text:"+item.getText());
-							editIndex(selectedparent, parent, text[0], String.valueOf(index+1));
+							editIndex(selectedObj.parent, parent, text[0], String.valueOf(index+1));
 							TreeItem newItem = new TreeItem(parent, SWT.NONE, index+1);
 							newItem.setText(text);
 						} else if(text[0]==item.getText() && event_flag==selectflag){
 							TreeItem newItem = new TreeItem(parent, SWT.NONE, index);
 							newItem.setText(text);
-						} else if(event_flag==0) {
+						} else if(event_flag=="0") {
 							ErlLogger.debug("pelse 3:");
 							ErlLogger.debug("parents is not null new parent text:"+item.getText());
-							editIndex(selectedparent, item, text[0], "");
+							editIndex(selectedObj.parent, item, text[0], "");
 							TreeItem newItem = new TreeItem(item, SWT.NONE);
 							newItem.setText(text);
 						}else {
 							ErlLogger.debug("pelse 4:");
-							if (removeflag==0){
+							if (removeflag=="0"){
 								TreeItem newItem = new TreeItem(tree, SWT.NONE);
 								newItem.setText(text);
 							}
@@ -661,13 +658,13 @@ public class CollectionsPage {
 							ErlLogger.debug("else 1:");
 
 							ErlLogger.debug("event not null:");
-							if (selectedparent!=null) {
-								ErlLogger.debug("old parent text:"+selectedparent.getText());
-								editIndex(selectedparent, null, text[0], "");
+							if (selectedObj.parent!=null) {
+								ErlLogger.debug("old parent text:"+selectedObj.parent.getText());
+								editIndex(selectedObj.parent, null, text[0], "");
 							} else {
 								ErlLogger.debug("null parent!");
 							}
-							if (removeflag==0){
+							if (removeflag=="0"){
 								TreeItem newItem = new TreeItem(tree, SWT.NONE, index);
 								newItem.setText(text);
 							}
@@ -675,21 +672,21 @@ public class CollectionsPage {
 							ErlLogger.debug("else 2:");
 
 							ErlLogger.debug("event not null:");
-							if (selectedparent!=null) {
-								ErlLogger.debug("old parent text:"+selectedparent.getText());
-								editIndex(selectedparent, null, text[0], "");
+							if (selectedObj.parent!=null) {
+								ErlLogger.debug("old parent text:"+selectedObj.parent.getText());
+								editIndex(selectedObj.parent, null, text[0], "");
 							} else {
 								ErlLogger.debug("null parent!");
 							}
-							if (removeflag==0){
+							if (removeflag=="0"){
 								TreeItem newItem = new TreeItem(tree, SWT.NONE, index+1);
 								newItem.setText(text);
 							}
-						} else if(event_flag==0) {
+						} else if(event_flag=="0") {
 							ErlLogger.debug("else 3:");
 							ErlLogger.debug("new parent text:"+item.getText());
 							editIndex(null, item, text[0], "");
-							//OtpErlangTuple reParams = formParams(selectedparent.getText(), "", text[0], "", "");
+							//OtpErlangTuple reParams = formParams(selectedObj.parent.getText(), "", text[0], "", "");
 
 							TreeItem newItem = new TreeItem(item, SWT.NONE);
 							newItem.setText(text);
@@ -713,19 +710,13 @@ public class CollectionsPage {
 			public void widgetSelected(SelectionEvent e) {
 				TreeItem selectitem = (TreeItem)e.item;
 				//ErlLogger.debug("ppppppp:"+selectitem.getParentItem());
+				ErlLogger.debug("composite_left x:"+composite_left.getBounds().x);
 				if(selectitem == null)
 					ErlLogger.debug("selectitem null");
 				else
 				{
 					ErlLogger.debug("select text:"+selectitem.getText());
-					selectedparent = selectitem.getParentItem();
-					if (selectedparent!=null)
-					{
-						ErlLogger.debug("select parent text:"+selectedparent.getText());
-					}
-					else
-						ErlLogger.debug("select parent is null!");
-					selectedObj = treeMapStore.get(selectitem.getText());
+					selectedObj = new SelectedItem(selectitem, treeMapStore.get(selectitem.getText()));
 				}
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -735,59 +726,6 @@ public class CollectionsPage {
 
 			}
 		});
-
-		/*		tree.addMouseListener(new MouseAdapter(){
-			public void mouseDoubleClick(MouseEvent e) {
-				boolean expandflag = selectitem.getExpanded();
-				selectitem.setExpanded(!expandflag);
-
-			}
-
-		});*/
-	}
-
-
-	public void selectionPage(String key){
-		selectedObj = treeMapStore.get(key);
-		int flag = checkObjectType(selectedObj) ;
-		if (flag == 0){
-			EwpCollections coll = (EwpCollections) selectedObj;
-			chaPage.setTextEmpty("");
-			collPage.setText(coll);
-		} else if(flag == 1){
-			EwpChannels chaObj = (EwpChannels) selectedObj;
-			collPage.setTextEmpty("");
-			chaPage.setText(chaObj);
-		} else{
-			collPage.setTextEmpty("");
-			chaPage.setTextEmpty("");
-		}
-	}
-
-	public String[] returnText(int flag) {
-		if (flag==0){
-			EwpCollections coll = (EwpCollections) selectedObj;
-			return new String [] {coll.coll_id, coll.coll_name};
-		} else if(flag==1){
-			EwpChannels chaObj = (EwpChannels) selectedObj;
-			return new String []{chaObj.cha_id, chaObj.cha_name};
-		} else {
-			return new String []{"",""};
-		}
-	}
-
-	public int checkObjectType(Object obj) {
-		if (obj instanceof EwpCollections){
-			ErlLogger.debug("-------------------EwpCollections type:"+(obj instanceof EwpCollections));
-			return 0;
-		} else if(obj instanceof EwpChannels){
-			ErlLogger.debug("-------------------EwpChannels type:"+(obj instanceof EwpChannels));
-			return 1;
-		} else {
-			ErlLogger.debug("-------------------EwpCollectionItems type:"+(obj instanceof EwpCollectionItems));
-			ErlLogger.debug("null type:"+(obj == null));
-			return 3;
-		}
 	}
 
 
@@ -804,27 +742,13 @@ public class CollectionsPage {
 			}
 			if (index == null)
 				index="";
-			int type = checkObjectType(selectedObj);
-			OtpErlangTuple reParams = formParams(oldParText, newParText, text, Integer.toString(type), index);
+			OtpErlangTuple reParams = util.formParams(oldParText, newParText, text, selectedObj.type, index);
 			OtpErlangObject result = getIdeBackend(confCon, reParams);
 			String reStr = Util.stringValue(result);
 			document.replace(0, document.getLength(), reStr);
 		} catch (BadLocationException e1) {
 			e1.printStackTrace();
 		}
-	}
-
-	// format the parmas for the synchronization of conf file
-	public OtpErlangTuple formParams(String oldParent, String nowParent, String id, String type, String index){
-
-		OtpErlangObject[] request = new OtpErlangObject[5];
-		request[0]=new OtpErlangList(oldParent);
-		request[1]=new OtpErlangList(nowParent);
-		request[2]=new OtpErlangList(id);
-		request[3]=new OtpErlangList(type);
-
-		request[4]=new OtpErlangList(index);
-		return new OtpErlangTuple(request);
 	}
 
 
@@ -897,6 +821,72 @@ public class CollectionsPage {
 		//ErlLogger.debug("the rpc call result : " + result);
 		return result;
 	}
+
+	public void erlBackend_addCha(String selectId, EwpChannels cha){
+		OtpErlangTuple params = util.formAddChaParams(selectId, cha);
+		OtpErlangObject res = null;
+
+		if(ideBackend == null) {
+			ideBackend = BackendCore.getBackendManager().getIdeBackend();
+		};
+		ErlLogger.debug("call ewp backend to add a new channel");
+		try {
+			res = ideBackend.call(15000, "ewp_conf_parse", "add_channel", "1b1s", confCon, params);
+		} catch (RpcException e) {
+			e.printStackTrace();
+		}
+		//ErlLogger.debug("the rpc call result : " + result);
+		setDocument(res);
+	}
+
+
+	public void erlBackend_removeCha(OtpErlangList itemList){
+		OtpErlangObject res = null;
+		if(ideBackend == null) {
+			ideBackend = BackendCore.getBackendManager().getIdeBackend();
+		};
+		ErlLogger.debug("call ewp backend to remove the selected channel");
+		try {
+			res = ideBackend.call(15000, "ewp_conf_parse", "remove_channel", "bs", confCon, itemList);
+		} catch (RpcException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		setDocument(res);
+	}
+
+	public void erlBackend_removeColl(OtpErlangList collList){
+		OtpErlangObject res = null;
+		if(ideBackend == null) {
+			ideBackend = BackendCore.getBackendManager().getIdeBackend();
+		};
+		ErlLogger.debug("call ewp backend to remove the selected collection");
+		try {
+			res = ideBackend.call(15000, "ewp_conf_parse", "remove_collection", "bs", confCon, collList);
+		} catch (RpcException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		setDocument(res);
+	}
+
+	public void erlBackend_addColl(String selectId, EwpCollections coll){
+		OtpErlangTuple params = util.formAddCollParams(selectId, coll);
+		OtpErlangObject res = null;
+
+		if(ideBackend == null) {
+			ideBackend = BackendCore.getBackendManager().getIdeBackend();
+		};
+		ErlLogger.debug("call ewp backend to add a new collection.");
+		try {
+			res = ideBackend.call(15000, "ewp_conf_parse", "add_collection", "1b1s", confCon, params);
+		} catch (RpcException e) {
+			e.printStackTrace();
+		}
+		//ErlLogger.debug("the rpc call result : " + result);
+		setDocument(res);
+	}
+
 
 	/*
 

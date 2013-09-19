@@ -1,10 +1,13 @@
 package com.rytong.conf.editor.pages;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
@@ -18,35 +21,33 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.ui.editors.text.TextEditor;
 import org.erlide.jinterface.ErlLogger;
 
-import com.ericsson.otp.erlang.OtpErlangBinary;
+import com.ericsson.otp.erlang.OtpErlangList;
+import com.ericsson.otp.erlang.OtpErlangObject;
+import com.rytong.conf.newcollection.wizard.NewCollWizard;
 
 public class CollectionTable {
 
-	private TextEditor editor;
-	private Composite pagecomposite;
 	private Composite coll_table;
-	private IDocument document;
 	private CollectionsPage parent;
 
-	private String filePath;
-	private OtpErlangBinary confCon=null;
+	private Button newbutton;
+	private Button editbutton;
+	private Button removebutton;
 
 	private Table table=null;
 	private HashMap<String, TableItem> tableMap=null;
 	private HashMap<String, Object> tableMapStore = null;
-	private int collIndex = 0;
 
 	public CollectionTable CollectionTable(){
 		ErlLogger.debug("CollectionTable initial!");
@@ -57,45 +58,49 @@ public class CollectionTable {
 		return this;
 	}
 
-	public void setParent(CollectionsPage obj) {
-		parent=obj;
-		editor = parent.editor;
-		filePath=parent.filePathStr;
-		confCon=parent.confCon;
-		document = editor.getDocumentProvider()
-				.getDocument(editor.getEditorInput());
-	}
 
-	public void initialCollectionsComposite(Composite maincomposite){
-		pagecomposite = maincomposite;
+	public void initialCollectionsComposite(CollectionsPage parent){
+		this.parent=parent;
 		//right composite
 		if (coll_table != null ) {
 			coll_table.dispose();
 		}
-		coll_table = new Composite(pagecomposite, SWT.BORDER);
+
+		// set the layout of collection table composite in main composite
+		coll_table = new Composite(parent.pagecomposite, SWT.BORDER);
 		FormData rightcomsite_form = new FormData();
 		rightcomsite_form.left = new FormAttachment(50,5);
 		rightcomsite_form.right = new FormAttachment(99);
-		rightcomsite_form.top = new FormAttachment(5);
-		rightcomsite_form.bottom = new FormAttachment(50);
+		rightcomsite_form.top = new FormAttachment(0,20);
+		rightcomsite_form.bottom = new FormAttachment(50, -2);
 		coll_table.setLayoutData(rightcomsite_form);
 
-		GridLayout layout_right = new GridLayout();
-		layout_right.numColumns = 6;
-		layout_right.verticalSpacing=10;
-		coll_table.setLayout(layout_right);
+		// set the layout of collection table composite
 
-		GridData label_gd = new GridData(GridData.BEGINNING);
-		label_gd.horizontalSpan = 10;
+
+		coll_table.setLayout(new FormLayout());
 
 		Label label_all = new Label(coll_table, 0);
 		label_all.setText("Collection Table");
-		label_all.setLayoutData(label_gd);
 
-		table = new Table(coll_table, SWT.NONE);
+		FormData labelcomsite_form = new FormData();
+		labelcomsite_form.left = new FormAttachment(0, 5);
+		labelcomsite_form.right = new FormAttachment(100, -5);
+		labelcomsite_form.top = new FormAttachment(0, 3);
+		//labelcomsite_form.bottom = new FormAttachment(100, -2);
+		label_all.setLayoutData(labelcomsite_form);
+
+
+		table = new Table(coll_table, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
-		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,8,9));
+		FormData tablecomsite_form = new FormData();
+		tablecomsite_form.left = new FormAttachment(0, 5);
+		tablecomsite_form.right = new FormAttachment(100, -106);
+		tablecomsite_form.top = new FormAttachment(0, 23);
+		tablecomsite_form.bottom = new FormAttachment(100, -5);
+		table.setLayoutData(tablecomsite_form);
+
 
 		Transfer[] Types = new Transfer[]{TextTransfer.getInstance()};
 		int operations = DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK;
@@ -107,8 +112,24 @@ public class CollectionTable {
 		collId.setWidth(200);
 		collId.setText("Collection Id");
 		TableColumn collName = new TableColumn(table, SWT.NONE);
-		collName.setWidth(100);
+		collName.setWidth(150);
 		collName.setText("Collection Name");
+
+
+		newbutton = new Button(coll_table, SWT.LEFT);
+		newbutton.setText(" New...");
+		newbutton.setLayoutData(setButtonLayout(0));
+
+		editbutton = new Button(coll_table, SWT.LEFT);
+		editbutton.setText(" Edit");
+		editbutton.setLayoutData(setButtonLayout(1));
+
+
+		removebutton = new Button(coll_table, SWT.LEFT);
+		removebutton.setText(" Remove");
+		removebutton.setLayoutData(setButtonLayout(2));
+		// add button listener
+		setButtonListener();
 
 		//collStateText.addModifyListener(listener);
 		//coll_table.setVisible(false);
@@ -116,11 +137,14 @@ public class CollectionTable {
 
 	}
 
-	public void setTable(HashMap<String, Object> collMap){
+
+	public void refreshTable(){
+		editbutton.setEnabled(false);
+		removebutton.setEnabled(false);
 		table.removeAll();
 		tableMap = new HashMap<String, TableItem>();
 		tableMapStore = new HashMap<String, Object>();
-		Map<String, Object> map = collMap;
+		Map<String, Object> map = parent.CollMap;
 		Iterator iter = map.entrySet().iterator();
 		while (iter.hasNext()) {
 			Map.Entry entry = (Map.Entry) iter.next();
@@ -156,26 +180,44 @@ public class CollectionTable {
 		tableId.setText(new String[]{id, name});
 	}
 
+
+	public FormData setButtonLayout(int i){
+		FormData tmp_form = new FormData();
+		tmp_form.left = new FormAttachment(100, -103);
+		tmp_form.right = new FormAttachment(100, -3);
+		tmp_form.top = new FormAttachment(0, 23+i*30);
+		return tmp_form;
+	}
+
+	// add table listener
+
 	public void setTableListener(final Table table) {
 		table.addMouseListener(new MouseAdapter(){
 			public void mouseDown(MouseEvent event) {
 				if (event.getSource() != null ){
-					parent.setTableDeselect(collIndex);
-					Table eventTab = (Table) event.getSource();
-					int Len = eventTab.getItemCount();
-					TableItem[] eventItem = eventTab.getSelection();
+					setChaTableDeselect();
+					TableItem[] eventItem = table.getSelection();
 
-					ErlLogger.debug("selectX:"+event.x+"  Y:"+event.y+"  H:"+Len*17);
-					if (eventItem.length==1 && (event.y < Len*17) ){
+					if (eventItem.length == 1){
 						selectionPage(eventItem[0].getText());
-					} else
-					{
-						eventTab.deselectAll();
+						removebutton.setEnabled(true);
+						editbutton.setEnabled(true);
+					} else if (eventItem.length > 1){
+						removebutton.setEnabled(true);
+						editbutton.setEnabled(false);
+					} else {
+						setTableDeselect();
 						parent.setVisiable();
 					}
 				}else {
 					ErlLogger.debug("select2 null :!");
 				}
+			}
+		});
+		table.addSelectionListener(new SelectionAdapter(){
+			public void widgetDefaultSelected(SelectionEvent event) {
+				setTableDeselect();
+				parent.setVisiable();
 			}
 		});
 	}
@@ -190,9 +232,10 @@ public class CollectionTable {
 
 				TableItem[] selection = table.getSelection();
 				ErlLogger.debug("dragStart------:"+selection.length+"--text:"+selection[0].getText());
-				parent.setVisiable();
-				parent.setSelectParentNull();
+
 				if (selection.length > 0){
+					parent.setVisiable();
+					parent.selectedObj=new SelectedItem(selection[0], tableMapStore.get(selection[0].getText()));
 					event.doit = true;
 					dragSourceItem[0] = selection[0];
 				} else {
@@ -221,9 +264,14 @@ public class CollectionTable {
 	}
 
 
+	public void setChaTableDeselect(){
+		parent.cha_table.setTableDeselect();
+	}
 
-	public void setTableDeSelect(){
+	public void setTableDeselect(){
 		table.deselectAll();
+		removebutton.setEnabled(false);
+		editbutton.setEnabled(false);
 	}
 
 	public void selectionPage(String key){
@@ -234,6 +282,69 @@ public class CollectionTable {
 			parent.setUnVisiable();
 			parent.chaPage.setTextEmpty("");
 			parent.collPage.setText(coll);
+	}
+
+	public void setButtonListener(){
+		newbutton.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e) {
+				setTableDeselect();
+				parent.setVisiable();
+				ErlLogger.debug("button listener:"+newbutton.getText());
+				NewCollWizard wmain= new NewCollWizard(null, null, null);
+				//Set<String> tmpset = tableMapStore.keySet();
+				//ErlLogger.debug("tmpset size"+tmpset.size());
+				wmain.initial(parent, tableMapStore, null);
+
+			}
+		});
+
+		editbutton.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e) {
+				TableItem[] tmpItem = table.getSelection();
+				if(tmpItem.length==1){
+					ErlLogger.debug("button listener:"+editbutton.getText());
+					NewCollWizard wmain= new NewCollWizard(null, null, null);
+					//Set<String> tmpset = tableMapStore.keySet();
+					//ErlLogger.debug("tmpset size"+tmpset.size());
+					wmain.initial(parent, tableMapStore, tmpItem[0].getText(0));
+				}
+			}
+		});
+
+		removebutton.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e) {
+				TableItem[] items = table.getSelection();
+				ErlLogger.debug("button listener:"+items.length);
+				int len = items.length;
+				if(len > 0){
+
+					table.deselectAll();
+					String tmpKey;
+
+					ArrayList<String> tmpList = new ArrayList<String>();
+					OtpErlangObject[] result = new OtpErlangObject[len];
+
+					for(int i =0; i< len; i++){
+						tmpKey = items[i].getText();
+						tmpList.add(tmpKey);
+						result[i]=new OtpErlangList(items[i].getText());
+					}
+					parent.erlBackend_removeColl(new OtpErlangList(result));
+					// refresh the tree composite and cha table composite
+					for(int i =0; i< len; i++){
+						tmpKey = tmpList.get(i);
+						parent.CollMap.remove(tmpKey);
+						// @FIXME
+						//parent.refreshTreeItemPage(tmpKey);
+					}
+					parent.setVisiable();
+
+					// refresh the tree composite and coll table composite
+					parent.coll_table.refreshTable();
+					parent.refreshTreePage();
+				}
+			}
+		});
 	}
 
 }
