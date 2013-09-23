@@ -12,7 +12,6 @@ import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.*;
 
 import com.rytong.ui.RytongUIConstants;
-import com.rytong.ui.editor.conf.model.Element;
 import com.rytong.ui.internal.RytongUIPlugin;
 
 /**
@@ -54,14 +53,14 @@ public class ScrolledPropertiesBlock extends MasterDetailsBlock {
 		}
 
 		public Image getColumnImage(Object obj, int index) {
-			if (obj instanceof TypeOne) {
+			if (obj instanceof Conf) {
 				return PlatformUI.getWorkbench().getSharedImages()
 						.getImage(ISharedImages.IMG_OBJ_ELEMENT);
 			}
-			if (obj instanceof TypeTwo) {
-				return PlatformUI.getWorkbench().getSharedImages()
-						.getImage(ISharedImages.IMG_OBJ_FILE);
-			}
+//			if (obj instanceof TypeTwo) {
+//				return PlatformUI.getWorkbench().getSharedImages()
+//						.getImage(ISharedImages.IMG_OBJ_FILE);
+//			}
 			return null;
 		}
 	}
@@ -146,12 +145,12 @@ public class ScrolledPropertiesBlock extends MasterDetailsBlock {
 	}
 
 	class PageProvider implements IDetailsPageProvider {
-    	private TypeOne element;
+    	private Conf element;
 
 		@Override
 		public Object getPageKey(Object object) {
-			if (object instanceof TypeOne) {
-            	this.element = (TypeOne)object;
+			if (object instanceof Conf) {
+            	this.element = (Conf)object;
 				RytongUIConstants.s = !RytongUIConstants.s;
 				if (RytongUIConstants.s)
 					return "conf";

@@ -14,18 +14,12 @@ import com.rytong.ui.editor.conf.model.Element;
 
 public class ConfDetailsPage implements IDetailsPage {
 	private IManagedForm mform;
-	private TypeOne input;
+	private Conf input;
     private FormPage page;
 	private Button [] choices;
-	private Button flag;
-	private Text text0;
     public String str;
-	private static final String RTEXT_DATA =
-			"<form><p>An example of a free-form text that should be "+ //$NON-NLS-1$
-			"wrapped below the section with widgets.</p>"+ //$NON-NLS-1$
-			"<p>It can contain simple tags like <a>links</a> and <b>bold text</b>.</p></form>"; //$NON-NLS-1$
 	
-	public ConfDetailsPage(FormPage page, TypeOne input) {
+	public ConfDetailsPage(FormPage page, Conf input) {
     	this.page = page;
     	this.input = input;
 	}
@@ -69,7 +63,7 @@ public class ConfDetailsPage implements IDetailsPage {
             if(a.getValue()==Annotation.Type.STRING) {
         		createSpacer(toolkit, client, 2);
         		toolkit.createLabel(client, a.getName()+":"); //$NON-NLS-1$
-        		final Text text = toolkit.createText(client, child.getDirtyValue(), SWT.BORDER_SOLID); //$NON-NLS-1$
+        		final Text text = toolkit.createText(client, child.getDirtyValue(), SWT.BORDER); //$NON-NLS-1$
         		text.addModifyListener(new ModifyListener() {
         			public void modifyText(ModifyEvent e) {
         				if (input!=null){
@@ -161,7 +155,7 @@ public class ConfDetailsPage implements IDetailsPage {
 	public void selectionChanged(IFormPart part, ISelection selection) {
 		IStructuredSelection ssel = (IStructuredSelection)selection;
 		if (ssel.size()==1) {
-			input = (TypeOne)ssel.getFirstElement();
+			input = (Conf)ssel.getFirstElement();
 		}
 		else
 			input = null;

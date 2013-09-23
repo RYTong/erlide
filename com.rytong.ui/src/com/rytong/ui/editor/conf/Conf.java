@@ -6,7 +6,7 @@ import com.rytong.ui.editor.conf.model.Element;
  * @author lu.jingbo@rytong.com
  *
  */
-public class TypeOne extends NamedObject {
+public class Conf extends NamedObject {
 	public static final String P_CHOICE="choice"; //$NON-NLS-1$
 	public static final String P_FLAG="flag"; //$NON-NLS-1$
 	public static final String P_TEXT="text"; //$NON-NLS-1$
@@ -17,7 +17,7 @@ public class TypeOne extends NamedObject {
 	private boolean flag;
     private Element element;
     
-    public TypeOne(String name, Element element) {
+    public Conf(String name, Element element) {
     	super(name);
     	this.element = element;
     }
@@ -25,13 +25,13 @@ public class TypeOne extends NamedObject {
 	/**
 	 * @param name
 	 */
-	public TypeOne(String name, int choice, boolean flag, String text) {
+	public Conf(String name, int choice, boolean flag, String text) {
 		super(name);
 		this.flag = flag;
 		this.text = text;
 		this.choice = choice;
 	}
-	public TypeOne(String name, Element element, int choice, boolean flag, String text) {
+	public Conf(String name, Element element, int choice, boolean flag, String text) {
 		super(name);
         this.element = element;
 		this.flag = flag;
