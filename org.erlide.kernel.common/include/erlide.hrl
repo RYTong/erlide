@@ -2,11 +2,16 @@
 -define(DebugStack(T), erlide_log:erlangLogStack(?MODULE, ?LINE, finest, T)).
 -define(Info(T), erlide_log:erlangLog(?MODULE, ?LINE, info, T)).
 
+-define(Err(T), erlide_log:erlangLog(?MODULE, ?LINE, error, T)).
+
 -define(SAVE_CALLS, erlang:process_flag(save_calls, 50)).
 
 -ifdef(EWP).
 -define(ewp_log(T), erlide_log:erlangLog(?MODULE, ?LINE, info, T)).
 -define(ewp_info(Format, Data), ?Debug(io_lib:format(Format, Data))).
+-define(ewp_err(E), ?Err(E)).
+-define(ewp_err(F, D), ?Err(io_lib:format(F, D))).
+
 -else.
 -define(ewp_log(T), ok).
 -define(ewp_info(F,D), ok).
