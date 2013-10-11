@@ -353,21 +353,21 @@ public class NewChaWizardViewPage extends WizardPage {
 		adapte_form.bottom = new FormAttachment(100, -5);
 		adapter_table.setLayoutData(adapte_form);
 
-		addBut = new Button(treeGroup, SWT.NONE | SWT.CENTER);
+		addBut = new Button(treeGroup,  SWT.CENTER);
 		addBut.setText("Add...");
 		addBut.setLayoutData(setButtonLayout(0));
 
-		editBut = new Button(treeGroup, SWT.NONE | SWT.CENTER);
+		editBut = new Button(treeGroup, SWT.CENTER);
 		editBut.setText("Edit");
 		editBut.setLayoutData(setButtonLayout(1));
 		editBut.setEnabled(false);
 
-		removeBut = new Button(treeGroup, SWT.NONE | SWT.CENTER);
+		removeBut = new Button(treeGroup, SWT.CENTER);
 		removeBut.setText("Remove");
 		removeBut.setLayoutData(setButtonLayout(2));
 		removeBut.setEnabled(false);
 
-		remAllBut = new Button(treeGroup, SWT.NONE | SWT.CENTER);
+		remAllBut = new Button(treeGroup, SWT.CENTER);
 		remAllBut.setText("Remove All");
 		remAllBut.setLayoutData(setButtonLayout(3));
 		remAllBut.setEnabled(false);
@@ -812,11 +812,11 @@ public class NewChaWizardViewPage extends WizardPage {
 	}
 
 
-	public String getFlag(Boolean flag){
+	public Boolean getFlag(Boolean flag){
 		if (flag == true)
-			return "1";
+			return true;
 		else
-			return "0";
+			return false;
 	}
 
 	private void setInitialOffConf(){
@@ -1192,7 +1192,6 @@ public class NewChaWizardViewPage extends WizardPage {
 				dkeyText.setText(params.getKey);
 				drkeyText.setText(params.requestKey);
 				dfromCom.setText(params.GetFrom);
-
 			}
 
 			dkeyText.addListener(SWT.Modify, setTextListener());

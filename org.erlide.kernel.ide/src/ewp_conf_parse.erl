@@ -14,18 +14,6 @@
 %%% API
 %%%===================================================================
 
--record(xml_element, {element,
-                      value="",
-                      children=[],
-                      attribute=[]
-                     }).
-
--record(xml_attribute,{name=[],
-                       value=[]}).
-
--define(XML, #xml_element{element="root"}).
--define(Data_Type(Value), [#xml_attribute{name="data_type", value=Value}]).
-
 %%
 %% Exported Functions
 %%
@@ -62,6 +50,8 @@
 %% @end
 %%--------------------------------------------------------------------
 add_channel(Key, Params) ->
+
+
 	?ewp_log({params, Params}),
 
 	%% {"testjc","ebank","test","channel_adapter","1",[{"encrypt_flag","1"},{"method","post"}]}
@@ -605,6 +595,20 @@ parse_channel_config(?TYPE_PATH, FilePath) ->
 			?ewp_log({error_path, Error}),
 			[[],<<>>]
 	end.
+
+%%--------------------------------------------------------------------
+
+-record(xml_element, {element,
+                      value="",
+                      children=[],
+                      attribute=[]
+                     }).
+
+-record(xml_attribute,{name=[],
+                       value=[]}).
+
+-define(XML, #xml_element{element="root"}).
+-define(Data_Type(Value), [#xml_attribute{name="data_type", value=Value}]).
 
 
 parse_conf(TList)  ->

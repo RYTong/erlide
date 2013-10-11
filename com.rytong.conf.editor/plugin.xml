@@ -13,26 +13,30 @@
             name="Simple Conf Editor">
       </editor>
       <editor
-            class="com.rytong.conf.editor.form.ConfFormEditor"
+            class="com.rytong.conf.adapter.editor.AdapterEditor"
             default="false"
-            extensions="conf2"
+            extensions="AD"
             icon="icons/conf.gif"
-            id="com.rytong.conf.editor.editor1"
-            name="Simple Conf Editor2">
+            id="com.rytong.conf.adapter.editor"
+            name="Adapter Editor">
       </editor>
    </extension>
    <extension
          point="org.eclipse.ui.newWizards">
-      <category
-            name="Sample Conf Wizards"
-            id="com.rytong.conf.editor">
-      </category>
       <wizard
-            name="Add Conf"
-            icon="icons/conf.gif"
-            category="com.rytong.conf.editor"
+            category="org.erlide.ui.wizards.newWizards"
             class="com.rytong.conf.editor.wizards.AddConfWizard"
-            id="com.rytong.conf.editor.wizards.AddConfWizard">
+            finalPerspective="org.erlide.ui.perspectives.ErlangPerspective"
+            icon="icons/conf.gif"
+            id="com.rytong.conf.editor.wizards.AddConfWizard"
+            name="Add Channel Conf">
+      </wizard>
+      <wizard
+            category="org.erlide.ui.wizards.newWizards"
+            class="com.rytong.conf.adapter.wizard.NewProcedureWizard"
+            icon="icons/conf.gif"
+            id="com.rytong.conf.adapter.wizard.NewProcedureWizard"
+            name="Add Procedure">
       </wizard>
    </extension>
 

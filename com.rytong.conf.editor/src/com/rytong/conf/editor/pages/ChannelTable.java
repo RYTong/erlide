@@ -1,11 +1,18 @@
 package com.rytong.conf.editor.pages;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
@@ -44,8 +51,10 @@ import org.erlide.jinterface.ErlLogger;
 import com.ericsson.otp.erlang.OtpErlangBinary;
 import com.ericsson.otp.erlang.OtpErlangList;
 import com.ericsson.otp.erlang.OtpErlangObject;
+import com.rytong.conf.editor.Activator;
 import com.rytong.conf.newchannel.wizard.NewChaWizard;
 import com.rytong.conf.newcollection.wizard.NewCollWizard;
+import com.rytong.ui.internal.RytongUIPlugin;
 
 public class ChannelTable {
 
@@ -311,6 +320,36 @@ public class ChannelTable {
 		editbutton.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				TableItem[] tmpItem = table.getSelection();
+
+				URL url = Activator.getDefault().getBundle()
+						.getEntry("templates/channel_oldCallback_cs_template.cs");
+				//url.
+				try {
+					File tempDir = new File(FileLocator.toFileURL(url).getFile());
+
+					ErlLogger.debug("test url:"+url);
+					ErlLogger.debug("test url:"+tempDir.exists());
+
+
+
+					String content = null;
+					InputStreamReader read = new InputStreamReader(new FileInputStream(tempDir),"utf-8");
+					BufferedReader reader = new BufferedReader(read);
+
+					String tempString = null;
+					// 一次读入一行，直到读入null为文件结束
+					while ((tempString = reader.readLine()) != null) {
+						// 显示行号
+						content=content+tempString;
+					}
+
+					ErlLogger.debug("File content:"+content);
+
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
 				ErlLogger.debug("button listener:"+editbutton.getText());
 				if(tmpItem.length==1){
 					ErlLogger.debug("selection:"+tmpItem[0].getText(0));

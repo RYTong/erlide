@@ -6,12 +6,15 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.TableItem;
+import org.erlide.jinterface.ErlLogger;
 
-public class WizarParams {
+import com.rytong.conf.editor.pages.EwpChannels;
 
-	public String sourceFlag = "";
-	public String csFlag = "";
-	public String offFileFlag = "";
+public class WizarParams implements Cloneable{
+
+	public Boolean sourceFlag = false;
+	public Boolean csFlag = false;
+	public Boolean offFileFlag = false;
 	public String plateForm = "";
 	public String resoulction = "";
 
@@ -25,6 +28,17 @@ public class WizarParams {
 		viewMap = new HashMap<TableItem, AdapterView>();
 		storeList = new ArrayList<AdapterView>();
 		oldList = new ArrayList<OldCallbackParams>();
+	}
+
+	public WizarParams clone(){
+		WizarParams tmp = null;
+		try {
+			tmp =(WizarParams) super.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return tmp;
 	}
 
 
@@ -43,10 +57,49 @@ public class WizarParams {
 		storeList.add(tmpView);
 	}
 
+
+	public ArrayList<OldCallbackParams> initialOldList(){
+		ErlLogger.debug("list st:"+(oldList != null)+"| "+ (oldList.size() > 0));
+		if ((oldList != null) && (oldList.size() > 0))
+			return oldList;
+		else {
+			oldList = new ArrayList<OldCallbackParams>();
+			return oldList;
+		}
+	}
+
+	public OldCallbackParams getOldView(int index){
+		return oldList.get(index);
+	}
+
+	public void addOldView(OldCallbackParams tmpObj){
+		oldList.add(tmpObj);
+	}
 	public void addOldView(String tranCode, String viewName){
 		OldCallbackParams tmpOldV = new OldCallbackParams();
 		tmpOldV.tranCode = tranCode;
 		tmpOldV.viewName = viewName;
 		oldList.add(tmpOldV);
+	}
+
+	public void refreshOldView(int index, OldCallbackParams tmpObj){
+		oldList.remove(index);
+		//oldList.add(tmpObj);
+		oldList.add(index, tmpObj);
+	}
+	public void refreshOldView(int index, String tranCode, String viewName){
+		oldList.remove(index);
+		OldCallbackParams tmpOldV = new OldCallbackParams();
+		tmpOldV.tranCode = tranCode;
+		tmpOldV.viewName = viewName;
+		oldList.add(tmpOldV);
+	}
+
+	public void removeOldView(int index){
+		oldList.remove(index);
+	}
+
+	public void clearOldView(){
+		oldList = new ArrayList<OldCallbackParams>();
 	}
 }

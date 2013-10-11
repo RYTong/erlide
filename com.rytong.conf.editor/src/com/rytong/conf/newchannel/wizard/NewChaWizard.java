@@ -3,6 +3,10 @@ package com.rytong.conf.newchannel.wizard;
 import java.util.HashMap;
 import java.util.Set;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -55,8 +59,8 @@ public class NewChaWizard extends Wizard {
 			Rectangle screenSize = Display.getDefault().getClientArea();
 			Shell shell =newWizardDialog.getShell();
 			shell.setSize(850, 600);
-			shell.setLocation((screenSize.width - newWizardDialog.getShell().getBounds().width) / 2,(
-					screenSize.height -newWizardDialog.getShell().getBounds().height) / 2);
+			shell.setLocation((screenSize.width - shell.getBounds().width) / 2,(
+					screenSize.height -shell.getBounds().height) / 2);
 			newWizardDialog.open();
 		}catch (Exception e){
 			e.printStackTrace();
@@ -95,8 +99,10 @@ public class NewChaWizard extends Wizard {
 		if (selectId != null){
 			parent.erlBackend_addCha(selectId, cha);
 			parent.ChaMap.remove(selectId);
-		} else
+		} else{
 			parent.erlBackend_addCha("", cha);
+		}
+		create_source_code(cha);
 		parent.ChaMap.put(cha.cha_id, cha);
 
 		//parent.ChaMap.remove(cha.cha_id);
@@ -113,4 +119,16 @@ public class NewChaWizard extends Wizard {
 		else
 			return false;
 	}
+
+	private void create_source_code(EwpChannels tmpCha){
+		if (tmpCha.add_view.csFlag){
+ 		} else {
+
+ 		}
+
+
+	}
+
+
+
 }

@@ -14,6 +14,7 @@ import com.ericsson.otp.erlang.OtpErlangList;
 import com.ericsson.otp.erlang.OtpErlangObject;
 import com.ericsson.otp.erlang.OtpErlangTuple;
 import com.rytong.conf.newchannel.wizard.AdapterView;
+import com.rytong.conf.newchannel.wizard.OldCallbackParams;
 import com.rytong.conf.newchannel.wizard.WizarParams;
 
 public class EwpChannels implements Cloneable{
@@ -25,7 +26,6 @@ public class EwpChannels implements Cloneable{
 	//public String cha_props;
 	public String cha_state="";
 	public String type="channels";
-	public String csFlag = "";
 	public WizarParams add_view = new WizarParams();
 
 
@@ -44,6 +44,7 @@ public class EwpChannels implements Cloneable{
 		EwpChannels cha = null;
 		try {
 			cha =(EwpChannels) super.clone();
+			cha.add_view = cha.add_view.clone();
 		} catch (CloneNotSupportedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -120,19 +121,32 @@ public class EwpChannels implements Cloneable{
 	}
 
 	public OtpErlangList get_views_list(){
-		HashMap<TableItem, AdapterView> viewMap = add_view.viewMap;
 		ArrayList<OtpErlangObject> list = new ArrayList<OtpErlangObject>();
-		Map<TableItem, AdapterView> map = viewMap;
-		Iterator<Entry<TableItem, AdapterView>> chaiter = map.entrySet().iterator();
+		if (cha_entry.equalsIgnoreCase(CHANNEL_ADAPTER)){
+			HashMap<TableItem, AdapterView> viewMap = add_view.viewMap;
+			Map<TableItem, AdapterView> map = viewMap;
+			Iterator<Entry<TableItem, AdapterView>> chaiter = map.entrySet().iterator();
 
-		while (chaiter.hasNext()) {
-			Map.Entry<TableItem, AdapterView> entry = chaiter.next();
-			//String key = (String) entry.getKey();
-			AdapterView views =  entry.getValue();
-			//ErlLogger.debug("cha key:"+key);
-			OtpErlangTuple tmpRe = formParamsStr(views.tranCode, views.viewName);
-			list.add(tmpRe);
+			while (chaiter.hasNext()) {
+				Map.Entry<TableItem, AdapterView> entry = chaiter.next();
+				//String key = (String) entry.getKey();
+				AdapterView views =  entry.getValue();
+				//ErlLogger.debug("cha key:"+key);
+				OtpErlangTuple tmpRe = formParamsStr(views.tranCode, views.viewName);
+				list.add(tmpRe);
+			}
+		} else if(cha_entry.equalsIgnoreCase(NEW_CALLBACK)){
+
+		} else {
+			Iterator<OldCallbackParams> chaiter = add_view.oldList.iterator();
+			while(chaiter.hasNext()){
+				OldCallbackParams tmp = chaiter.next();
+				OtpErlangTuple tmpRe = formParamsStr(tmp.tranCode, tmp.viewName);
+				list.add(tmpRe);
+			}
+
 		}
+
 		if (list.size()!=0){
 			OtpErlangObject[] result = new OtpErlangObject[list.size()];
 			for(int i=0; i<list.size();i++)
