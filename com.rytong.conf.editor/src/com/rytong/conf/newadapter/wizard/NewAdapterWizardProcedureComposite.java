@@ -67,11 +67,20 @@ public class NewAdapterWizardProcedureComposite {
     protected EwpAdpaterList tmpEwpAdpList;
     private String error_msg=null;
 
+    /**
+     * 添加procedure想到内的，procedure编辑页面
+     * @return
+     */
     public NewAdapterWizardProcedureComposite NewAdapterWizardProcedureComposite(){
         return this;
     }
 
-
+    /**
+     * 初始化赋值，添加procedure edit 容器
+     * @param parent
+     * @param composite
+     * @return
+     */
     public EwpProcedure initial_composite(NewAdapterWizardComonPage parent, Composite composite){
         this.parent = parent;
         tmpEwpAdpList = parent.getAdpList();
@@ -91,6 +100,9 @@ public class NewAdapterWizardProcedureComposite {
         return nowAdp;
     }
 
+    /**
+     * 初始化容器，在容器内添加procedure相关元素
+     */
     private void initial_ui_element(Composite composite){
         proc_id = new Label(composite, SWT.NONE);
         proc_id.setText("Id*:");
@@ -187,6 +199,10 @@ public class NewAdapterWizardProcedureComposite {
         remAllBut.setLayoutData(setParamsLayout(3));
     }
 
+    /**
+     * 为procedure的adapter combo进行处事化操作
+     * @param tmpCom
+     */
     private void initial_combo_adapter(Combo tmpCom){
         Object[] tmpObj = tmpEwpAdpList.getAdapterArray();
         ArrayList<String> tmpArray = new ArrayList<String>();
@@ -203,6 +219,11 @@ public class NewAdapterWizardProcedureComposite {
         g_group.setVisible(false);
     }
 
+    /**
+     * 计算label在容器内的布局
+     * @param i
+     * @return
+     */
     private FormData setLabelLayout(int i){
         FormData comsite_form = new FormData();
         comsite_form.left = new FormAttachment(0,5);
@@ -211,6 +232,11 @@ public class NewAdapterWizardProcedureComposite {
         return comsite_form;
     }
 
+    /**
+     * 计算text在容器内的布局
+     * @param i
+     * @return
+     */
     private FormData setTextLayout(int i){
         FormData comsite_form = new FormData();
         comsite_form.left = new FormAttachment(0,107);
@@ -219,6 +245,11 @@ public class NewAdapterWizardProcedureComposite {
         return comsite_form;
     }
 
+    /**
+     * 计算parameters table在容器内的布局
+     * @param i
+     * @return
+     */
     public FormData setParamsLayout(int i){
         FormData tmp_form = new FormData();
         tmp_form.left = new FormAttachment(65, 10);
@@ -227,6 +258,9 @@ public class NewAdapterWizardProcedureComposite {
         return tmp_form;
     }
 
+    /**
+     * 为text 添加监听处理，并进行相关复制操作
+     */
     public void setTextListener(){
         text_id.addModifyListener(new ModifyListener(){
 
@@ -309,12 +343,18 @@ public class NewAdapterWizardProcedureComposite {
         });
     }
 
+    /**
+     * 设置parameter table 为未选中的状态
+     */
     public void setTableDeselect(){
         paramsTab.deselectAll();
         removeBut.setEnabled(false);
         editBut.setEnabled(false);
     }
 
+    /**
+     * 为parameter table添加监听事件，用来动态改变删除及修改按键的状态
+     */
     private void setParamsTableListener(){
         paramsTab.addMouseListener(new MouseAdapter(){
             public void mouseDown(MouseEvent event) {
@@ -402,6 +442,9 @@ public class NewAdapterWizardProcedureComposite {
             return false;
     }
 
+    /**
+     * 判断是否在wizard中显示error
+     */
     private void check_error(){
         if (tmpEwpAdpList.checkExistedProcedure(text_id.getText(), combo_adapter.getText())){
             error_msg = "该procedure已经存在！";

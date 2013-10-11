@@ -53,6 +53,10 @@ public class EwpAdapter {
             return false;
     }
 
+    /**
+     * 为adapter复制
+     *
+     */
     public void setValue(String id, String value){
         if(id == sname){
             this.name = value;
@@ -70,13 +74,18 @@ public class EwpAdapter {
         }
     }
 
+    /**
+     * 判断adapter的必须项是否为空
+     */
     public boolean checkNeededValue(){
         if(name.replace(" ", "").isEmpty()||host.replace(" ", "").isEmpty())
             return false;
         else
             return true;
     }
-
+    /**
+     * 赋值
+     */
     public void setStatus(){
         status = true;
     }
@@ -113,17 +122,28 @@ public class EwpAdapter {
         this.return_type = return_type;
     }
 
+    /**
+     * 为adapter添加子procedure
+     * @param tmpProcedure
+     */
     public void setChildren(EwpProcedure tmpProcedure){
         String adapterName = tmpProcedure.getAdapter();
         if (adapterName.equalsIgnoreCase(name)){
             childrenMap.put(tmpProcedure.getId(), tmpProcedure);
         }
     }
-
+    /**
+     * 删除该adapter的某个子procedure
+     * @param id
+     */
     public void removeChildren(String id){
         childrenMap.remove(id);
     }
 
+    /**
+     * 刷新adapter的指定procedure
+     * @param tmpProcedure
+     */
     public void refreshChildren(EwpProcedure tmpProcedure){
         childrenMap.remove(tmpProcedure.getId());
         childrenMap.put(tmpProcedure.getId(), tmpProcedure);
@@ -161,6 +181,10 @@ public class EwpAdapter {
         return childrenMap.values().toArray();
     }
 
+    /**
+     * 获取该adapter的子procedure列表
+     * @return EwpProcedure List
+     */
     public List<EwpProcedure> getChildrenList (){
         ArrayList<EwpProcedure> list = new ArrayList<EwpProcedure>();
         for(EwpProcedure obj: childrenMap.values()){
@@ -169,6 +193,10 @@ public class EwpAdapter {
         return list;
     }
 
+    /**
+     * 拼接adapter为 erlang tuple，用于和erlang之间的交互
+     * @return OtpErlangTuple
+     */
     public OtpErlangTuple formAdapter(){
         //Name, Host, Port, Protocol, ReturnType
         OtpErlangObject[] request = new OtpErlangObject[5];
@@ -179,6 +207,7 @@ public class EwpAdapter {
         request[4] = new OtpErlangAtom(return_type);
         return new OtpErlangTuple(request);
     }
+
 
     public OtpErlangTuple editAdapterName(){
         return editAdapterTuple(sname, name);
@@ -200,6 +229,12 @@ public class EwpAdapter {
         return editAdapterTupleAtomValue(sreturn_type, return_type);
     }
 
+    /**
+     * 拼接adapter为 erlang tuple，用于和erlang之间的交互，
+     * 主要用于adapter的某个值修改
+     * @return OtpErlangTuple
+     * {name:List, key:atom, Value:List}
+     */
     private OtpErlangTuple editAdapterTuple(String Key, String Value){
         // {OldName, Name, RVal}
         //Id, App, Name, Entry, Views, Props, State
@@ -210,6 +245,12 @@ public class EwpAdapter {
         return new OtpErlangTuple(request);
     }
 
+    /**
+     * 拼接adapter为 erlang tuple，用于和erlang之间的交互，
+     * 主要用于adapter的某个值修改
+     * @return OtpErlangTuple
+     * {name:List, key:atom, atom}
+     */
     private OtpErlangTuple editAdapterTupleAtomValue(String Key, String Value){
         // {OldName, Name, RVal}
         //Id, App, Name, Entry, Views, Props, State
@@ -219,6 +260,13 @@ public class EwpAdapter {
         request[2] = new OtpErlangAtom(Value);
         return new OtpErlangTuple(request);
     }
+
+    /**
+     * 拼接adapter为 erlang tuple，用于和erlang之间的交互，
+     * 主要用于adapter的某个值修改
+     * @return OtpErlangTuple
+     * {name:List, key:atom, Value:Int}
+     */
     private OtpErlangTuple editAdapterTupleIntValue(String Key, String Value){
         // {OldName, Name, RVal}
         //Id, App, Name, Entry, Views, Props, State

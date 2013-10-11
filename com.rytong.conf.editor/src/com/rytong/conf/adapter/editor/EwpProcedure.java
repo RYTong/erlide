@@ -55,6 +55,9 @@ public class EwpProcedure {
         path = "";
     }
 
+    /**
+     * 为procedure赋值
+     */
     public void setValue(String id, String value){
         if(id == "id"){
             this.id = value;
@@ -81,6 +84,11 @@ public class EwpProcedure {
         }
     }
 
+    /**
+     * 判断输入是否为string型的 true或false
+     * @param str
+     * @return boolean
+     */
     private Boolean check_type(String str){
         if (str.equalsIgnoreCase("true"))
             return true;
@@ -88,6 +96,10 @@ public class EwpProcedure {
             return false;
     }
 
+    /**
+     * 判断必须项是否为空
+     * @return boolean
+     */
     public boolean checkNeededValue(){
         if(id.replace(" ", "").isEmpty()||
                 adapter.replace(" ", "").isEmpty()||
@@ -136,7 +148,6 @@ public class EwpProcedure {
     public void setUseSample(Boolean sampleFlag){
         this.use_sample = sampleFlag;
     }
-
 
     public String getId(){
         return id;
@@ -211,9 +222,11 @@ public class EwpProcedure {
         return sadapter;
     }
 
+    /**
+     * 拼接procedure参数为erlang tuple，用于java和erlang之间的交互
+     * @return OtpErlangTuple
+     */
     public OtpErlangTuple formProcedure(){
-
-
         //Id, App, Name, Entry, Views, Props, State
         OtpErlangObject[] request = new OtpErlangObject[9];
         //{Id, Adapter, Path, Return_type, Code, Log, UseSample, SampleData}
@@ -234,7 +247,11 @@ public class EwpProcedure {
         return new OtpErlangTuple(request);
     }
 
-    public OtpErlangList get_props_tuple(){
+    /**
+     * 拼接procedure的parameters为erlang tuple
+     * @return
+     */
+    private OtpErlangList get_props_tuple(){
         ArrayList<OtpErlangObject> list = new ArrayList<OtpErlangObject>();
         Map<String, ConfParams> map = params;
         Iterator<Entry<String, ConfParams>> adpiter = map.entrySet().iterator();
@@ -255,7 +272,13 @@ public class EwpProcedure {
             return null;
     }
 
-    public OtpErlangTuple formParamsStr(String key, String value){
+    /**
+     * 把每个parameters拼接成tuple/list
+     * @param key String()
+     * @param value String()
+     * @return OtpErlangTuple [{k, v}]
+     */
+    private OtpErlangTuple formParamsStr(String key, String value){
         OtpErlangObject[] request = new OtpErlangObject[2];
         // we assume that all the key should be atom.
         request[0]=new OtpErlangList(key);
@@ -291,10 +314,14 @@ public class EwpProcedure {
         return editAdapterTuple(ssample_data, sample_data);
     }
 
+    /**
+     * 把procedure的修改项，拼接为erlang tuple，用于与erlang交互
+     * @return OtpErlangTuple
+     * [{id:List, adapter:List, parameters:atom}]
+     */
     public OtpErlangTuple editParameters(){
         //params
         OtpErlangObject[] request = new OtpErlangObject[4];
-
         request[0] = new OtpErlangList(oldId);
         request[1] = new OtpErlangList(oldAdapter);
         request[2] = new OtpErlangAtom(sParamters);
@@ -304,16 +331,19 @@ public class EwpProcedure {
             request[3]=props;
         else
             request[3]=new OtpErlangList();
-
         return new OtpErlangTuple(request);
     }
 
+    /**
+     * 把procedure的修改项，拼接为erlang tuple，用于与erlang交互
+     * @return OtpErlangTuple
+     * [{id:List, adapter:List, key:atom, value:List}]
+     */
     private OtpErlangTuple editAdapterTuple(String Key, String Value){
 
         // {Id, Adapter, RId, RVal}
         //Id, App, Name, Entry, Views, Props, State
         OtpErlangObject[] request = new OtpErlangObject[4];
-
         request[0] = new OtpErlangList(oldId);
         request[1] = new OtpErlangList(oldAdapter);
         request[2] = new OtpErlangAtom(Key);
@@ -322,17 +352,20 @@ public class EwpProcedure {
         return new OtpErlangTuple(request);
     }
 
+    /**
+     * 把procedure的修改项，拼接为erlang tuple，用于与erlang交互
+     * @return OtpErlangTuple
+     * [{id:List, adapter:List, key:atom, value:atom}]
+     */
     private OtpErlangTuple editAdapterTuple(String Key, boolean Value){
 
         // {Id, Adapter, RId, RVal}
         //Id, App, Name, Entry, Views, Props, State
         OtpErlangObject[] request = new OtpErlangObject[4];
-
         request[0] = new OtpErlangList(id);
         request[1] = new OtpErlangList(adapter);
         request[2] = new OtpErlangAtom(Key);
         request[3] = new OtpErlangAtom(Value);
-
         return new OtpErlangTuple(request);
     }
 
