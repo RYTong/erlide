@@ -94,6 +94,8 @@ public class ErlangPlugin extends Plugin {
                 .getDefault();
         
         yawsPath = guess_path("yaws");
+        if (yawsPath == null)
+            yawsPath = "/usr/local/lib/yaws";
         ewpPath = guess_path("ewp");
         
         yawsVer = get_yaws_version();

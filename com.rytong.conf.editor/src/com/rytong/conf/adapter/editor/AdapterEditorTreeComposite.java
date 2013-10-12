@@ -30,7 +30,6 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.erlide.jinterface.ErlLogger;
 
 import com.rytong.conf.newadapter.wizard.NewAdapterWizard;
-import com.rytong.ui.internal.templates.AppTemplate;
 
 public class AdapterEditorTreeComposite {
 

@@ -17,6 +17,8 @@ public class RytongUIMessages extends NLS {
 	public static String VersionSelectionPage_desc;
     
 	public static String VersionSelectionPage_label;
+	
+	public static String VersionSelectionPage_plabel;
     
 	public static String VersionSelectionPage_versions;
 

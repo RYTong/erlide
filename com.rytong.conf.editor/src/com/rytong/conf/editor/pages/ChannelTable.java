@@ -54,7 +54,6 @@ import com.ericsson.otp.erlang.OtpErlangObject;
 import com.rytong.conf.editor.Activator;
 import com.rytong.conf.newchannel.wizard.NewChaWizard;
 import com.rytong.conf.newcollection.wizard.NewCollWizard;
-import com.rytong.ui.internal.RytongUIPlugin;
 
 public class ChannelTable {
 

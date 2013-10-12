@@ -76,6 +76,8 @@ public class NewAppProjectWizard extends Wizard implements INewWizard {
 
             description.setNatureIds(new String[] { ErlangCore.NATURE_ID });
             project.setDescription(description, null);
+            set_ewp_path();
+            
 			final IErlProject erlProject = ErlModelManager.getErlangModel()
                     .getErlangProject(project);
 			OldErlangProjectProperties prefs;
@@ -392,5 +394,11 @@ public class NewAppProjectWizard extends Wizard implements INewWizard {
 	}
 
 	protected void createProject(final IProgressMonitor monitor) {
+	}
+	
+	private void set_ewp_path() {
+		File ewp = new File(fData.ewpPath);
+		if (ewp.isDirectory())
+			ErlangPlugin.ewpPath = fData.ewpPath;
 	}
 }
