@@ -11,6 +11,9 @@
             id="com.rytong.ui.NewAppProjectWizard"
             name="EMP App Project"
             project="true">
+         <description>
+            Create an EMP project
+         </description>
       </wizard>
       <wizard
             category="org.erlide.ui.wizards.newWizards"

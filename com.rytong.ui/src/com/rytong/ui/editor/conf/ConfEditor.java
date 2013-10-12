@@ -50,11 +50,11 @@ public class ConfEditor extends FormEditor {
 	@Override
 	protected void addPages() {
 		createSourcePage();
-      try {
-		addPage((new DesignPage(this)));
-	} catch (PartInitException e) {
-		e.printStackTrace();
-	}
+//      try {
+//		addPage((new DesignPage(this)));
+//	} catch (PartInitException e) {
+//		e.printStackTrace();
+//	}
 	}
 
 	/* (non-Javadoc)

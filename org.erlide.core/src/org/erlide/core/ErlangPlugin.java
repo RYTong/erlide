@@ -10,6 +10,14 @@
  *******************************************************************************/
 package org.erlide.core;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IExtensionRegistry;
@@ -30,6 +38,12 @@ import org.osgi.framework.BundleContext;
 public class ErlangPlugin extends Plugin {
     private static ErlangPlugin plugin;
     private ErlangCore core;
+    
+    public static String yawsPath;
+    public static String ewpPath;
+    
+    public static String yawsVer="unknown";
+    public static String ewpVer="unknown";
 
     public ErlangPlugin() {
         super();
@@ -78,6 +92,12 @@ public class ErlangPlugin extends Plugin {
                 .toPortableString();
         final ErlangDebugOptionsManager erlangDebugOptionsManager = ErlangDebugOptionsManager
                 .getDefault();
+        
+        yawsPath = guess_path("yaws");
+        ewpPath = guess_path("ewp");
+        
+        yawsVer = get_yaws_version();
+        ewpVer = get_ewp_version();
 
         core = new ErlangCore(this, workspace, extensionRegistry,
                 portableString, erlangDebugOptionsManager);
@@ -87,4 +107,77 @@ public class ErlangPlugin extends Plugin {
     public ErlangCore getCore() {
         return core;
     }
+    
+    private String guess_path(String Pkg) {
+        String cmd = "whereis "+Pkg;
+        String lineStr = exec_cmd(cmd);
+        for (String path : lineStr.split(" ")) {
+            if (path.endsWith("/lib/"+Pkg)) 
+                return path;
+        }
+        return null;
+    }
+    
+    private String get_yaws_version() {
+        String lineStr = exec_cmd("yaws --version");
+        if (lineStr != null) {
+            String v[] = lineStr.split(" ");
+            return v[1];
+        }
+        return null;
+    }
+    
+    public static String get_ewp_version() {
+        if (ewpPath != null) {
+            String ver = read_file(new File(ewpPath+"/RPM/VERSION"));
+            if (ver != null) {
+                String pver = read_file(new File(ewpPath+"/RPM/PATCHLEVEL"));
+                if (pver !=null)
+                    return ver+"."+pver;
+                return ver;
+            }
+        }
+        return "unknown";
+    }
+    
+    public static String read_file(File file) {
+        BufferedReader br;
+        try {
+            br = new BufferedReader(new FileReader(file));
+        String temp=null;
+        StringBuffer sb=new StringBuffer();
+        temp=br.readLine();
+        while(temp!=null) {
+            sb.append(temp+" ");
+            temp=br.readLine();
+        }
+        br.close();
+        return sb.toString().trim();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    private String exec_cmd(String cmd) {
+        Runtime run = Runtime.getRuntime();
+        String lineStr = null;
+        try {
+            Process p = run.exec(cmd);
+            BufferedInputStream in = new BufferedInputStream(p.getInputStream());
+            BufferedReader inBr = new BufferedReader(new InputStreamReader(in));
+            lineStr = inBr.readLine();
+            if (p.waitFor() != 0) {
+                if (p.exitValue() == 1)
+                    return null;
+            }
+            inBr.close();
+            in.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return lineStr;
+    }
+
 }

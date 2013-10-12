@@ -24,13 +24,22 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
+import org.erlide.backend.BackendCore;
+import org.erlide.core.ErlangCore;
+import org.erlide.core.ErlangPlugin;
+import org.erlide.core.internal.model.root.OldErlangProjectProperties;
+import org.erlide.core.internal.model.root.PathSerializer;
+import org.erlide.core.model.root.ErlModelManager;
+import org.erlide.core.model.root.IErlProject;
 import org.erlide.core.model.util.PluginUtils;
 import org.erlide.jinterface.ErlLogger;
+import org.osgi.service.prefs.BackingStoreException;
 
 import com.rytong.ui.internal.RytongUIMessages;
 import com.rytong.ui.internal.RytongUIPlugin;
 import com.rytong.ui.RytongUIConstants;
 
+@SuppressWarnings("restriction")
 public class NewAppProjectWizard extends Wizard implements INewWizard {
 
 	private WizardNewProjectCreationPage namePage;
@@ -63,10 +72,31 @@ public class NewAppProjectWizard extends Wizard implements INewWizard {
 		try {
 			project.create(description, null);
 			project.open(null);
-		} catch (CoreException e) {
+            description = project.getDescription();
+
+            description.setNatureIds(new String[] { ErlangCore.NATURE_ID });
+            project.setDescription(description, null);
+			final IErlProject erlProject = ErlModelManager.getErlangModel()
+                    .getErlangProject(project);
+			OldErlangProjectProperties prefs;
+	        prefs = new OldErlangProjectProperties();
+	        prefs.setRuntimeVersion(BackendCore.getRuntimeInfoManager()
+	                .getDefaultRuntime().getVersion());
+	        String includeDir = "include";
+	        if (ErlangPlugin.yawsPath != null) 
+	        	includeDir += ";"+ErlangPlugin.yawsPath+"/include";
+	        if (ErlangPlugin.ewpPath != null){
+	        	includeDir += ";"+ErlangPlugin.ewpPath+"/include";
+	        	includeDir += ";"+ErlangPlugin.ewpPath+"/include/models";
+	        	includeDir += ";"+ErlangPlugin.ewpPath+"/include/internal";
+	        	includeDir += ";"+ErlangPlugin.ewpPath+"/drivers/db/include";
+	        }
+            prefs.setIncludeDirs(PathSerializer.unpackList(includeDir));
+            erlProject.setAllProperties(prefs);
+		} catch (CoreException | BackingStoreException e) {
 			e.printStackTrace();
 		}
-      File templateDirectory = new File(fData.template.getLocation());
+        File templateDirectory = new File(fData.template.getLocation());
 		generateFiles(templateDirectory, project);
 //		String[] appdirs = RytongUIPlugin.getAppDirs();
 //		List<String> sresult = new ArrayList<String>(Arrays.asList(appdirs));

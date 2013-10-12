@@ -40,8 +40,11 @@ import org.erlide.backend.BackendUtils;
 import org.erlide.backend.IBackend;
 import org.erlide.backend.runtimeinfo.RuntimeInfo;
 import org.erlide.core.ErlangCore;
+import org.erlide.core.ErlangPlugin;
+import org.erlide.core.internal.model.erlang.ErlEwpExternalReferenceEntryList;
 import org.erlide.core.internal.model.erlang.ErlExternalReferenceEntryList;
 import org.erlide.core.internal.model.erlang.ErlOtpExternalReferenceEntryList;
+import org.erlide.core.internal.model.erlang.ErlYawsExternalReferenceEntryList;
 import org.erlide.core.internal.model.root.ErlModel.External;
 import org.erlide.core.model.erlang.IErlModule;
 import org.erlide.core.model.erlang.ModuleKind;
@@ -148,6 +151,7 @@ public class ErlProject extends Openable implements IErlProject {
             // ErlLogger.debug("childcount %d", children.size());
             // ErlLogger.debug(">>adding otp");
             addOtpExternals(children);
+            addEmpExternals(children);
             // ErlLogger.debug("childcount %d", children.size());
             final IErlModel model = getModel();
             for (final IResource element : elems) {
@@ -181,6 +185,14 @@ public class ErlProject extends Openable implements IErlProject {
         children.add(new ErlOtpExternalReferenceEntryList(this, name));
     }
 
+    private void addEmpExternals(final List<IErlElement> children) {
+        //final IBackend backend = CoreUtil.getBuildOrIdeBackend(fProject);
+        if (ErlangPlugin.yawsPath != null)
+	        children.add(new ErlYawsExternalReferenceEntryList(this, "yaws-"+ErlangPlugin.yawsVer));
+        if (ErlangPlugin.ewpPath != null)
+	        children.add(new ErlEwpExternalReferenceEntryList(this, "ewp-"+ErlangPlugin.ewpVer));
+    }
+    
     private void addExternals(final List<IErlElement> children) {
         final String externalIncludes = getExternalIncludesString();
         final String externalModules = getExternalModulesString();
@@ -723,8 +735,8 @@ public class ErlProject extends Openable implements IErlProject {
         if ((delta.getFlags() & IResourceDelta.DESCRIPTION) != 0) {
             // TODO when we have cache in ErlModuleMap for referenced projects,
             // we should purge it here
-            int i = 0;
-            ++i;
+//            int i = 0;
+//            ++i;
         }
         if ((delta.getFlags() & ~IResourceDelta.MARKERS) != 0) {
             super.resourceChanged(delta);
