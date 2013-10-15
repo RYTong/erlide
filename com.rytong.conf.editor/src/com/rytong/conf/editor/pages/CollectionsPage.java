@@ -131,6 +131,9 @@ public class CollectionsPage {
         editor.setInput(input);
     }
 
+    public TextEditor getEditor(){
+        return editor;
+    }
 
     public void setUnVisiable(){
         composite_left.setVisible(false);

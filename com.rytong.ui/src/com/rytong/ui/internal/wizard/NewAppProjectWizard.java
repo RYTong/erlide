@@ -42,64 +42,66 @@ import com.rytong.ui.RytongUIConstants;
 @SuppressWarnings("restriction")
 public class NewAppProjectWizard extends Wizard implements INewWizard {
 
-	private WizardNewProjectCreationPage namePage;
-	private VersionSelectionPage buildPage;
-	private TemplateListSelectionPage tempPage;
-	private AppFieldData fData;
+    private WizardNewProjectCreationPage namePage;
+    private VersionSelectionPage buildPage;
+    private TemplateListSelectionPage tempPage;
+    private AppFieldData fData;
    private IProject project;
 
 
-	public NewAppProjectWizard() {
-		super();
+    public NewAppProjectWizard() {
+        super();
 //		setNeedsProgressMonitor(true);
-		setWindowTitle(RytongUIMessages.NewAppProjectWizard_title);
+        setWindowTitle(RytongUIMessages.NewAppProjectWizard_title);
 }
 
-	@Override
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		setNeedsProgressMonitor(true);
-	}
+    @Override
+    public void init(IWorkbench workbench, IStructuredSelection selection) {
+        setNeedsProgressMonitor(true);
+    }
 
-	@Override
-	public boolean performFinish() {
-		final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		project = root.getProject(namePage.getProjectName());
-		IProjectDescription description = ResourcesPlugin.getWorkspace()
-				.newProjectDescription(project.getName());
-		if (!Platform.getLocation().equals(namePage.getLocationPath())) {
-			description.setLocation(namePage.getLocationPath());
-		}
-		try {
-			project.create(description, null);
-			project.open(null);
+    @Override
+    public boolean performFinish() {
+        final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+        project = root.getProject(namePage.getProjectName());
+        IProjectDescription description = ResourcesPlugin.getWorkspace()
+                .newProjectDescription(project.getName());
+        if (!Platform.getLocation().equals(namePage.getLocationPath())) {
+            description.setLocation(namePage.getLocationPath());
+        }
+        try {
+            project.create(description, null);
+            project.open(null);
             description = project.getDescription();
 
             description.setNatureIds(new String[] { ErlangCore.NATURE_ID });
             project.setDescription(description, null);
             set_ewp_path();
-            
-			final IErlProject erlProject = ErlModelManager.getErlangModel()
+
+            final IErlProject erlProject = ErlModelManager.getErlangModel()
                     .getErlangProject(project);
-			OldErlangProjectProperties prefs;
-	        prefs = new OldErlangProjectProperties();
-	        prefs.setRuntimeVersion(BackendCore.getRuntimeInfoManager()
-	                .getDefaultRuntime().getVersion());
-	        String includeDir = "include";
-	        if (ErlangPlugin.yawsPath != null) 
-	        	includeDir += ";"+ErlangPlugin.yawsPath+"/include";
-	        if (ErlangPlugin.ewpPath != null){
-	        	includeDir += ";"+ErlangPlugin.ewpPath+"/include";
-	        	includeDir += ";"+ErlangPlugin.ewpPath+"/include/models";
-	        	includeDir += ";"+ErlangPlugin.ewpPath+"/include/internal";
-	        	includeDir += ";"+ErlangPlugin.ewpPath+"/drivers/db/include";
-	        }
+            OldErlangProjectProperties prefs;
+            prefs = new OldErlangProjectProperties();
+            prefs.setRuntimeVersion(BackendCore.getRuntimeInfoManager()
+                    .getDefaultRuntime().getVersion());
+            String includeDir = "include";
+            if (ErlangPlugin.yawsPath != null)
+                includeDir += ";"+ErlangPlugin.yawsPath+"/include";
+            if (ErlangPlugin.ewpPath != null){
+                includeDir += ";"+ErlangPlugin.ewpPath+"/include";
+                includeDir += ";"+ErlangPlugin.ewpPath+"/include/models";
+                includeDir += ";"+ErlangPlugin.ewpPath+"/include/internal";
+                includeDir += ";"+ErlangPlugin.ewpPath+"/drivers/db/include";
+            }
             prefs.setIncludeDirs(PathSerializer.unpackList(includeDir));
             erlProject.setAllProperties(prefs);
-		} catch (CoreException | BackingStoreException e) {
-			e.printStackTrace();
-		}
+        } catch (CoreException  e) {
+            e.printStackTrace();
+        } catch (BackingStoreException e){
+            e.printStackTrace();
+        }
         File templateDirectory = new File(fData.template.getLocation());
-		generateFiles(templateDirectory, project);
+        generateFiles(templateDirectory, project);
 //		String[] appdirs = RytongUIPlugin.getAppDirs();
 //		List<String> sresult = new ArrayList<String>(Arrays.asList(appdirs));
 //		List<IPath> result = new ArrayList<IPath>();
@@ -107,49 +109,49 @@ public class NewAppProjectWizard extends Wizard implements INewWizard {
 //			result.add(new Path(s));
 //		}
 //		buildPaths(root, project, result);
-		return true;
-	}
+        return true;
+    }
 
-	private void generateFiles(File src, IContainer dst) {
-		File[] members = src.listFiles();
+    private void generateFiles(File src, IContainer dst) {
+        File[] members = src.listFiles();
 
-		for (int i = 0; i < members.length; i++) {
-			File member = members[i];
-			if (member.isDirectory()) {
+        for (int i = 0; i < members.length; i++) {
+            File member = members[i];
+            if (member.isDirectory()) {
             //IPath path = new Path(member.getName());
-				IContainer dstContainer = dst.getFolder(new Path(member.getName()));
+                IContainer dstContainer = dst.getFolder(new Path(member.getName()));
 
-				if (dstContainer instanceof IFolder && !dstContainer.exists())
-					try {
-						((IFolder) dstContainer).create(true, true, null);
-					} catch (CoreException e) {
-						e.printStackTrace();
-					}
-				generateFiles(member, dstContainer);
-			} else {
-				InputStream in = null;
-				try {
-					in = new FileInputStream(member);
+                if (dstContainer instanceof IFolder && !dstContainer.exists())
+                    try {
+                        ((IFolder) dstContainer).create(true, true, null);
+                    } catch (CoreException e) {
+                        e.printStackTrace();
+                    }
+                generateFiles(member, dstContainer);
+            } else {
+                InputStream in = null;
+                try {
+                    in = new FileInputStream(member);
                String fileName = member.getName();
                boolean binary = false;
                if (fileName.endsWith(".png")||
-               	 fileName.endsWith(".jpg")||
-               	 fileName.endsWith(".gif"))
-               	binary = true;
+                    fileName.endsWith(".jpg")||
+                    fileName.endsWith(".gif"))
+                   binary = true;
                if (!fileName.equalsIgnoreCase(RytongUIConstants.TEMPLATE_PROPFILE))
-    					copyFile(fileName, in, dst, binary, null);
-				} catch (IOException ioe) {
-				} finally {
-					if (in != null)
-						try {
-							in.close();
-						} catch (IOException ioe2) {
-						}
-				}
-			}
-		}
+                        copyFile(fileName, in, dst, binary, null);
+                } catch (IOException ioe) {
+                } finally {
+                    if (in != null)
+                        try {
+                            in.close();
+                        } catch (IOException ioe2) {
+                        }
+                }
+            }
+        }
 
-	}
+    }
 
 //	private IFolder generateSubFolder(IFolder curFolder, IPath path) {
 //		//IPath path = new Path(packageName.replace('.', File.separatorChar));
@@ -169,62 +171,62 @@ public class NewAppProjectWizard extends Wizard implements INewWizard {
 //		return project.getFolder(path);
 //	}
 
-	private void copyFile(String fileName, InputStream input, IContainer dst, boolean binary, IProgressMonitor monitor) {
-		String targetFileName = getProcessedString(fileName, fileName);
+    private void copyFile(String fileName, InputStream input, IContainer dst, boolean binary, IProgressMonitor monitor) {
+        String targetFileName = getProcessedString(fileName, fileName);
 
-		IFile dstFile = dst.getFile(new Path(targetFileName));
+        IFile dstFile = dst.getFile(new Path(targetFileName));
 
-		try {
-			InputStream stream = getProcessedStream(fileName, input, binary);
-			if (dstFile.exists()) {
-				dstFile.setContents(stream, true, true, monitor);
-			} else {
-				dstFile.create(stream, true, monitor);
-			}
-			stream.close();
+        try {
+            InputStream stream = getProcessedStream(fileName, input, binary);
+            if (dstFile.exists()) {
+                dstFile.setContents(stream, true, true, monitor);
+            } else {
+                dstFile.create(stream, true, monitor);
+            }
+            stream.close();
 
-		} catch (IOException e) {
-        	e.printStackTrace();
-		} catch (CoreException e){
-			e.printStackTrace();
-		}
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CoreException e){
+            e.printStackTrace();
+        }
+    }
 
-	private String getProcessedString(String fileName, String source) {
-		if (source.indexOf('$') == -1)
-			return source;
-		int loc = -1;
-		StringBuffer buffer = new StringBuffer();
-		boolean replacementMode = false;
-		for (int i = 0; i < source.length(); i++) {
-			char c = source.charAt(i);
-			if (c == '$') {
-				if (replacementMode) {
-					String key = source.substring(loc, i);
-					String value = key.length() == 0 ? "$" //$NON-NLS-1$
-							: getReplacementString(fileName, key);
-					buffer.append(value);
-					replacementMode = false;
-				} else {
-					replacementMode = true;
-					loc = i + 1;
-					continue;
-				}
-			} else if (!replacementMode)
-				buffer.append(c);
-		}
-		return buffer.toString();
-	}
+    private String getProcessedString(String fileName, String source) {
+        if (source.indexOf('$') == -1)
+            return source;
+        int loc = -1;
+        StringBuffer buffer = new StringBuffer();
+        boolean replacementMode = false;
+        for (int i = 0; i < source.length(); i++) {
+            char c = source.charAt(i);
+            if (c == '$') {
+                if (replacementMode) {
+                    String key = source.substring(loc, i);
+                    String value = key.length() == 0 ? "$" //$NON-NLS-1$
+                            : getReplacementString(fileName, key);
+                    buffer.append(value);
+                    replacementMode = false;
+                } else {
+                    replacementMode = true;
+                    loc = i + 1;
+                    continue;
+                }
+            } else if (!replacementMode)
+                buffer.append(c);
+        }
+        return buffer.toString();
+    }
 
-	private String getReplacementString(String fileName, String key) {
-		return "undefined";
-	}
+    private String getReplacementString(String fileName, String key) {
+        return "undefined";
+    }
 
-	//TODO We should do some replace here.
-	private InputStream getProcessedStream(String fileName, InputStream stream, boolean binary) throws IOException, CoreException {
+    //TODO We should do some replace here.
+    private InputStream getProcessedStream(String fileName, InputStream stream, boolean binary) throws IOException, CoreException {
 //		if (binary)
 //			return stream;
-		return stream;
+        return stream;
 
 //		InputStreamReader reader = new InputStreamReader(stream);
 //		int bufsize = 1024;
@@ -305,7 +307,7 @@ public class NewAppProjectWizard extends Wizard implements INewWizard {
 //			}
 //		}
 //		return new ByteArrayInputStream(outBuffer.toString().getBytes(project.getDefaultCharset()));
-	}
+    }
 
 //	private void buildPaths(IWorkspaceRoot root, IProject project,
 //			List<IPath> result) {
@@ -338,67 +340,67 @@ public class NewAppProjectWizard extends Wizard implements INewWizard {
 //
 //	}
 
-	@Override
-	public void addPages() {
-		try {
-			fData = new AppFieldData();
+    @Override
+    public void addPages() {
+        try {
+            fData = new AppFieldData();
 
-			super.addPages();
-			namePage = new WizardNewProjectCreationPage("main");
-			namePage.setTitle(RytongUIMessages.NewAppProjectWizard_title);
-			namePage.setDescription(RytongUIMessages.NewAppProjectWizard_desc);
-			namePage.setImageDescriptor(RytongUIPlugin.getDefault()
-					.getImageDescriptor(
-							RytongUIConstants.IMG_NEW_PROJECT_WIZARD));
-			addPage(namePage);
-			namePage.getProjectName();
+            super.addPages();
+            namePage = new WizardNewProjectCreationPage("main");
+            namePage.setTitle(RytongUIMessages.NewAppProjectWizard_title);
+            namePage.setDescription(RytongUIMessages.NewAppProjectWizard_desc);
+            namePage.setImageDescriptor(RytongUIPlugin.getDefault()
+                    .getImageDescriptor(
+                            RytongUIConstants.IMG_NEW_PROJECT_WIZARD));
+            addPage(namePage);
+            namePage.getProjectName();
 
-			buildPage = new VersionSelectionPage("select_version", fData);
-			buildPage.setTitle(RytongUIMessages.VersionSelectionPage_title);
-			buildPage
-					.setDescription(RytongUIMessages.VersionSelectionPage_desc);
-			buildPage.setImageDescriptor(RytongUIPlugin.getDefault()
-					.getImageDescriptor(
-							RytongUIConstants.IMG_NEW_PROJECT_WIZARD));
-			addPage(buildPage);
+            buildPage = new VersionSelectionPage("select_version", fData);
+            buildPage.setTitle(RytongUIMessages.VersionSelectionPage_title);
+            buildPage
+                    .setDescription(RytongUIMessages.VersionSelectionPage_desc);
+            buildPage.setImageDescriptor(RytongUIPlugin.getDefault()
+                    .getImageDescriptor(
+                            RytongUIConstants.IMG_NEW_PROJECT_WIZARD));
+            addPage(buildPage);
 
-			tempPage = new TemplateListSelectionPage("select_template", fData);
-			tempPage.setTitle(RytongUIMessages.TemplateListSelectionPage_title);
-			tempPage.setDescription(RytongUIMessages.TemplateListSelectionPage_desc);
-			tempPage.setImageDescriptor(RytongUIPlugin.getDefault()
-					.getImageDescriptor(
-							RytongUIConstants.IMG_NEW_PROJECT_WIZARD));
-			addPage(tempPage);
-		} catch (final Exception x) {
-			reportError(x);
-		}
-	}
+            tempPage = new TemplateListSelectionPage("select_template", fData);
+            tempPage.setTitle(RytongUIMessages.TemplateListSelectionPage_title);
+            tempPage.setDescription(RytongUIMessages.TemplateListSelectionPage_desc);
+            tempPage.setImageDescriptor(RytongUIPlugin.getDefault()
+                    .getImageDescriptor(
+                            RytongUIConstants.IMG_NEW_PROJECT_WIZARD));
+            addPage(tempPage);
+        } catch (final Exception x) {
+            reportError(x);
+        }
+    }
 
-	@Override
-	public boolean canFinish() {
-		IWizardPage page = getContainer().getCurrentPage();
-		return super.canFinish() && (page == tempPage);
-	}
+    @Override
+    public boolean canFinish() {
+        IWizardPage page = getContainer().getCurrentPage();
+        return super.canFinish() && (page == tempPage);
+    }
 
-	@Override
-	public void createPageControls(Composite pageContainer) {
-	}
+    @Override
+    public void createPageControls(Composite pageContainer) {
+    }
 
-	private void reportError(final Exception x) {
-		ErlLogger.error(x);
-		ErrorDialog.openError(getShell(), RytongUIPlugin
-				.getResourceString("wizards.errors.projecterrordesc"),
-				RytongUIPlugin
-						.getResourceString("wizards.errors.projecterrortitle"),
-				PluginUtils.makeStatus(x));
-	}
+    private void reportError(final Exception x) {
+        ErlLogger.error(x);
+        ErrorDialog.openError(getShell(), RytongUIPlugin
+                .getResourceString("wizards.errors.projecterrordesc"),
+                RytongUIPlugin
+                        .getResourceString("wizards.errors.projecterrortitle"),
+                PluginUtils.makeStatus(x));
+    }
 
-	protected void createProject(final IProgressMonitor monitor) {
-	}
-	
-	private void set_ewp_path() {
-		File ewp = new File(fData.ewpPath);
-		if (ewp.isDirectory())
-			ErlangPlugin.ewpPath = fData.ewpPath;
-	}
+    protected void createProject(final IProgressMonitor monitor) {
+    }
+
+    private void set_ewp_path() {
+        File ewp = new File(fData.ewpPath);
+        if (ewp.isDirectory())
+            ErlangPlugin.ewpPath = fData.ewpPath;
+    }
 }
