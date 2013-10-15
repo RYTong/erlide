@@ -10,12 +10,13 @@
             filenames="channel.conf"
             icon="icons/conf.gif"
             id="com.rytong.conf.editor"
-            name="Simple Conf Editor">
+            name="Channel Conf Editor">
       </editor>
       <editor
             class="com.rytong.conf.adapter.editor.AdapterEditor"
             default="false"
-            extensions="AD"
+            extensions="conf"
+            filenames="adapter.conf"
             icon="icons/conf.gif"
             id="com.rytong.conf.adapter.editor"
             name="Adapter Editor">

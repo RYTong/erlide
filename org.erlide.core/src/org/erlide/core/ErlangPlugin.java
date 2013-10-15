@@ -28,8 +28,8 @@ import org.osgi.framework.BundleContext;
 
 /**
  * The main plugin class to be used in the desktop.
- * 
- * 
+ *
+ *
  * @author Eric Merritt [cyberlync at gmail dot com]
  * @author Vlad Dumitrescu [vladdu55 at gmail dot com]
  * @author jakob
@@ -38,10 +38,10 @@ import org.osgi.framework.BundleContext;
 public class ErlangPlugin extends Plugin {
     private static ErlangPlugin plugin;
     private ErlangCore core;
-    
+
     public static String yawsPath;
     public static String ewpPath;
-    
+
     public static String yawsVer="unknown";
     public static String ewpVer="unknown";
 
@@ -92,12 +92,12 @@ public class ErlangPlugin extends Plugin {
                 .toPortableString();
         final ErlangDebugOptionsManager erlangDebugOptionsManager = ErlangDebugOptionsManager
                 .getDefault();
-        
+
         yawsPath = guess_path("yaws");
         if (yawsPath == null)
             yawsPath = "/usr/local/lib/yaws";
         ewpPath = guess_path("ewp");
-        
+
         yawsVer = get_yaws_version();
         ewpVer = get_ewp_version();
 
@@ -109,17 +109,23 @@ public class ErlangPlugin extends Plugin {
     public ErlangCore getCore() {
         return core;
     }
-    
+
     private String guess_path(String Pkg) {
-        String cmd = "whereis "+Pkg;
-        String lineStr = exec_cmd(cmd);
-        for (String path : lineStr.split(" ")) {
-            if (path.endsWith("/lib/"+Pkg)) 
-                return path;
+        try {
+            String cmd = "whereis "+Pkg;
+            String lineStr = exec_cmd(cmd);
+            if (lineStr != null){
+                for (String path : lineStr.split(" ")) {
+                    if (path.endsWith("/lib/"+Pkg))
+                        return path;
+                }}
+            return null;
+        } catch (Exception e){
+            e.printStackTrace();
         }
         return null;
     }
-    
+
     private String get_yaws_version() {
         String lineStr = exec_cmd("yaws --version");
         if (lineStr != null) {
@@ -128,7 +134,7 @@ public class ErlangPlugin extends Plugin {
         }
         return null;
     }
-    
+
     public static String get_ewp_version() {
         if (ewpPath != null) {
             String ver = read_file(new File(ewpPath+"/RPM/VERSION"));
@@ -141,7 +147,7 @@ public class ErlangPlugin extends Plugin {
         }
         return "unknown";
     }
-    
+
     public static String read_file(File file) {
         BufferedReader br;
         try {

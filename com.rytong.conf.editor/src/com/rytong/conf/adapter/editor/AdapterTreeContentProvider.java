@@ -25,7 +25,7 @@ public class AdapterTreeContentProvider implements ITreeContentProvider{
         // TODO Auto-generated method stub
         Object[] tmp = ((EwpAdpaterList) inputElement).getAdapterArray();
         ErlLogger.debug("adapter length:"+tmp.length);
-        ErlLogger.debug(""+((EwpAdapter) tmp[0]).getChildrenArray().length);
+        //ErlLogger.debug(""+((EwpAdapter) tmp[0]).getChildrenArray().length);
         return tmp;
     }
 
