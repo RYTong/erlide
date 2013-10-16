@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Editor
 Bundle-SymbolicName: com.rytong.conf.editor; singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.0.0
 Bundle-Activator: com.rytong.conf.editor.ChannelConfPlugin
 Bundle-Vendor: RYTONG
 Require-Bundle: org.eclipse.ui,
@@ -12,9 +12,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.editors,
  org.eclipse.ui.ide,
  org.erlide.jinterface;bundle-version="0.15.2",
- org.erlide.core;bundle-version="1.0.0",
  org.eclipse.ui.forms;bundle-version="3.5.101",
- com.rytong.ui;bundle-version="1.0.0",
- org.erlide.libs
+ com.rytong.ui;bundle-version="1.1.0",
+ org.erlide.libs,
+ org.erlide.core;bundle-version="1.1.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
