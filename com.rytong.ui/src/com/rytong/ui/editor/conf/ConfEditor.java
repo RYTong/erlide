@@ -63,6 +63,8 @@ public class ConfEditor extends FormEditor {
 	@Override
 	public void doSave(IProgressMonitor monitor) {
     	editor.doSave(monitor);
+    	isDirty = false;
+    	firePropertyChange(PROP_DIRTY);
 	}
 
 	/* (non-Javadoc)
@@ -106,7 +108,7 @@ public class ConfEditor extends FormEditor {
 
 	private void createSourcePage() {
         try {
-            editor = new SourceEditor();
+            editor = new SourceEditor(this);
             editorIndex = addPage(editor, getEditorInput());
             setPageText(editorIndex, "Source");
         } catch (PartInitException e) {

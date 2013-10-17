@@ -37,13 +37,17 @@ public class SourceEditor extends TextEditor {
 
 	private ColorManager colorManager;
 	private ConfScanner confScanner;
-    
+
 	public final static String EDITOR_MATCHING_BRACKETS = "matchingBrackets";
-	public final static String EDITOR_MATCHING_BRACKETS_COLOR= "matchingBracketsColor";
+	public final static String EDITOR_MATCHING_BRACKETS_COLOR = "matchingBracketsColor";
 
 	public SourceEditor() {
+		this(null);
+	}
+
+	public SourceEditor(ConfEditor ce) {
 		super();
-		// setDocumentProvider(provider);
+		setDocumentProvider(new SourceDocumentProvider(ce));
 	}
 
 	@Override
@@ -54,20 +58,25 @@ public class SourceEditor extends TextEditor {
 		setSourceViewerConfiguration(cfg);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#configureSourceViewerDecorationSupport(org.eclipse.ui.texteditor.SourceViewerDecorationSupport)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#
+	 * configureSourceViewerDecorationSupport
+	 * (org.eclipse.ui.texteditor.SourceViewerDecorationSupport)
 	 */
 	@Override
 	protected void configureSourceViewerDecorationSupport(
 			SourceViewerDecorationSupport support) {
 		super.configureSourceViewerDecorationSupport(support);
-		char[] matchChars = {'{', '}', '[', ']'}; //which brackets to match		
-		ICharacterPairMatcher matcher = new DefaultCharacterPairMatcher(matchChars ,
-				IDocumentExtension3.DEFAULT_PARTITIONING);
+		char[] matchChars = { '{', '}', '[', ']' }; // which brackets to match
+		ICharacterPairMatcher matcher = new DefaultCharacterPairMatcher(
+				matchChars, IDocumentExtension3.DEFAULT_PARTITIONING);
 		support.setCharacterPairMatcher(matcher);
-		support.setMatchingCharacterPainterPreferenceKeys(EDITOR_MATCHING_BRACKETS,EDITOR_MATCHING_BRACKETS_COLOR);
-	 
-		//Enable bracket highlighting in the preference store
+		support.setMatchingCharacterPainterPreferenceKeys(
+				EDITOR_MATCHING_BRACKETS, EDITOR_MATCHING_BRACKETS_COLOR);
+
+		// Enable bracket highlighting in the preference store
 		IPreferenceStore store = getPreferenceStore();
 		store.setDefault(EDITOR_MATCHING_BRACKETS, true);
 		store.setDefault(EDITOR_MATCHING_BRACKETS_COLOR, "128,128,128");
@@ -75,7 +84,7 @@ public class SourceEditor extends TextEditor {
 
 	@Override
 	public void doSaveAs() {
-      make_errors();
+		make_errors();
 		super.doSaveAs();
 	}
 
@@ -91,7 +100,10 @@ public class SourceEditor extends TextEditor {
 		super.dispose();
 	}
 
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.ui.editors.text.TextEditor#createActions()
 	 */
 	@Override
@@ -111,9 +123,9 @@ public class SourceEditor extends TextEditor {
 		if (!(editorInput instanceof IFileEditorInput)) {
 			return;
 		}
-        String content = getDocumentProvider().getDocument(editorInput).get();
+		String content = getDocumentProvider().getDocument(editorInput).get();
 		IFile file = ((IFileEditorInput) editorInput).getFile();
-//		String fn = file.getLocation().toFile().getAbsolutePath();
+		// String fn = file.getLocation().toFile().getAbsolutePath();
 
 		// start by clearing all the old markers.
 		int depth = IResource.DEPTH_INFINITE;
@@ -127,10 +139,12 @@ public class SourceEditor extends TextEditor {
 		if (rst != null) {
 			int lineno = Integer.valueOf(rst[0].toString());
 			String errmsg = (String) rst[1];
-			IPreferenceStore prefs = RytongUIPlugin.getDefault() .getPreferenceStore();
+			IPreferenceStore prefs = RytongUIPlugin.getDefault()
+					.getPreferenceStore();
 			String severity = prefs.getString(PreferenceConstants.VALIDATION);
 			if (PreferenceConstants.SYNTAX_VALIDATION_IGNORE.equals(severity)) {
-				ErlLogger.debug("Possible syntax errors ignored due to preference settings");
+				ErlLogger
+						.debug("Possible syntax errors ignored due to preference settings");
 				return;
 			}
 
@@ -153,7 +167,7 @@ public class SourceEditor extends TextEditor {
 	}
 
 	private Object[] consult_conf(String content) {
-    
+
 		IBackend ideBackend = BackendCore.getBackendManager().getIdeBackend();
 		Object[] rst = null;
 		if (ideBackend != null) {
@@ -171,7 +185,8 @@ public class SourceEditor extends TextEditor {
 								.elementAt(1);
 						int lineno = ((OtpErlangLong) errdata.elementAt(0))
 								.intValue();
-						String errmsg =  ((OtpErlangString)errdata.elementAt(1)).stringValue();
+						String errmsg = ((OtpErlangString) errdata.elementAt(1))
+								.stringValue();
 						rst = new Object[] { lineno, errmsg };
 					}
 				}
