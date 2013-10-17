@@ -1,2 +1,0 @@
-%% Ebank Error Code header
-%%

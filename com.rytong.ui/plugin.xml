@@ -80,13 +80,6 @@
             id="com.rytong.ui.mgroup"
             separatorsVisible="true">
       </group>
-      <menuContribution
-            locationURI="menu:org.eclipse.ui.main.menu">
-         <command
-               commandId="com.rytong.ui.form.command"
-               style="push">
-         </command>
-      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -94,12 +87,6 @@
             id="com.rytong.ui.form.category"
             name="Forms Test">
       </category>
-      <command
-            categoryId="com.rytong.ui.form.category"
-            defaultHandler="com.rytong.ui.editor.conf.OpenSimpleFormEditorAction"
-            id="com.rytong.ui.form.command"
-            name="Simple Form Editor">
-      </command>
       <command
             defaultHandler="com.rytong.ui.editor.FormatHandler"
             description="Conf Formatter"

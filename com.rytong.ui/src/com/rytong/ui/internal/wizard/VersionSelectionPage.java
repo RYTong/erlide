@@ -54,14 +54,14 @@ public class VersionSelectionPage extends WizardPage {
 		});
 		GridData gd_vers = new GridData();
 		versCtrl.setLayoutData(gd_vers);
-		
+
 		Label plabel = new Label(container, SWT.NONE);
 		plabel.setText(RytongUIMessages.VersionSelectionPage_plabel);
 		GridData gd_plbl = new GridData();
 		label.setLayoutData(gd_plbl);
 
-		path = new Text(container, SWT.NONE); 
-		path.setText(ErlangPlugin.ewpPath==null?"":ErlangPlugin.ewpPath);
+		path = new Text(container, SWT.NONE);
+		path.setText(ErlangPlugin.ewpPath == null ? "" : ErlangPlugin.ewpPath);
 		path.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -70,7 +70,7 @@ public class VersionSelectionPage extends WizardPage {
 		});
 		GridData gd_path = new GridData();
 		path.setLayoutData(gd_path);
-		
+
 		setControl(container);
 		setPageComplete(validatePage());
 
@@ -84,11 +84,15 @@ public class VersionSelectionPage extends WizardPage {
 		if (page.getControl() != null)
 			page.dispose();
 	}
-	
-	public void update_path(String path) {
-		fData.ewpPath = path;
-	}
 
+	public void update_path(String path) {
+		if (path.endsWith("/")) {
+			fData.ewpPath = path.substring(0, path.length() - 1);
+		} else {
+			fData.ewpPath = path;
+		}
+	}
+	
 	private boolean validatePage() {
 		return true;
 	}

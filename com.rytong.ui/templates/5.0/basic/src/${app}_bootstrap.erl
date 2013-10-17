@@ -7,9 +7,9 @@
 %% @doc
 %% @doc Main entrance to the entire ewp application.
 
--module(ebank_bootstrap).
+-module(${app}_bootstrap).
 
--include("ebank.hrl").
+-include("${app}.hrl").
 
 -export([start/1,
          stop/0]).

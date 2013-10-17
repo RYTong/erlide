@@ -1,13 +1,13 @@
 %%----------------------------------------------------------------------
-%% EBANK specific attributes
+%% ${app} specific attributes
 %%----------------------------------------------------------------------
 
 %% Define APP
--define(APP, "ebank").
+-define(APP, "${app}").
 
 -include("ewp.hrl").
--include("ebank_error.hrl").
+-include("${app}_error.hrl").
 
 %%----------------------------------------------------------------------
-%% End of EBANK specific attributes
+%% End of ${app} specific attributes
 %%----------------------------------------------------------------------

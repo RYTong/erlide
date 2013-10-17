@@ -14,7 +14,7 @@ public class SimpleModel {
 	private ArrayList objects;
 	public SimpleModel() {
 		modelListeners = new ArrayList();
-		objects = new ArrayList<>();
+		objects = new ArrayList<NamedObject>();
 		initialize();
 	}
 	public void addModelListener(IModelListener listener) {

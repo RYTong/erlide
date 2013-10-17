@@ -127,19 +127,23 @@ public class ErlangPlugin extends Plugin {
     }
 
     private String get_yaws_version() {
-        String lineStr = exec_cmd("yaws --version");
-        if (lineStr != null) {
-            String v[] = lineStr.split(" ");
-            return v[1];
+        try {
+	        String lineStr = exec_cmd("yaws --version");
+	        if (lineStr != null) {
+	            String v[] = lineStr.split(" ");
+	            return v[1];
+	        }
+        } catch (Exception e) {
+            System.out.println(e.getStackTrace());
         }
-        return null;
+        return "unknown";
     }
 
     public static String get_ewp_version() {
         if (ewpPath != null) {
-            String ver = read_file(new File(ewpPath+"/RPM/VERSION"));
+            String ver = read_file(new File(ewpPath+File.separator+"RPM"+File.separator+"VERSION"));
             if (ver != null) {
-                String pver = read_file(new File(ewpPath+"/RPM/PATCHLEVEL"));
+                String pver = read_file(new File(ewpPath+File.separator+"RPM"+File.separator+"PATCHLEVEL"));
                 if (pver !=null)
                     return ver+"."+pver;
                 return ver;
