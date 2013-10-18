@@ -212,8 +212,7 @@ public class NewAppProjectWizard extends Wizard implements INewWizard {
 				continue;
 			} else if (c == '}' && replacementMode) {
 				String key = source.substring(loc, i);
-				String value = key.length() == 0 ? "$" //$NON-NLS-1$
-						: getReplacementString(fileName, key);
+				String value = getReplacementString(fileName, key);
 				buffer.append(value);
 				replacementMode = false;
 			} else if (!replacementMode)
@@ -223,10 +222,10 @@ public class NewAppProjectWizard extends Wizard implements INewWizard {
 	}
 
 	public String getReplacementString(String fileName, String key) {
-		if ("app".endsWith("app")) {
+		if (key.endsWith("app"))
 			return namePage.getProjectName();
-		} else
-			return key;
+		else 
+			return "${"+key+"}";
 	}
 
 	// TODO We should do some replace here.
@@ -291,12 +290,13 @@ public class NewAppProjectWizard extends Wizard implements INewWizard {
 		//
 			if (c == '$' && i<read-1 && cbuffer[i+1]=='{' && !replacementMode) {
 				replacementMode = true;
+				++i;
 				continue;
 			} else if (c == '}' && replacementMode) {
 				String key = keyBuffer.toString();
-				String value = key.length() == 0 ? "$" //$NON-NLS-1$
-						: getReplacementString(fileName, key);
+				String value = getReplacementString(fileName, key);
 				outBuffer.append(value);
+				keyBuffer.delete(0, keyBuffer.length());
 				replacementMode = false;
 			} else if (!replacementMode) {
 				outBuffer.append(c);
