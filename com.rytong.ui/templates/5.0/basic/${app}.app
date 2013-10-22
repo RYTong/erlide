@@ -1,4 +1,4 @@
-{application,$app,[
+{application,${app},[
   {description,"Mobile banking demo"},
   {vsn,1.6},
   {modules,[]},
@@ -7,7 +7,6 @@
   {env,[{env,development}]},
   {mod,${app}_bootstrap},
   {controllers,[{{"${app}","index"},{${app},index},[{decrypt, false}, {verify, false}]},
-                {{"test","index"},{${app},index},[{decrypt, false}, {verify, false}]},
                 {{"phone","check_cs_server"},{${app},check_cs_server},[{decrypt, false}, {verify, false}]},
                 {"pubsub",pubsub ,[{decrypt, false}, {verify, false}]},
                 {{"${app}","about"},{${app},about},[{decrypt, false}, {verify, true}]},
@@ -17,11 +16,11 @@
                 {{"${app}_s","getui"},{${app},getui},[{decrypt, true}, {verify, true}]},
                 {{"${app}_s","check_phone_num"},{${app},check_phone_num},[{decrypt, true}, {verify, true}]},
                 {{"${app}_s","question"},{${app},entry},[{decrypt, true}, {verify, true}]},
-                {{"${app}_s","get_json_data"},{${app},get_json_data},[{decrypt, true}, {verify, true}]},
                 {{"${app}_s","unlogin"},{${app},unlogin},[{decrypt, true}, {verify, true}]},
                 {{"${app}_s","searchmenu"},{${app},searchmenu},[{decrypt, true}, {verify, true}]},
                 {{"${app}_s","passwordEncoding"},{${app},passwordEncoding},[{decrypt, true}, {verify, true}]}]},
-  {plugins,[channel,user,ota,security,migrate]},
+  %{plugins,[channel,user,ota,security,migrate]},
+  {plugins, []},
   {menu, db},
   
   {migrate_version, [

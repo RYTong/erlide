@@ -172,7 +172,7 @@ public class ErlangPlugin extends Plugin {
         }
         return null;
     }
-    private String exec_cmd(String cmd) {
+    public static String exec_cmd(String cmd) {
         Runtime run = Runtime.getRuntime();
         String lineStr = null;
         try {

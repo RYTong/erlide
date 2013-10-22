@@ -189,6 +189,8 @@ public class NewAppProjectWizard extends Wizard implements INewWizard {
 				dstFile.create(stream, true, monitor);
 			}
 			stream.close();
+			if ("configure".equals(dstFile.getName())||"iewp".equals(dstFile.getName()))
+				addx(dstFile.getLocation().toOSString());
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -403,5 +405,9 @@ public class NewAppProjectWizard extends Wizard implements INewWizard {
 				ErlangPlugin.ewpPath = fData.ewpPath;
 				ErlangPlugin.ewpVer = ErlangPlugin.get_ewp_version();
 		}
+	}
+	
+	private void addx(String FileName) {
+		ErlangPlugin.exec_cmd("chmod +x "+FileName);
 	}
 }
