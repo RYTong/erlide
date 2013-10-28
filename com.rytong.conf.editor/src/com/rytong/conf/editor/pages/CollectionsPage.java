@@ -234,8 +234,12 @@ public class CollectionsPage {
             child = new TreeItem(ftree, SWT.NONE);
         }
         else {
-            //ErlLogger.debug("tree index is -------:"+Integer.parseInt(index));
-            child = new TreeItem(ftree, SWT.NONE, Integer.parseInt(index)-1);
+            Integer tmpIndex = ftree.getItemCount();
+            //ErlLogger.debug("tree index is -------:"+Integer.parseInt(index)+"|tmpIndex:"+tmpIndex);
+            if (Integer.parseInt(index)-1 >tmpIndex+1)
+                child = new TreeItem(ftree, SWT.NONE, tmpIndex);
+            else
+                child = new TreeItem(ftree, SWT.NONE, Integer.parseInt(index)-1);
         }
         child.setText(new String[]{id, name});
         return child;

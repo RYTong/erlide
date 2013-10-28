@@ -27,8 +27,10 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.TreeItem;
 import org.erlide.jinterface.ErlLogger;
 
+import com.ericsson.otp.erlang.OtpErlangTuple;
 import com.rytong.conf.newadapter.wizard.NewAdapterWizard;
 
 public class AdapterEditorTreeComposite {
@@ -38,12 +40,11 @@ public class AdapterEditorTreeComposite {
     private AdapterEditorProcedureComposite right_com;
     private AdapterEditorAdapterComposite adp_com;
     private AdapterEditorTreeComposite g_this;
-    private Table table;
     private Tree tree;
 
     private Button addBut;
     private Button removeBut;
-    private Button remAllBut;
+
 
     //private TableViewer viewer;
     private TreeViewer viewer;
@@ -130,6 +131,7 @@ public class AdapterEditorTreeComposite {
                 //EwpProcedure[] tmps = new EwpProcedure[selection.size()];
                 Object[] tmpObj = new Object[selection.size()];
                 if (tmpObj.length > 0){
+                    removeBut.setEnabled(true);
                     Iterator iter = selection.iterator();
                     int i=0;
                     while(iter.hasNext()){
@@ -165,10 +167,7 @@ public class AdapterEditorTreeComposite {
         removeBut = new Button(composite_left, SWT.CENTER);
         removeBut.setText(" Remove");
         removeBut.setLayoutData(setButtonLayout(1));
-
-        remAllBut= new Button(composite_left, SWT.CENTER);
-        remAllBut.setText("Remove All");
-        remAllBut.setLayoutData(setButtonLayout(2));
+        removeBut.setEnabled(false);
         setButtonListener();
     }
 
@@ -178,35 +177,6 @@ public class AdapterEditorTreeComposite {
         tmp_form.right = new FormAttachment(100, -10);
         tmp_form.top = new FormAttachment(0, 10+i*30);
         return tmp_form;
-    }
-
-    public void setTablelistener(){
-
-        table.addMouseListener(new MouseAdapter(){
-            public void mouseDown(MouseEvent event) {
-                if (event.getSource() != null ){
-                    TableItem[] eventItem = table.getSelection();
-                    ErlLogger.debug("ttt1:"+eventItem.length);
-                    if (eventItem.length == 1){
-                        setTableSelected();
-                        ErlLogger.debug("ttt:"+eventItem[0].getText());
-                        //selectionPage(eventItem[0].getText());
-                        removeBut.setEnabled(true);
-                    } else if (eventItem.length > 1){
-                        setTableSelected();
-                        removeBut.setEnabled(true);
-                    } else {
-                        setTableDeSelected();
-                        table.deselectAll();
-                        removeBut.setEnabled(false);
-                    }
-                }else {
-                    ErlLogger.debug("select2 null :!");
-                }
-
-            }
-
-        });
     }
 
     public void setButtonListener(){
@@ -220,21 +190,29 @@ public class AdapterEditorTreeComposite {
         removeBut.addSelectionListener(new SelectionAdapter(){
             public void widgetSelected(SelectionEvent e) {
                 ErlLogger.debug("remove button!");
-            }
-        });
-        remAllBut.addSelectionListener(new SelectionAdapter(){
-            public void widgetSelected(SelectionEvent e) {
-                ErlLogger.debug("edit button!");
+                //parent_backend.erlBackend_addProcedure(m_tmp_pro);
+                TreeItem[] eventItem = tree.getSelection();
+                ErlLogger.debug("llllll:"+eventItem.length);
+                if (eventItem.length >=1){
+                    if (g_tree_selection instanceof EwpProcedure ){
+                        EwpProcedure tmpPro = ((EwpProcedure) g_tree_selection);
+                        ErlLogger.debug("procedure:"+tmpPro.getId());
+                        parent.erlBackend_removeProcedure(tmpPro);
+                        parent.getAdpList().removeProcedure(tmpPro);
+                    } else if(g_tree_selection instanceof EwpAdapter ){
+                        EwpAdapter tmpAdp = ((EwpAdapter) g_tree_selection);
+                        ErlLogger.debug("EwpAdapter:"+tmpAdp.getName());
+                        parent.erlBackend_removeAdapter(tmpAdp);
+                        parent.getAdpList().removeAdapter(tmpAdp);
+                    }
+                }
+                parent.refreshTree();
             }
         });
     }
 
     public TreeViewer getViewer(){
         return viewer;
-    }
-
-    public Table getTable(){
-        return table;
     }
 
     public void setTableSelected(){

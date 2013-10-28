@@ -286,6 +286,19 @@ public class EwpProcedure {
         return new OtpErlangTuple(request);
     }
 
+    /**
+     * 把procedure的标示，拼接为erlang tuple，用于与erlang交互
+     * @return OtpErlangTuple
+     * [{id:List, adapter:List}]
+     */
+    public OtpErlangTuple form_remove_index(){
+        //params
+        OtpErlangObject[] request = new OtpErlangObject[2];
+        request[0] = new OtpErlangList(id);
+        request[1] = new OtpErlangList(adapter);
+        return new OtpErlangTuple(request);
+    }
+
     // format edit params
     public OtpErlangTuple editAdapterId(){
         return editAdapterTuple(sid, id);

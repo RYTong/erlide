@@ -2,7 +2,10 @@ package com.rytong.conf.adapter.editor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.erlide.jinterface.ErlLogger;
 
@@ -191,6 +194,42 @@ public class EwpAdapter {
             list.add(obj);
         }
         return list;
+    }
+
+    /**
+     * 拼接adapter为 erlang tuple，用于和erlang之间的交互
+     * @return OtpErlangTuple
+     */
+    public OtpErlangTuple form_remove_index(){
+        //Name, Host, Port, Protocol, ReturnType
+        OtpErlangObject[] request = new OtpErlangObject[2];
+        request[0] = new OtpErlangList(name);
+        OtpErlangList props = get_child_list();
+        if (props!=null)
+            request[1]=props;
+        else
+            request[1]=new OtpErlangList();
+        return new OtpErlangTuple(request);
+    }
+
+    private OtpErlangList get_child_list(){
+        ArrayList<String> list = new ArrayList<String>();
+        Map<String, EwpProcedure> map = childrenMap;
+        Iterator<Entry<String, EwpProcedure>> adpiter = map.entrySet().iterator();
+        while (adpiter.hasNext()) {
+            Map.Entry entry = (Map.Entry) adpiter.next();
+            String tmpKey = (String) entry.getKey();
+            //ErlLogger.debug("cha key:"+key);
+            list.add(tmpKey);
+        }
+        if (list.size()!=0){
+            OtpErlangObject[] result = new OtpErlangObject[list.size()];
+            for(int i=0; i<list.size();i++)
+                result[i]=new OtpErlangList(list.get(i));
+            return new OtpErlangList(result);
+        }
+        else
+            return null;
     }
 
     /**

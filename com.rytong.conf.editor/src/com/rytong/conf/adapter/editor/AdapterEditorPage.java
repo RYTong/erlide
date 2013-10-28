@@ -243,6 +243,27 @@ public class AdapterEditorPage {
         setDocument(res);
     }
 
+    /***
+     * 拼接adapter的信息为erlang tuple，删除adapter
+     * @param EwpAdapter
+     */
+    public void erlBackend_removeAdapter(EwpAdapter adp){
+        OtpErlangTuple params = adp.form_remove_index();
+        OtpErlangObject res = null;
+
+        if(ideBackend == null) {
+            ideBackend = BackendCore.getBackendManager().getIdeBackend();
+        };
+        ErlLogger.debug("call ewp backend to remove a adapter.");
+        try {
+            res = ideBackend.call(15000, "ewp_adapter_conf", "remove_adapter", "1b1s", confCon, params);
+        } catch (RpcException e) {
+            e.printStackTrace();
+        }
+        //ErlLogger.debug("the rpc call result : " + result);
+        setDocument(res);
+    }
+
     public void erlBackend_addProcedure(EwpProcedure tmppro){
         OtpErlangTuple params = tmppro.formProcedure();
         OtpErlangObject res = null;
@@ -253,6 +274,27 @@ public class AdapterEditorPage {
         ErlLogger.debug("call ewp backend to add a new procedure.");
         try {
             res = ideBackend.call(15000, "ewp_adapter_conf", "add_procedure", "1b1s", confCon, params);
+        } catch (RpcException e) {
+            e.printStackTrace();
+        }
+        //ErlLogger.debug("the rpc call result : " + result);
+        setDocument(res);
+    }
+
+    /***
+     * 拼接procedure的信息为erlang tuple，删除procedure
+     * @param EwpProcedure
+     */
+    public void erlBackend_removeProcedure(EwpProcedure tmppro){
+        OtpErlangTuple params = tmppro.form_remove_index();
+        OtpErlangObject res = null;
+
+        if(ideBackend == null) {
+            ideBackend = BackendCore.getBackendManager().getIdeBackend();
+        };
+        ErlLogger.debug("call ewp backend to remove a new procedure.");
+        try {
+            res = ideBackend.call(15000, "ewp_adapter_conf", "remove_procedure", "1b1s", confCon, params);
         } catch (RpcException e) {
             e.printStackTrace();
         }

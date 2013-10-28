@@ -21,6 +21,59 @@ public class EwpAdpaterList {
         procedureIndexList = new ArrayList<String>();
     }
 
+    public void removeProcedure(EwpProcedure tmpProcedure){
+
+        String newId = tmpProcedure.getId();
+        String adapterName = tmpProcedure.getAdapter();
+        ErlLogger.debug("adapterName name :"+newId+"|"+adapterName);
+        Iterator<EwpProcedure> tmp = procedureList.iterator();
+        while(tmp.hasNext()){
+            EwpProcedure tmpPro = tmp.next();
+            String tmpId = tmpPro.getId();
+            String tmpAdapterName = tmpPro.getAdapter();
+            ErlLogger.debug("tmpAdapterName name :"+tmpId+"|"+tmpAdapterName);
+            if(tmpId.equalsIgnoreCase(newId) && tmpAdapterName.equalsIgnoreCase(adapterName)){
+                procedureList.remove(tmpPro);
+                procedureIndexList.remove(createIndex(newId, adapterName));
+                ErlLogger.debug("over!");
+                break;
+            }
+        }
+        EwpAdapter adpter = adapaterMap.get(adapterName);
+        if (adpter != null){
+            ErlLogger.debug("father adapter:"+adpter.getName());
+            adpter.removeChildren(newId);
+        }
+    }
+
+    public void removeAdapter(EwpAdapter tmpAdapter){
+        String tmpAdpName = tmpAdapter.getName();
+        ErlLogger.debug("tmpAdapter name :"+tmpAdpName);
+
+        EwpAdapter tmpAdp = adapaterMap.get(tmpAdpName);
+        if (tmpAdp != null){
+            ArrayList<EwpProcedure> tmpList = new ArrayList<EwpProcedure>();
+            Iterator<EwpProcedure> tmp = procedureList.iterator();
+            while(tmp.hasNext()){
+                EwpProcedure tmpProcedure = tmp.next();
+                String adapterName = tmpProcedure.getAdapter();
+                ErlLogger.debug("adapterName name :"+adapterName);
+                if (adapterName.equalsIgnoreCase(tmpAdpName)){
+                    String proId = tmpProcedure.getId();
+                    tmpList.add(tmpProcedure);
+                    procedureIndexList.remove(createIndex(proId, adapterName));
+                }
+            }
+            for (int i=0; i<tmpList.size();i++){
+                procedureList.remove(tmpList.get(i));
+            }
+            adapaterMap.remove(tmpAdpName);
+        } else {
+            tmpAdp.setErrStatus();
+            tmpAdp.setErrMsg("");
+        }
+    }
+
     public void addProcedureList(EwpProcedure tmpProcedure){
         procedureList.add( tmpProcedure);
         procedureIndexList.add(createIndex(tmpProcedure.getId(), tmpProcedure.getAdapter()));

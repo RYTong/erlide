@@ -22,7 +22,8 @@
 %%
 %% API Functions
 %%
-
+%% @FIXME 该函数并没有使用上一个标签的位置来格式化之后的代码，
+%% 需要使用FIrst参数作为标示来计算格式化代码的位置
 indent_lines(_Offset, _Length, Text) ->
     ?D(Text),
     Str = try
@@ -31,8 +32,7 @@ indent_lines(_Offset, _Length, Text) ->
                     Text
           end,
 
-
-	%%?ewp_log(Str),
+    %%?ewp_log(Str),
     {First, FirstLineNum, Lines} = erlide_text:get_text_and_lines(Str, 0, length(Str)),
     ?D(Lines),
     do_indent_lines(Lines).

@@ -100,7 +100,7 @@ is available from http://www.eclipse.org/legal/epl-v10.html
          id="com.rytong.ui"
          download-size="0"
          install-size="0"
-         version="1.1.0"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
@@ -133,7 +133,7 @@ is available from http://www.eclipse.org/legal/epl-v10.html
          id="com.rytong.template.editor"
          download-size="0"
          install-size="0"
-         version="1.0.0"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin

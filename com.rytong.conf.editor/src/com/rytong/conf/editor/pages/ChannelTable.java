@@ -200,13 +200,41 @@ public class ChannelTable {
     }
 
     public void setTableListener(final Table table) {
-        table.addMouseListener(new MouseAdapter(){
+        table.addSelectionListener(new SelectionAdapter(){
+            public void widgetSelected(SelectionEvent event) {
+                if (event.getSource() != null ){
+                    setCollTableDeselect();
+
+                    TableItem[] eventItem = table.getSelection();
+                    if (eventItem.length == 1){
+                        selectionPage(eventItem[0].getText());
+                        removebutton.setEnabled(true);
+                        editbutton.setEnabled(true);
+                    } else if (eventItem.length > 1){
+                        removebutton.setEnabled(true);
+                        editbutton.setEnabled(false);
+                    } else {
+                        table.deselectAll();
+                        removebutton.setEnabled(false);
+                        editbutton.setEnabled(false);
+                        parent.setVisiable();
+                    }
+                }else {
+                    ErlLogger.debug("select2 null :!");
+                }
+            }
+
+            public void widgetDefaultSelected(SelectionEvent event) {
+                table.deselectAll();
+                parent.setVisiable();
+            }
+        });
+/*        table.addMouseListener(new MouseAdapter(){
             public void mouseDown(MouseEvent event) {
                 if (event.getSource() != null ){
                     setCollTableDeselect();
 
                     TableItem[] eventItem = table.getSelection();
-
                     if (eventItem.length == 1){
                         selectionPage(eventItem[0].getText());
                         removebutton.setEnabled(true);
@@ -227,13 +255,7 @@ public class ChannelTable {
             }
 
         });
-
-        table.addSelectionListener(new SelectionAdapter(){
-            public void widgetDefaultSelected(SelectionEvent event) {
-                table.deselectAll();
-                parent.setVisiable();
-            }
-        });
+    */
     }
 
     public void selectionPage(String key){

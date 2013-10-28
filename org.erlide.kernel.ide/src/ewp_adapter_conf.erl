@@ -67,6 +67,52 @@ edit_procedure(Key, {Id, Adapter, RId, RVal}) ->
     NewKey = proplists:delete(?PRO, CKey)++NewAdpList,
     ouput_data(NewKey).
 
+
+remove_adapter(Key, {Name, Children}) ->
+    ?ewp_log({adapter, {Name, Children}}),
+    %% {params,{"localhosr"}
+    CKey = binary_to_term((Key)),
+
+    TmpAdpList = proplists:get_all_values(?ADP, CKey),
+    NewAdpList = [{?ADP, X}||X<-TmpAdpList, proplists:get_value(name, X) /= Name],
+    TmpProList = proplists:get_all_values(?PRO, CKey),
+    NewProList = lists:foldr(fun(Params, Acc) ->
+                                     TmpId = proplists:get_value(id, Params),
+                                     TmpAdapter = proplists:get_value(adapter, Params),
+                                     case TmpAdapter of
+                                         Name ->
+                                             case lists:member(TmpId, Children) of
+                                                 true ->
+                                                     Acc;
+                                                 _ ->
+                                                     [{?PRO, Params}|Acc]
+                                             end;
+                                         _ ->
+                                             [{?PRO, Params}|Acc]
+                                     end
+                             end, [], TmpProList),
+    NewKey = NewAdpList++NewProList,
+    ouput_data(NewKey).
+
+remove_procedure(Key, {Id, Adapter}) ->
+    ?ewp_log({params, {Id, Adapter}}),
+    %% {params,{"mb0104","simulator"}}
+    CKey = binary_to_term((Key)),
+
+    TmpProList = proplists:get_all_values(?PRO, CKey),
+    NewProList = lists:foldr(fun(Params, Acc) ->
+                                     TmpId = proplists:get_value(id, Params),
+                                     TmpAdapter = proplists:get_value(adapter, Params),
+                                     if TmpId == Id andalso TmpAdapter == Adapter ->
+                                            Acc;
+                                        true ->
+                                            [{?PRO, Params}|Acc]
+                                     end
+                             end, [], TmpProList),
+    NewKey = proplists:delete(?PRO, CKey)++NewProList,
+    ouput_data(NewKey).
+
+
 new_procedure({Id, Adapter, Return_type, Log, Code, UseSample, SampleData, Path, Params}) ->
     %%{"test_p","test",xml,false,false,false,[],"test",[{"123","123"}]}
     [{procedure,[{id, Id},

@@ -128,11 +128,11 @@ public class ErlangPlugin extends Plugin {
 
     private String get_yaws_version() {
         try {
-	        String lineStr = exec_cmd("yaws --version");
-	        if (lineStr != null) {
-	            String v[] = lineStr.split(" ");
-	            return v[1];
-	        }
+            String lineStr = exec_cmd("yaws --version");
+            if (lineStr != null) {
+                String v[] = lineStr.split(" ");
+                return v[1];
+            }
         } catch (Exception e) {
             System.out.println(e.getStackTrace());
         }
@@ -172,6 +172,11 @@ public class ErlangPlugin extends Plugin {
         }
         return null;
     }
+
+
+    /**
+     * @since 1.1
+     */
     public static String exec_cmd(String cmd) {
         Runtime run = Runtime.getRuntime();
         String lineStr = null;
