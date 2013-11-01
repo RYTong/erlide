@@ -1,0 +1,14 @@
+package com.rytong.ui.internal;
+
+import org.eclipse.osgi.util.NLS;
+
+public class RytongUIMessages extends NLS {
+    
+	private static final String BUNDLE_NAME = "com.rytong.ui.internal.rytresources";//$NON-NLS-1$
+    	
+%props%
+	static {
+		// load message values from bundle file
+		NLS.initializeMessages(BUNDLE_NAME, RytongUIMessages.class);
+	}
+}

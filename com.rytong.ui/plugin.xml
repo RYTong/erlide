@@ -102,5 +102,24 @@
             sequence="CTRL+SHIFT+F">
       </key>
    </extension>
+   <extension
+         point="org.eclipse.ui.importWizards">
+      <wizard
+            category="org.erlide.ui.ErlangProjectImport.category"
+            class="com.rytong.ui.internal.wizard.EmpProjectImportWizard"
+            icon="icons/empapp.ico"
+            id="com.rytong.ui.EmpProjectImport.wizard"
+            name="Import EMP app project into workspace">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.erlide.ui.preferences"
+            class="com.rytong.ui.internal.preference.EwpPreferencePage"
+            id="com.rytong.ui.preferences.ewp"
+            name="Installed ewp">
+      </page>
+   </extension>
 
 </plugin>

@@ -78,6 +78,7 @@ public class NewAppProjectWizard extends Wizard implements INewWizard {
 			description.setNatureIds(new String[] { ErlangCore.NATURE_ID });
 			project.setDescription(description, null);
 			set_ewp_path();
+			System.out.println("eewpPath: " + ErlangPlugin.ewpPath);
 
 			final IErlProject erlProject = ErlModelManager.getErlangModel()
 					.getErlangProject(project);
