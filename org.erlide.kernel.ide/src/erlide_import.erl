@@ -19,6 +19,7 @@
 
 %% import(L) ->
 %%     import("", L).
+-define(ERL_EBIN, "ebin").
 
 import(Prefix0, L) ->
     M0 = filter_out_dotnames(L),
@@ -29,7 +30,7 @@ import(Prefix0, L) ->
                  _ ->
                      Prefix0++"/"
              end,
-	import(Prefix, M, new_empty(), new_empty(), new_empty(), none, new_empty()).
+    import(Prefix, M, new_empty(), new_empty(), new_empty(), ?ERL_EBIN, new_empty()).
 
 %%
 %% Local Functions
@@ -52,13 +53,13 @@ filter_out_tilde(L) ->
                              _ -> true
                          end
                  end, L).
-                         
+
 
 import(_Prefix, [], Files, SourceDirs, IncludeDirs, BeamDir, AllDirs) ->
     {to_list(Files), to_list(SourceDirs), to_list(IncludeDirs), BeamDir, to_list(AllDirs)};
 import(Prefix, [File | Rest], Files, SourceDirs, IncludeDirs, BeamDir, AllDirs0) ->
     Dir = filename:dirname(File),
-	AllDirs = add_elem(remove_prefix(Prefix, Dir), AllDirs0),
+    AllDirs = add_elem(remove_prefix(Prefix, Dir), AllDirs0),
     case filename:extension(File) of
         ".hrl" ->
             import(Prefix, Rest, [File | Files], SourceDirs, add_elem(remove_prefix(Prefix, Dir), IncludeDirs), BeamDir, AllDirs);
@@ -90,5 +91,4 @@ remove_prefix(Prefix, Dir) ->
     end.
 
 
-         
-         
+

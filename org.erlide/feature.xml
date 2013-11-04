@@ -2,7 +2,7 @@
 <feature
       id="org.erlide"
       label="Erlang IDE"
-      version="1.1.0"
+      version="2.1.1"
       provider-name="erlide.org"
       image="erlang-64.gif">
    <install-handler/>
@@ -142,4 +142,5 @@ is available from http://www.eclipse.org/legal/epl-v10.html
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
 </feature>
