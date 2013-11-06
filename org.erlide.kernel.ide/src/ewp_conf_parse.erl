@@ -518,7 +518,7 @@ replace_conf([Conf|Next], ConfId, Id, Value, Acc) ->
         ConfId ->
             AId= list_to_atom(Id),
             ?ewp_log({replace, {Conf, AId, Value}}),
-            NewConf = replace_proplist(Conf, AId, Value, []),
+            NewConf = replace_proplist(Conf, AId, ewp_check_conf:safe_u28(Value), []),
             ?ewp_log({newcoll, NewConf}),
             replace_conf(Next, ConfId, Id, Value, [NewConf|Acc]);
         _ -> replace_conf(Next, ConfId, Id, Value, [Conf|Acc])
@@ -535,7 +535,11 @@ replace_proplist([{Id1,Value1}|Next], Id, Value, Acc) ->
 replace_proplist([], Id, Value, Acc)->
     lists:reverse(Acc).
 
-convert(V1, []) ->
+convert(undefined, V) ->
+    V;
+convert([], V) ->
+    V;
+convert(_, []) ->
     undefined;
 convert(V1, V) when is_list(V1)->
     V;

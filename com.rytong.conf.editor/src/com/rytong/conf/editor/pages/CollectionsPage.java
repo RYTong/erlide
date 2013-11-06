@@ -76,10 +76,11 @@ import com.ericsson.otp.erlang.OtpErlangTuple;
 import com.rytong.conf.editor.editors.MultiConfEditor;
 import com.rytong.conf.editor.handler.ConfErrorHandler;
 import com.rytong.conf.util.ChannelConfUtil;
+import com.rytong.ui.editor.conf.SourceEditor;
 
 public class CollectionsPage {
 
-    public TextEditor editor;
+    public SourceEditor editor;
     public String filePathStr="";
     public OtpErlangBinary confCon=null;
     public Composite pagecomposite;
@@ -121,7 +122,7 @@ public class CollectionsPage {
         pagecomposite = composite;
     }
 
-    public void setEditor(TextEditor maineditor){
+    public void setEditor(SourceEditor maineditor){
         editor = maineditor;
         document = editor.getDocumentProvider()
                 .getDocument(editor.getEditorInput());
@@ -152,7 +153,10 @@ public class CollectionsPage {
             confCon = (OtpErlangBinary)resultList.elementAt(1);
 
             String resultStr = Util.stringValue(resultConf);
+            ErlLogger.debug("resultStr:"+document.getLength());
             //ErlLogger.debug("resultStr:"+resultStr);
+            //testdoc.replace(0, document.getLength(), resultStr);
+
             document.replace(0, document.getLength(), resultStr);
         } catch (BadLocationException e) {
             // TODO Auto-generated catch block
@@ -890,7 +894,7 @@ public class CollectionsPage {
         } catch (RpcException e) {
             e.printStackTrace();
         }
-        //ErlLogger.debug("the rpc call result : " + result);
+        //ErlLogger.debug("the rpc call result : " + res);
         setDocument(res);
     }
 

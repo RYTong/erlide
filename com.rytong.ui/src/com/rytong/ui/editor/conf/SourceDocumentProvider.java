@@ -11,35 +11,36 @@ import org.eclipse.ui.editors.text.FileDocumentProvider;
  *
  */
 public class SourceDocumentProvider extends FileDocumentProvider {
-	private ConfEditor ce;
+    private ConfEditor ce;
 
-	public SourceDocumentProvider() {
-		this(null);
-	}
-	
-	public SourceDocumentProvider(ConfEditor ce) {
-		super();
-		this.ce = ce;
-	}
+    public SourceDocumentProvider() {
+        this(null);
+    }
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.editors.text.StorageDocumentProvider#createDocument(java.lang.Object)
-	 */
-	@Override
-	protected IDocument createDocument(Object element) throws CoreException {
-		IDocument document = super.createDocument(element);
-		document.addDocumentListener(new IDocumentListener() {
-			
-			@Override
-			public void documentChanged(DocumentEvent event) {
-				ce.markDirty();
-			}
-			
-			@Override
-			public void documentAboutToBeChanged(DocumentEvent event) {
-			}
-		});
-		return document;
-	}
+    public SourceDocumentProvider(ConfEditor ce) {
+        super();
+        this.ce = ce;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.ui.editors.text.StorageDocumentProvider#createDocument(java.lang.Object)
+     */
+    @Override
+    protected IDocument createDocument(Object element) throws CoreException {
+        IDocument document = super.createDocument(element);
+        document.addDocumentListener(new IDocumentListener() {
+
+            @Override
+            public void documentChanged(DocumentEvent event) {
+                if (ce !=null)
+                    ce.markDirty();
+            }
+
+            @Override
+            public void documentAboutToBeChanged(DocumentEvent event) {
+            }
+        });
+        return document;
+    }
 
 }
