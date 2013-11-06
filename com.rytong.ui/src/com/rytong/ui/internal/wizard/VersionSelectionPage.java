@@ -61,7 +61,9 @@ public class VersionSelectionPage extends WizardPage {
 		label.setLayoutData(gd_plbl);
 
 		path = new Text(container, SWT.NONE);
-		path.setText(ErlangPlugin.ewpPath == null ? "" : ErlangPlugin.ewpPath);
+		String default_path = ErlangPlugin.ewpPath == null ? "" : ErlangPlugin.ewpPath;
+		path.setText(default_path);
+		fData.ewpPath = default_path;
 		path.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
