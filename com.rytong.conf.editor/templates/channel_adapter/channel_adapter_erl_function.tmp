@@ -1,0 +1,13 @@
+%% @doc $trancode desc.
+%% @spec $trancode(TranCode, Channel) -> Json.
+%%  Json = string()
+%% @throw
+'$trancode'(TranCode, Channel) ->
+$params
+    Response =
+        ewp_adapter:invoke_procedure("$adapter",
+                                     "$procedure",
+                                     [$keylist]),
+
+    CsKey = ewp_channel_util:channel_adapter_cs_key(Channel, TranCode),
+    cs_api:render(CsKey, Response).

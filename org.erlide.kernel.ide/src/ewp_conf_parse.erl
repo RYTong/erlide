@@ -44,6 +44,7 @@
 -define(ITEM_CHA, 1).
 -define(ITEM_COLL, 0).
 
+-define(JC_TMP_DIR, "/work/code/tmp/").
 %%--------------------------------------------------------------------
 %% @doc
 %% @spec %% add a new channel
@@ -571,7 +572,7 @@ parse_channel_config(?TYPE_TEXT, Conf) ->
                 NewContent = ewp_check_conf:check_conf(Term),
                 Con = parse_conf(NewContent),
                 %%?ewp_log({parse_over, Con}),
-                Re = [unicode:characters_to_list(list_to_binary(Con)), term_to_binary(Term)],
+                Re = [list_to_binary(Con), term_to_binary(Term)],
                 %%?ewp_log({result_text, Re}),
                 Re
         end
@@ -592,7 +593,8 @@ parse_channel_config(?TYPE_PATH, FilePath) ->
         {ok, Content} ->
             NewContent = ewp_check_conf:check_conf(Content),
             Con = parse_conf(NewContent),
-            Re = [unicode:characters_to_list(list_to_binary(Con)), term_to_binary(Content)],
+            Re = [list_to_binary(Con), term_to_binary(Content)],
+            %%file:write_file("/work/code/tmp/text.txt", [Con]),
             ?ewp_log({result, Re}),
             Re;
         {error, Error} ->

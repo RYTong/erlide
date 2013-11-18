@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<content>
+    <head>
+        <style>
+            .wrap {width:320px;height:500px;top:0px;left:0px;}
+            .title {top: 10px; left:100px; font-size:25px}
+            .item {top: 100px; left:30px;}
+            .item_key {width: 100px; text-align: right;}
+            .item_value {width: 150px;}
+            .submit {top: 200px; left:230px;}
+            .desc {top: 400px; left:90px; font-size: 10px}
+        </style>
+        <script type="text/x-lua" src="RYTL.lua"></script>
+        <script type="text/x-lua">
+            <![CDATA[
+
+            ryt = RYTL:new{};
+
+            function forward()
+                to_trancode = "$to_trancode";
+                if to_trancode == "chain_tail" then
+                    ryt:alert("这是最后一个页面了！");
+                else
+                    ryt:post(nil, "app_s/run", "id=$channel&tranCode="..to_trancode, refresh, {}, false);
+                end;
+            end;
+
+            function refresh(responseData)
+              if responseData["responseCode"] == 200 then
+                 ryt:add(responseData["responseBody"]);
+                 ryt:replace(responseData["responseBody"]);
+              else
+                 ryt:alert("网络请求失败！");
+              end;
+            end;
+
+            ]]>
+        </script>
+    </head>
+
+    <body>
+        <div class="wrap">
+            <label class="title">示例页面</label>
+            <div class="item">
+                <table>
+                    <tr>
+                        <td class="item_key"><label>CHANNEL:</label></td>
+                        <td class="item_value"><label>$channel</label></td>
+                    </tr>
+                    <tr>
+                        <td><label>TRANCODE:</label></td>
+                        <td><label><?cs var:res.tranCode ?></label></td>
+                    </tr>
+                    <tr>
+                        <td><label>THISFILE:</label></td>
+                        <td><label>$cs</label></td>
+                    </tr>
+                </table>
+            </div>
+            <input class="submit" type="button" value="Next" onclick="forward()"/>
+            <label class="desc">此模板由ewp自动生成，请修改．</label>
+        </div>
+    </body>
+</content>

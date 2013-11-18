@@ -8,6 +8,8 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
@@ -18,6 +20,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.part.FileEditorInput;
 import org.erlide.jinterface.ErlLogger;
 
 import com.ericsson.otp.erlang.OtpErlangObject;
@@ -26,11 +29,15 @@ import com.rytong.conf.editor.pages.EwpChannels;
 
 public class NewChaWizard extends Wizard {
     private static String PAGE_TITLE="New Channel Wizard";
+    private ChannelAdapterTemplate createTmpUtil;
     protected EwpChannels cha = new EwpChannels();
     private CollectionsPage parent=null;
 
     protected HashMap<String, EwpChannels>  keyMap;
     protected String selectId;
+
+    protected NewChaWizardDetailPage detailPage;
+    protected NewChaWizardViewPage viewPage;
 
     public NewChaWizard NewChaWizard(){
         return this;
@@ -78,19 +85,27 @@ public class NewChaWizard extends Wizard {
         keyMap = tmpMap;
         parent=parentPage;
         this.selectId = selectId;
+    }
 
+    public ChannelAdapterTemplate getCsTmpUtil(){
+        return createTmpUtil;
     }
 
     public void addPages() {
         ErlLogger.debug("add page!");
+        createTmpUtil = new ChannelAdapterTemplate(this);
         if (selectId != null){
             cha = parent.ChaMap.get(selectId).clone();
-            addPage(new NewChaWizardDetailPage(this));
-            addPage(new NewChaWizardViewPage(this));
+            detailPage = new NewChaWizardDetailPage(this);
+            viewPage = new NewChaWizardViewPage(this);
+            addPage(detailPage);
+            addPage(viewPage);
 
         } else {
-            addPage(new NewChaWizardDetailPage(this));
-            addPage(new NewChaWizardViewPage(this));
+            detailPage = new NewChaWizardDetailPage(this);
+            viewPage = new NewChaWizardViewPage(this);
+            addPage(detailPage);
+            addPage(viewPage);
         }
         //addPage(new NewCollWizardItemsPage(parent, coll));
     }
@@ -105,9 +120,18 @@ public class NewChaWizard extends Wizard {
         } else{
             parent.erlBackend_addCha("", cha);
         }
-        create_source_code(cha);
+        create_source_code();
+        //create_source_code(cha);
         parent.ChaMap.put(cha.cha_id, cha);
-
+        try {
+            TextEditor tmpEditor = this.getTextEditor();
+            IProject tmpProject = ((FileEditorInput) tmpEditor.getEditorInput()).getFile().getProject();
+            tmpProject.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+            //ResourcesPlugin.getWorkspace().getRoot().getProject( "proj" ).refreshLocal( IResource.DEPTH_INFINITE, new NullProgressMonitor() );
+        } catch (CoreException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         //parent.ChaMap.remove(cha.cha_id);
         parent.cha_table.refreshTable();
         parent.setVisiable();
@@ -123,20 +147,25 @@ public class NewChaWizard extends Wizard {
             return false;
     }
 
-    private void create_source_code(EwpChannels tmpCha){
-
-        if (tmpCha.add_view.csFlag){
-            ErlLogger.debug("cs flag is true!");
-            final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-            final IResource resource = root.findMember(new Path("test.cs"));
-         } else {
-             ErlLogger.debug("cs flag is false");
-         }
+    private void create_source_code(){
+        if (cha.cha_entry.equalsIgnoreCase(EwpChannels.CHANNEL_ADAPTER)){
+            createTmpUtil.createCsTemplate(cha);
+            createTmpUtil.createOffTemplate(cha);
+            createTmpUtil.createAdpErlTemplate(cha);
+        }
     }
 
     public TextEditor getTextEditor(){
         return parent.getEditor();
     }
 
+
+    protected NewChaWizardDetailPage getDetailPage(){
+        return detailPage;
+    }
+
+    protected NewChaWizardViewPage getViewPage(){
+        return viewPage;
+    }
 
 }

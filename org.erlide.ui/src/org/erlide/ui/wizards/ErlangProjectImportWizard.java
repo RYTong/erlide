@@ -46,10 +46,13 @@ import org.eclipse.ui.wizards.datatransfer.FileSystemStructureProvider;
 import org.erlide.backend.BackendCore;
 import org.erlide.core.ErlangCore;
 import org.erlide.core.internal.model.root.OldErlangProjectProperties;
+import org.erlide.core.model.root.ErlModelManager;
+import org.erlide.core.model.root.IErlProject;
 import org.erlide.core.model.util.PluginUtils;
 import org.erlide.jinterface.ErlLogger;
 import org.erlide.ui.internal.ErlideUIPlugin;
 import org.erlide.ui.perspectives.ErlangPerspective;
+import org.osgi.service.prefs.BackingStoreException;
 
 public class ErlangProjectImportWizard extends Wizard implements IImportWizard {
     // {
@@ -93,6 +96,11 @@ public class ErlangProjectImportWizard extends Wizard implements IImportWizard {
         importIncludeAndSourceDirsPage.setup(projectPath, epi.getDirectories(),
                 epi.getIncludeDirs(), epi.getSourceDirs(), beamDir);
         resources = epi.getResources();
+//         Iterator<String> tmpIterator = resources.iterator();
+//        while (tmpIterator.hasNext()){
+//             String tmpPstr = tmpIterator.next();
+//            ErlLogger.debug("setup iterator tmpPstr:"+tmpPstr.toString());
+//        }
         final List<Object> fileSystemObjects = new ArrayList<Object>();
         for (final Object o : selectedResources) {
             final FileSystemElement fse = (FileSystemElement) o;
@@ -173,7 +181,7 @@ public class ErlangProjectImportWizard extends Wizard implements IImportWizard {
 
     /**
      * Validate finish
-     * 
+     *
      * @return
      */
     private boolean validateFinish() {
@@ -225,7 +233,7 @@ public class ErlangProjectImportWizard extends Wizard implements IImportWizard {
 
     /**
      * Displays an error that occured during the project creation. *
-     * 
+     *
      * @param e
      *            details on the error
      */
@@ -272,8 +280,19 @@ public class ErlangProjectImportWizard extends Wizard implements IImportWizard {
             final OldErlangProjectProperties erlangProjectProperties = new OldErlangProjectProperties(
                     project);
             erlangProjectProperties.setIncludeDirs(includeDirs);
+
             erlangProjectProperties.setSourceDirs(sourceDirs);
             erlangProjectProperties.setOutputDir(outputDir);
+
+            final IErlProject erlProject = ErlModelManager.getErlangModel()
+                    .getErlangProject(project);
+            //  we add properties if there's no property file.
+            try {
+                erlProject.setAllProperties(erlangProjectProperties);
+            } catch (BackingStoreException e) {
+                e.printStackTrace();
+            }
+
         } catch (final CoreException e) {
             throw new InvocationTargetException(e);
         } finally {

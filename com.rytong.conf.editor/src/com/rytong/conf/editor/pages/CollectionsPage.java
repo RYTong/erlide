@@ -470,7 +470,6 @@ public class CollectionsPage {
              ErlLogger.debug("document text not null!");
                 result = getIdeBackend(conFromDoc, text);
         }
-
         return Util.stringValue(result);
 
     }

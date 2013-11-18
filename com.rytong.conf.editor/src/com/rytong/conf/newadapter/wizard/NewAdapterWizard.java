@@ -69,7 +69,6 @@ public class NewAdapterWizard extends Wizard {
         ErlLogger.debug("add page!");
         g_wizard_page = new NewAdapterWizardComonPage(this);
         addPage(g_wizard_page);
-        //addPage(new NewCollWizardItemsPage(parent, coll));
     }
 
     @Override

@@ -1,0 +1,72 @@
+-module('$channel').
+
+-include("ewp.hrl").
+
+-export([before_request/2,
+         after_request/3,
+         send_request/2
+        ]).
+
+
+%% ----------------------------------------------------
+%%            callbcak template for newcallbcak
+%% ----------------------------------------------------
+
+%% 根据channel定制发送远程请求前的逻辑，可能是
+%% 1，验证客户端请求参数，可以通过 ?param(Key) 取值；
+%% 2，为请求添加定制参数
+%% before_request(TranCode, Channel) ->  {Type, Request}
+%% Parameters:
+%% TranCode = string()
+%% Channel = tuple(),
+%%
+%% Result:
+%% Type = atom() = Request_type()
+%% Request = url()
+%% Request_type = 'http' -> 当Type为'http'时，这是一个http请求，Request是一个请求的Url.
+%%                'rpc'  -> 当Type为'rpc'时，这是一个rpc:call请求.
+%%                'socket' -> 当Type为'socket'时，这是一个gen tcp处理.
+%%                 Else -> 当Type不为以上三种时，Type为用户自定义类型，
+%%                         ewp回调该模块下的send_request时使用。
+%%%-----------------------------------------------------------------
+
+before_request($trancode, Channel) ->
+    %% 我们可以通过如下方式取值
+    %% (1) TranCode = ?param("tranCode"),
+    %% (2) Type = o(Channel, method),
+    %% (3) P = ewp_params:get_params(),
+    %% do_sth_here
+    {Type="", Request=""}.
+
+%% 当'befor request'返回的Type类型不为 'http','rpc','socket'中的一种时，
+%% ewp回调该函数处理请求，其中：
+%% 1.Type和Request为before request的结果
+%% 2.Response 为传入after_request(TranCode, Channel, Response)的参数
+send_request(Type, Request) ->
+    %% do_sth_here
+    Response = [],
+    Response.
+
+
+%% Params:
+%% TranCode = string()
+%% Channel = tuple/list() = [{id, ""}, {method, ''}..]
+%% Response : Res 是before request(TranCode, Channel)->{Type, Request} 的执行结果
+%%          1.当befor request返回的Type为'http'时,
+%%            Res是远程返回的报文或者客户端请求所组成的tuplelist,
+%%            可以通过xml_eng:xpath_term/2取值
+%%          2.当befor request返回的Type为其他时,Response 为send_request的处理结果
+%% 在这里定制tranCode的业务逻辑
+%% 最后返回{CsKey, XmlList, TupleList}
+%% CsKey 为返回的模版名称
+%% XmlList为 XML报文或者[{Key, Xml}]这样的以xml报文
+%% 作为value的key-value对。
+after_request($trancode, Channel, Response) ->
+    %% 我们可以这样定义模板的名称
+    %% Format = ?param(o),
+    %% CsKey = ewp_channel_util:channel_run_cs_key(Channel, TranCode, Format),
+
+    CsKey = "",
+    XmlList = [],
+    TupleList = [{ebank, sample}|Response],
+    {CsKey, XmlList, TupleList}.

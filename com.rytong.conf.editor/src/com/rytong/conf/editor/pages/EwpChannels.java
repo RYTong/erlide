@@ -33,6 +33,11 @@ public class EwpChannels implements Cloneable{
     public static String NEW_CALLBACK = "new_callback";
     public static String CHANNEL_CALLBACK = "channel_callback";
 
+    public static String CHANNEL_ADAPTER_CN = "适配";
+    public static String NEW_CALLBACK_CN = "新回调";
+    public static String CHANNEL_CALLBACK_CN = "旧回调";
+    //"适配","新回调","旧回调"
+
     public HashMap<String, String> cha_props = new HashMap<String, String>();
 
     public EwpChannels EwpChannels(){
@@ -102,8 +107,10 @@ public class EwpChannels implements Cloneable{
             return 0;
         else if(flag.equalsIgnoreCase(EwpChannels.NEW_CALLBACK))
             return 1;
-        else
+        else if(flag.equalsIgnoreCase(EwpChannels.CHANNEL_CALLBACK))
             return 2;
+        else
+            return 0;
     }
 
     private static String[] methodStr = new String[] {"method", "post"};
@@ -144,7 +151,6 @@ public class EwpChannels implements Cloneable{
                 OtpErlangTuple tmpRe = formParamsStr(tmp.tranCode, tmp.viewName);
                 list.add(tmpRe);
             }
-
         }
 
         if (list.size()!=0){
@@ -204,6 +210,20 @@ public class EwpChannels implements Cloneable{
             return false;
         else
             return true;
+    }
+
+    public WizarParams getViewMap(){
+        return add_view;
+    }
+
+    public String getEntryName(){
+        //"适配","新回调","旧回调"
+        if (cha_entry.equalsIgnoreCase(CHANNEL_ADAPTER))
+            return CHANNEL_ADAPTER_CN;
+        else if (cha_entry.equalsIgnoreCase(NEW_CALLBACK))
+            return NEW_CALLBACK_CN;
+        else
+            return CHANNEL_CALLBACK_CN;
     }
 
 }

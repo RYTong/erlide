@@ -28,10 +28,11 @@ public class ErlProjectImport {
         l = (OtpErlangList) t.elementAt(1);
         sourceDirs = (List<String>) erlangStringList2Collection(l,
                 new ArrayList<String>());
+        ErlLogger.debug("sourceDirs >>> %s", sourceDirs);
         l = (OtpErlangList) t.elementAt(2);
         includeDirs = (List<String>) erlangStringList2Collection(l,
                 new ArrayList<String>());
-        ErlLogger.debug(">>> %s", t);
+        //ErlLogger.debug(">>> %s", t);
         beamDir = Util.stringValue(t.elementAt(3));
         ErlLogger.debug(">>> %s", beamDir);
         l = (OtpErlangList) t.elementAt(4);

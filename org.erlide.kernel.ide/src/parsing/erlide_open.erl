@@ -14,7 +14,7 @@
          get_external_module/2,
          get_external_module_tree/1,
          get_external_include/2,
-		 get_external_1/3,
+         get_external_1/3,
          get_lib_dirs/0,
          get_lib_src_include/1,
          get_lib_files/1
@@ -79,7 +79,7 @@ open_info(S, #open_context{}=Context) when is_list(S); is_binary(S) ->
             {error, E}
     end.
 
-get_external_include(FilePath, #open_context{externalIncludes=ExternalIncludes, 
+get_external_include(FilePath, #open_context{externalIncludes=ExternalIncludes,
                                              pathVars=PathVars}) ->
     ?D(FilePath),
     ExtIncPaths = get_external_modules_files(ExternalIncludes, PathVars),
@@ -150,8 +150,8 @@ get_lib_dir(Dir) ->
         _ ->
             Dir
     end.
-                
-    
+
+
 try_open(Offset, TokensWComments, BeforeReversedWComments, Context) ->
     Tokens = erlide_text:strip_comments(TokensWComments),
     BeforeReversed = erlide_text:strip_comments(BeforeReversedWComments),
@@ -208,7 +208,7 @@ consider_local([#token{kind=':'} | _]) ->
 consider_local(_) ->
     true.
 
-consider_macro_def([#token{kind=atom, value=define}, #token{kind='-'} | _]) ->
+consider_macro_def([#token{kind=atom, value=define}, #token{kind='-'} |_]) ->
     true;
 consider_macro_def([#token{kind='('} | Rest]) ->
     consider_macro_def(Rest);
@@ -307,7 +307,7 @@ upto_offset([#token{offset=O, length=L}=T | Rest], Offset) when Offset>=O+L ->
     [T | upto_offset(Rest, Offset)];
 upto_offset([], _) ->
     [];
-upto_offset([T | _], _) ->
+upto_offset([T |_], _) ->
     [T].
 
 o_record_def([#token{kind='('}, #token{value=Value}, #token{kind=','} | Tokens], Offset) ->
@@ -386,7 +386,7 @@ get_external_modules_files(PackedFileNames, PathVars) ->
     Fun = fun(_Parent, FileName, Acc) -> [replace_path_var(FileName, PathVars) | Acc] end,
     Fun2 = fun(_Parent, _FileName, Acc) -> Acc end,
     FileNames = erlide_util:unpack(PackedFileNames),
-    R = fold_externals(Fun, Fun2, FileNames, PathVars), 
+    R = fold_externals(Fun, Fun2, FileNames, PathVars),
     %%?D(R),
     R.
 
