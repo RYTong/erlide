@@ -337,35 +337,6 @@ public class ChannelTable {
             public void widgetSelected(SelectionEvent e) {
                 TableItem[] tmpItem = table.getSelection();
 
-                URL url = ChannelConfPlugin.getDefault().getBundle()
-                        .getEntry("templates/channel_oldCallback_cs_template.cs");
-                //url.
-                try {
-                    File tempDir = new File(FileLocator.toFileURL(url).getFile());
-
-                    ErlLogger.debug("test url:"+url);
-                    ErlLogger.debug("test url:"+tempDir.exists());
-
-
-
-                    String content = null;
-                    InputStreamReader read = new InputStreamReader(new FileInputStream(tempDir),"utf-8");
-                    BufferedReader reader = new BufferedReader(read);
-
-                    String tempString = null;
-                    // 一次读入一行，直到读入null为文件结束
-                    while ((tempString = reader.readLine()) != null) {
-                        // 显示行号
-                        content=content+tempString;
-                    }
-
-                    ErlLogger.debug("File content:"+content);
-
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-
                 ErlLogger.debug("button listener:"+editbutton.getText());
                 if(tmpItem.length==1){
                     ErlLogger.debug("selection:"+tmpItem[0].getText(0));

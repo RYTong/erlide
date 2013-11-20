@@ -38,6 +38,7 @@ import com.rytong.conf.editor.pages.SelectedItem;
 import com.rytong.conf.newchannel.wizard.AdapterChannel;
 import com.rytong.conf.newchannel.wizard.AdapterParams;
 import com.rytong.conf.newchannel.wizard.AdapterView;
+import com.rytong.conf.newchannel.wizard.OldCallbackParams;
 
 
 public class ChannelConfUtil {
@@ -143,6 +144,10 @@ public class ChannelConfUtil {
 
     public AddDiaolog newAddDiaolog(Shell parent, Boolean addFlag, AdapterChannel adapter, AdapterView view){
         return new AddDiaolog(parent, addFlag, adapter, view);
+    }
+
+    public viewDiaolog newViewDiaolog(Shell parent, Boolean addFlag, OldCallbackParams oldParams, String chaId){
+        return new viewDiaolog(parent, addFlag, oldParams, chaId);
     }
 
     // -------------------------------------------------
@@ -561,6 +566,149 @@ public class ChannelConfUtil {
                     view.adapter.replace(" ", "").isEmpty()||
                     view.procedure.replace(" ", "").isEmpty()||
                     view.viewName.replace(" ", "").isEmpty())
+                okBut.setEnabled(false);
+            else
+                okBut.setEnabled(true);
+        }
+    }
+
+    /***
+     * viewDiaolog is a dialog used for new Callback and old callback
+     * @author jcrom
+     *
+     */
+    public class viewDiaolog extends Dialog {
+        private String dialogTitle="";
+        private String dialogText="";
+        private Button okBut;
+
+        private Label keyLabel;
+        private Label valueLabel;
+        private Text dialogTexKey;
+        private Text dialogTexValue;
+
+        private boolean addFlag;
+        private OldCallbackParams oldParams;
+        private String chaId;
+
+
+        public viewDiaolog(Shell parent, Boolean addFlag, OldCallbackParams oldParams, String chaId)
+        {
+            super(parent);
+            this.addFlag = addFlag;
+            this.oldParams = oldParams;
+            this.chaId = chaId;
+            if (addFlag){
+                dialogTitle="Add Props...";
+                dialogText = " Add a new channel params.";
+            } else{
+                dialogTitle="Edit Props...";
+                dialogText = " Edit a new channel params.";
+            }
+        }
+
+        //@FIXME add mouse right down listener
+        protected Control createDialogArea(Composite parent){
+            ErlLogger.debug("createDialogArea ok!");
+            super.createDialogArea(parent);
+
+
+            Composite composite = new Composite(parent, SWT.NONE);
+            composite.setLayout(new FormLayout());
+            composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+            Label msg = new Label(composite, SWT.NONE);
+            msg.setText(dialogText);
+            msg.setLayoutData(setLabelLayout(0));
+
+            keyLabel = new Label(composite, SWT.NULL);
+            keyLabel.setText("TranCode:");
+            keyLabel.setLayoutData(setLabelLayout(1));
+            dialogTexKey = new Text(composite, SWT.BORDER);
+            dialogTexKey.setLayoutData(setTextLayout(1));
+
+            valueLabel = new Label(composite, SWT.NONE);
+            valueLabel.setText("ViewName:");
+            valueLabel.setLayoutData(setLabelLayout(2));
+            dialogTexValue = new Text(composite, SWT.BORDER);
+            dialogTexValue.setLayoutData(setTextLayout(2));
+            if (!addFlag){
+                dialogTexKey.setText(oldParams.tranCode);
+                dialogTexValue.setText(oldParams.viewName);
+            }
+
+            setTextListener();
+            return composite;
+        }
+
+        private FormData setLabelLayout(int i){
+            FormData comsite_form = new FormData();
+            comsite_form.left = new FormAttachment(0,5);
+            comsite_form.right = new FormAttachment(0, 100);
+            comsite_form.top = new FormAttachment(0,5+i*29);
+            return comsite_form;
+        }
+
+        private FormData setTextLayout(int i){
+            FormData comsite_form = new FormData();
+            comsite_form.left = new FormAttachment(0,107);
+            comsite_form.right = new FormAttachment(100, -10);
+            comsite_form.top = new FormAttachment(0,5+i*28);
+            return comsite_form;
+        }
+
+
+        /*			newShell.setSize(450,200);
+            Rectangle screenSize = Display.getDefault().getClientArea();
+            newShell.setLocation((screenSize.width - newShell.getBounds().width) / 2,(
+                    screenSize.height - newShell.getBounds().height) / 2); */
+
+        protected void configureShell(Shell newShell){
+            ErlLogger.debug("configureShell ok!");
+            super.configureShell(newShell);
+            newShell.setText(dialogTitle);
+        }
+
+        protected Point getInitialSize() {
+            ErlLogger.debug("getInitialSize ok!");
+            okBut = getButton(IDialogConstants.OK_ID);
+            if (addFlag){
+                okBut.setEnabled(false);
+            }
+            return new Point(400,210);
+        }
+
+        private void setTextListener(){
+            dialogTexKey.addModifyListener(new ModifyListener(){
+                public void modifyText(ModifyEvent e) {
+                    // TODO Auto-generated method stub
+                    oldParams.tranCode = dialogTexKey.getText();
+                    oldParams.viewName = formatViewName(oldParams.tranCode);
+                    dialogTexValue.setText(oldParams.viewName);
+                    //ErlLogger.debug("dialogKeyStr:"+dialogKeyStr);
+                    setOkButton();
+
+                }
+            });
+            dialogTexValue.addModifyListener(new ModifyListener(){
+                public void modifyText(ModifyEvent e) {
+                    // TODO Auto-generated method stub
+                    oldParams.viewName = dialogTexValue.getText();
+                    //@FIXME check the type of input params
+                    //ErlLogger.debug("dialogKeyStr index:"+dialogValueStr.indexOf("\""));
+                    ErlLogger.debug("dialogKeyStr:"+oldParams.viewName);
+                    setOkButton();
+                }
+            });
+        }
+
+        private String formatViewName(String tranCode){
+            return chaId.concat("_").concat(tranCode);
+        }
+
+        private void setOkButton(){
+
+            if (oldParams.tranCode.replace(" ", "").isEmpty() || oldParams.viewName.replace(" ", "").isEmpty())
                 okBut.setEnabled(false);
             else
                 okBut.setEnabled(true);

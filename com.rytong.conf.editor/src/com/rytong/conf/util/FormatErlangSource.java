@@ -54,6 +54,7 @@ public class FormatErlangSource {
     private static final String RE_ADAPTER_ERL_KEYLIST_RBRACKET = "]";
 
     private String separator = System.getProperty("line.separator");
+    private ChannelConfFileUtil fileBuilder;
 
     public String getDateStr(){
         DateFormat dateForm = new SimpleDateFormat( "yyyy-MM-dd");
@@ -62,13 +63,14 @@ public class FormatErlangSource {
 
     public FormatErlangSource(){
         //TODO some thing
+        fileBuilder = new ChannelConfFileUtil();
     }
 
 
     public String formatAdaoterErlSource(EwpChannels cha, String tmpFileName){
 
         ErlLogger.debug("separator:"+System.getProperty("line.separator"));
-        String content = getTemplateContent(cha.cha_entry, tmpFileName);
+        String content = fileBuilder.getTemplateContent(cha.cha_entry, tmpFileName);
 
         content = content.replaceAll(RE_ADAPTER_ERL_MODULE, cha.cha_id);
         content = content.replaceAll(RE_ADAPTER_ERL_DATE, getDateStr());
@@ -170,69 +172,10 @@ public class FormatErlangSource {
     }
 
     private String getFunction(){
-        return getTemplateContent(EwpChannels.CHANNEL_ADAPTER, ADAPTER_FUNCTION);
+        return fileBuilder.getTemplateContent(EwpChannels.CHANNEL_ADAPTER, ADAPTER_FUNCTION);
     }
 
 
 
-    /**
-     * 获得plugin中模版的位置
-     * @param type
-     * @return
-     */
-     public String getTemplateContent(String type, String tmpName){
-         ErlLogger.debug("tmpFileName:-----"+tmpName);
-         URL url = ChannelConfPlugin.getDefault().getBundle()
-                 .getEntry("templates/"+type);
-         //ErlLogger.debug("url:-----"+url.toString());
-         String content="";
-         try {
-             File tempDir = new File(FileLocator.toFileURL(url).getFile());
-             for (File f : tempDir.listFiles()) {
-                 if (f.getName().equalsIgnoreCase(tmpName)){
-                     //ErlLogger.debug("f:"+f.getAbsolutePath());
-                     content = getContent(f);
-                 }
-                 //@Fix me
-             }
-         } catch (IOException e) {
-             // TODO Auto-generated catch block
-             e.printStackTrace();
-         }
-         return content;
-     }
 
-     /**
-      * 读取文件内容
-      * @param appFile
-      * @return
-      */
-     public String getContent(File appFile){
-         try{
-             //ErlLogger.debug("App file path:"+appFile);
-             if (appFile.isFile()){
-                 //String content = "";
-                 InputStreamReader read = new InputStreamReader(new FileInputStream(appFile),"utf-8");
-                 BufferedReader reader = new BufferedReader(read);
-                 StringBuilder sbuilder = new StringBuilder();
-                 String tempString = null;
-                 // 一次读入一行，直到读入null为文件结束
-                 if ((tempString = reader.readLine()) != null){
-                     sbuilder.append(tempString);
-                     while ((tempString = reader.readLine()) != null) {
-                         // 显示行号
-                         sbuilder.append(separator).append(tempString);
-                     }
-                     //ErlLogger.debug("File content:"+content);
-                     read.close();
-                     return sbuilder.toString();
-                 }
-             }
-             return "";
-         }  catch (IOException e) {
-             // TODO Auto-generated catch block
-             e.printStackTrace();
-         }
-         return "";
-     }
 }

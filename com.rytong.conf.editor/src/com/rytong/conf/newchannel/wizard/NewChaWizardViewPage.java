@@ -1,64 +1,16 @@
 package com.rytong.conf.newchannel.wizard;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.editors.text.TextEditor;
-import org.eclipse.ui.part.FileEditorInput;
-import org.erlide.core.model.root.ErlModelManager;
-import org.erlide.core.model.root.IErlProject;
 import org.erlide.jinterface.ErlLogger;
 
-import com.rytong.conf.editor.ChannelConfPlugin;
 import com.rytong.conf.editor.pages.EwpChannels;
+import com.rytong.conf.util.ChannelConfUtil;
 
 public class NewChaWizardViewPage extends WizardPage {
     private ChannelAdapterTemplate createTmpUtil;
@@ -70,8 +22,7 @@ public class NewChaWizardViewPage extends WizardPage {
 
     private String selectId;
     private Composite parent;
-
-    private Group templateGroup;
+    protected ChannelConfUtil confUtil;
 
 
     protected NewChaWizardViewPage(NewChaWizard wizard) {
@@ -83,11 +34,13 @@ public class NewChaWizardViewPage extends WizardPage {
         cha_view = cha.add_view;
         this.selectId = wizard.selectId;
         createTmpUtil = wizard.getCsTmpUtil();
+        confUtil = new ChannelConfUtil();
         // TODO Auto-generated constructor stub
     }
     protected Composite parentcomposite ;
     protected OldCallBackChannel oldCallBack;
     protected AdapterChannel adapterCallBack;
+    protected NewCallBackChannel newCallBack;
 
 
     private Label separateLine;
@@ -141,19 +94,22 @@ public class NewChaWizardViewPage extends WizardPage {
 
         //initial_adapter_group();
         adapterCallBack = new AdapterChannel(wizard, this);
-        templateGroup = adapterCallBack.initial_composite();
+        adapterCallBack.initial_composite();
         // initial old callback composit
         oldCallBack = new OldCallBackChannel(wizard, this);
         oldCallBack.initial_composite();
 
+        newCallBack = new NewCallBackChannel(wizard, this);
+        newCallBack.initial_composite();
+
         if (selectId !=null){
+            set_visiable(flag);
             if (flag == 0){
-                set_visiable(flag);
                 adapterCallBack.initial_text();
             } else if(flag == 1){
-
+                newCallBack.initial_text();
             } else {
-
+                oldCallBack.initial_text();
             }
         } else{
             initial_default();
@@ -165,14 +121,18 @@ public class NewChaWizardViewPage extends WizardPage {
 
     public void set_visiable(int flag){
         if (flag == 0){
-            templateGroup.setVisible(true);
+
+            adapterCallBack.set_visiable();
             oldCallBack.set_unvisiable();
+            newCallBack.set_unvisiable();
         } else if (flag == 1) {
-            templateGroup.setVisible(false);
+            adapterCallBack.set_unvisiable();
             oldCallBack.set_unvisiable();
+            newCallBack.set_visiable();
         }else {
-            templateGroup.setVisible(false);
+            adapterCallBack.set_unvisiable();
             oldCallBack.set_visiable();
+            newCallBack.set_unvisiable();
         }
         chaEntryLabel.setText(cha.getEntryName());
     }
@@ -184,7 +144,6 @@ public class NewChaWizardViewPage extends WizardPage {
         cha.cha_state = "1";
         set_visiable(EwpChannels.get_entry_index(cha.cha_entry));
     }
-
 
     public void tmpTest(){
         createTmpUtil.createCsTemplate(cha);

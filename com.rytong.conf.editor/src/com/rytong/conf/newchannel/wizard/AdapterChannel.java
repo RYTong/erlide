@@ -116,7 +116,7 @@ public class AdapterChannel {
         cha_view = cha.add_view;
         this.selectId = wizard.selectId;
         parentcomposite = parent.parentcomposite;
-        confUtil = new ChannelConfUtil();
+        confUtil = parent.confUtil;
     }
 
     public void initial_text(){
@@ -128,15 +128,21 @@ public class AdapterChannel {
         while(tmpIt.hasNext()){
             AdapterView tmpVIews= tmpIt.next();
             TableItem tmpItem = addAdaptItem(tmpVIews);
-            cha_view.viewMap.put(tmpItem, tmpVIews);
+            cha_view.addAdapterView(tmpItem, tmpVIews);
             remAllBut.setEnabled(true);
         }
     }
 
-    public Group initial_composite(){
+    public  void set_unvisiable(){
+        templateGroup.setVisible(false);
+    }
+
+    public  void set_visiable(){
+        templateGroup.setVisible(true);
+    }
+
+    public void initial_composite(){
         adapter_group(parentcomposite);
-        //templateGroup.setVisible(false);
-        return templateGroup;
     }
 
     public void adapter_group(Composite parentcomposite){
@@ -352,7 +358,6 @@ public class AdapterChannel {
 
     }
 
-
     public Listener setCheckButListener(){
         Listener listener = new Listener(){
             @Override
@@ -361,21 +366,20 @@ public class AdapterChannel {
                 Button tmpBut = (Button) event.widget;
 
                 if (tmpBut == templateBut) {
-                     ErlLogger.debug("templateBut button!");
-                     boolean newFlag = ChannelConfUtil.getFlag(tmpBut.getSelection());
+                    ErlLogger.debug("templateBut button!");
+                    boolean newFlag = ChannelConfUtil.getFlag(tmpBut.getSelection());
                     cha_view.setSrcFlag(newFlag);
                     setGroupSt(mod_status, newFlag);
                     //erlTest();
                 } else if (tmpBut == csBut) {
-                     ErlLogger.debug("csbut button!");
-
+                    ErlLogger.debug("csbut button!");
                     boolean tmpFlag = ChannelConfUtil.getFlag(tmpBut.getSelection());
                     cha_view.setCsFlag(tmpFlag);
                     setGroupSt(cs_status, tmpFlag);
                     //tmpTest();
                     //ErlLogger.debug("root:"+root.getFullPath().toString());
                 } else if (tmpBut == offBut ){
-                     ErlLogger.debug("offbut button!");
+                    ErlLogger.debug("offbut button!");
                     Boolean tmpFlag = tmpBut.getSelection();
                     cha_view.setOffFlag(ChannelConfUtil.getFlag(tmpFlag));
                     setGroupSt(off_status, tmpFlag);
@@ -546,7 +550,7 @@ public class AdapterChannel {
                     if (addLog.getReturnCode() == Window.OK) {
                         TableItem tmpItem = addAdaptItem(tmpView);
                         adapter_table.setSelection(tmpItem);
-                        cha_view.viewMap.put(tmpItem, tmpView);
+                        cha_view.addAdapterView(tmpItem, tmpView);
                         remAllBut.setEnabled(true);
                         refresh_parase_table(tmpView);
                         TableItem[] selItem = adapter_table.getSelection();
@@ -558,7 +562,7 @@ public class AdapterChannel {
                     }
 
                 } else {
-                    AdapterView tmpViews = cha_view.viewMap.get(adapt_item[0]);
+                    AdapterView tmpViews = cha_view.getAdapterView(adapt_item[0]);
                     AdapterParams tmpParam = new AdapterParams();
 
                     paramsDiaolog addLog = confUtil.newParamsDiaolog(parent.getShell(), addFlagGlobal, tmpParam);
@@ -579,12 +583,12 @@ public class AdapterChannel {
                 ErlLogger.debug("editBut button!");
                 if (focusFlag == 1){
 
-                    AdapterView tmpView = cha_view.viewMap.get(adapt_item[0]);
+                    AdapterView tmpView = cha_view.getAdapterView(adapt_item[0]);
                     AddDiaolog addLog = confUtil.newAddDiaolog(parent.getShell(), !addFlagGlobal, adapterChannel, tmpView);
                     addLog.open();
                     if (addLog.getReturnCode() == Window.OK) {
-                        cha_view.viewMap.remove(adapt_item[0]);
-                        cha_view.viewMap.put(updateAdaptItem(adapt_item[0], tmpView), tmpView);
+                        cha_view.removeAdapterView(adapt_item[0]);
+                        cha_view.addAdapterView(updateAdaptItem(adapt_item[0], tmpView), tmpView);
                     }
                 }
             }
@@ -598,7 +602,7 @@ public class AdapterChannel {
                 if (focusFlag == 1){
                     int[] indeces= adapter_table.getSelectionIndices();
                     adapter_table.remove(indeces);
-                    cha_view.viewMap.remove(adapt_item[0]);
+                    cha_view.removeAdapterView(adapt_item[0]);
                 }
             }
         });
@@ -686,11 +690,11 @@ public class AdapterChannel {
                     if (adapt_item.length == 1){
                         editBut.setEnabled(true);
                         removeBut.setEnabled(true);
-                        refresh_parase_table(cha_view.viewMap.get(adapt_item[0]));
+                        refresh_parase_table(cha_view.getAdapterView(adapt_item[0]));
                     } else if (adapt_item.length > 1){
                         editBut.setEnabled(false);
                         removeBut.setEnabled(true);
-                        refresh_parase_table(cha_view.viewMap.get(adapt_item[0]));
+                        refresh_parase_table(cha_view.getAdapterView(adapt_item[0]));
                     } else {
                         editBut.setEnabled(false);
                         removeBut.setEnabled(false);

@@ -6,51 +6,44 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
 import org.erlide.jinterface.ErlLogger;
 
 import com.rytong.conf.editor.pages.EwpChannels;
-import com.rytong.conf.newchannel.wizard.NewChaWizardDetailPage.AddDiaolog;
+import com.rytong.conf.util.ChannelConfFileUtil;
 import com.rytong.conf.util.ChannelConfUtil;
 import com.rytong.conf.util.ChannelConfUtil.viewDiaolog;
 
-public class OldCallBackChannel {
+public class NewCallBackChannel {
     private NewChaWizard wizard;
     private NewChaWizardViewPage parent;
     private ChannelConfUtil confUtil;
+    private ChannelCallBackTemplate templateBuilder;
+
     private EwpChannels cha;
     private String selectId;
 
-
+    private Label srcLebal;
+    private Button srcBut;
     private Label csLabel;
     private Button csBut;
-    private boolean csFlag;
 
     protected Composite composite;
     private Table table;
@@ -61,12 +54,13 @@ public class OldCallBackChannel {
 
     private boolean addFlagGlobal = true;
 
-    public OldCallBackChannel(NewChaWizard wizard, NewChaWizardViewPage parent){
+    public NewCallBackChannel(NewChaWizard wizard, NewChaWizardViewPage parent){
         this.wizard = wizard;
         this.parent = parent;
         cha = wizard.cha;
         this.selectId = wizard.selectId;
         confUtil = parent.confUtil;
+        templateBuilder = new ChannelCallBackTemplate(wizard);
     }
 
     public Composite initial_composite(){
@@ -82,28 +76,29 @@ public class OldCallBackChannel {
         composite.setLayout(new FormLayout());
         //templateGroup.setText("Template List");
 
+        srcLebal = new Label(composite, SWT.NONE);
+        srcLebal.setText("生成辅助代码");
+        srcLebal.setLayoutData(setLabelForm( 0));
+        srcBut = new Button(composite, SWT.BORDER | SWT.CHECK);
+        srcBut.setLayoutData(setButForm(0));
+        srcBut.addListener(SWT.Selection, setCheckBoxListener());
+
         csLabel = new Label(composite, SWT.NONE);
         csLabel.setText("生成CS模板");
-        FormData csl_form = new FormData();
-        csl_form.left = new FormAttachment(0,40);
-        csl_form.right = new FormAttachment(100, -10);
-        csl_form.top = new FormAttachment(0, 10);
-        csLabel.setLayoutData(csl_form);
+        csLabel.setLayoutData(setLabelForm(1));
         csBut = new Button(composite, SWT.BORDER | SWT.CHECK);
-        FormData csb_form = new FormData();
-        csb_form.left = new FormAttachment(0,20);
-        csb_form.right = new FormAttachment(0, 40);
-        csb_form.top = new FormAttachment(0,10);
-        csBut.setLayoutData(csb_form);
+        csBut.setLayoutData(setButForm(1));
         csBut.addListener(SWT.Selection, setCheckBoxListener());
 
         draw_table(composite);
+
         initial_element();
 
         ErlLogger.debug("entry:"+cha.cha_entry);
 
         return composite;
     }
+
 
     public void draw_table(Composite composite){
         table = new Table(composite, SWT.BORDER | SWT.MULTI);
@@ -142,33 +137,33 @@ public class OldCallBackChannel {
 
         setTableListener();
         setButtonListener();
-
     }
 
     public void initial_element(){
         table.setEnabled(false);
-        addBut.setEnabled(false);
-        editBut.setEnabled(false);
-        removeBut.setEnabled(false);
-        remAllBut.setEnabled(false);
+            addBut.setEnabled(false);
+            editBut.setEnabled(false);
+            removeBut.setEnabled(false);
+            remAllBut.setEnabled(false);
+
     }
 
     public void initial_text(){
+        editBut.setEnabled(false);
+        removeBut.setEnabled(false);
         table.setEnabled(true);
-        HashMap<TableItem, OldCallbackParams> tmpOldViewMap = cha.add_view.oldViewMap;
-        Map<TableItem, OldCallbackParams> map = tmpOldViewMap;
+        HashMap<TableItem, OldCallbackParams> tmpNewViewMap = cha.add_view.newViewMap;
+        Map<TableItem, OldCallbackParams> map = tmpNewViewMap;
         Iterator<Entry<TableItem, OldCallbackParams>> chaiter = map.entrySet().iterator();
         while(chaiter.hasNext()){
             Entry<TableItem, OldCallbackParams> tmpIter = chaiter.next();
             OldCallbackParams viewParam = tmpIter.getValue();
             addParamsItem(table, viewParam);
         }
-        editBut.setEnabled(false);
-        removeBut.setEnabled(false);
         if (table.getItemCount() == 0)
             remAllBut.setEnabled(false);
-    }
 
+    }
 
     public TableItem addParamsItem(Table table, OldCallbackParams tmpParams){
         TableItem tmpItem = new TableItem(table, SWT.NONE);
@@ -176,8 +171,26 @@ public class OldCallBackChannel {
         return tmpItem;
     }
 
+    public Listener setCheckButListener(){
+        Listener listener = new Listener(){
+            @Override
+            public void handleEvent(Event event) {
+                // TODO Auto-generated method stub
+                Button tmpBut = (Button) event.widget;
+
+                if (tmpBut == csBut) {
+                    cha.add_view.setCsFlag(ChannelConfUtil.getFlag(tmpBut.getSelection()));
+                } else {
+                    ErlLogger.debug("else button!");
+                }
+            }
+
+        };
+        return listener;
+    }
 
     private static TableItem[] table_item;
+
     public void setTableListener(){
         table.addMouseListener(new MouseAdapter(){
              public void mouseDown(MouseEvent event) {
@@ -216,26 +229,29 @@ public class OldCallBackChannel {
                     TableItem tmpItem = new TableItem(table, SWT.BORDER);
                     tmpOld.viewName = tmpOld.viewName.replace(" ", "");
                     tmpItem.setText(new String[]{tmpOld.tranCode, tmpOld.viewName});
-                    cha.add_view.addOldView(tmpItem, tmpOld);
-                    ErlLogger.debug("old list:"+cha.add_view.oldViewMap.size());
+                    cha.add_view.addNewView(tmpItem, tmpOld);
+                    ErlLogger.debug("new list:"+cha.add_view.newViewMap.size());
                     remAllBut.setEnabled(true);
                 }
+
+
             }
         });
 
         editBut.addSelectionListener(new SelectionAdapter(){
             public void widgetSelected(SelectionEvent e) {
                 ErlLogger.debug("edit button!");
-                OldCallbackParams tmpOld = cha.add_view.getOldView(table_item[0]);
+                OldCallbackParams tmpOld = cha.add_view.getNewView(table_item[0]);
                 ErlLogger.debug("edit button:"+tmpOld.tranCode);
-                viewDiaolog newDialog = confUtil.newViewDiaolog(parent.getShell(), !addFlagGlobal, tmpOld, cha.cha_id);
+                viewDiaolog newDialog =  confUtil.newViewDiaolog(parent.getShell(), !addFlagGlobal, tmpOld, cha.cha_id);
                 newDialog.open();
                 ErlLogger.debug("dialog result :"+newDialog.getReturnCode());
                 if (newDialog.getReturnCode()==Window.OK){
+
                     tmpOld.viewName = tmpOld.viewName.replace(" ", "");
                     table_item[0].setText(new String[]{tmpOld.tranCode, tmpOld.viewName});
-                    cha.add_view.refreshOldView(table_item[0], tmpOld);
-                    ErlLogger.debug("old list:"+cha.add_view.oldViewMap.size());
+                    cha.add_view.refreshNewView(table_item[0], tmpOld);
+                    ErlLogger.debug("new list:"+cha.add_view.newViewMap.size());
                 }
 
             }
@@ -245,9 +261,9 @@ public class OldCallBackChannel {
             public void widgetSelected(SelectionEvent e) {
                 ErlLogger.debug("remove button:"+table_item[0]);
                 if (table.getItemCount() != 0){
-                    table_item[0].dispose();
                     //table.remove(table_item[0]);
-                    cha.add_view.removeOldView(table_item[0]);
+                    table_item[0].dispose();
+                    cha.add_view.removeNewView(table_item[0]);
                     remAllBut.setEnabled(false);
                     removeBut.setEnabled(false);
                 }
@@ -258,23 +274,32 @@ public class OldCallBackChannel {
             public void widgetSelected(SelectionEvent e) {
                 ErlLogger.debug("remove all button!");
                 table.removeAll();
-                cha.add_view.clearOldView();
+                cha.add_view.clearNewView();
                 removeBut.setEnabled(false);
                 remAllBut.setEnabled(false);
             }
         });
     }
 
+    private boolean srcFlag = false;
+    private boolean csFlag = false;
 
     public Listener setCheckBoxListener(){
         Listener tmpListener = new Listener(){
             @Override
             public void handleEvent(Event event) {
                 Button tmpBut = (Button) event.widget;
-                 if (tmpBut == csBut) {
+                if (tmpBut == srcBut){
+                    ErlLogger.debug("srcBut bug!");
+                    srcFlag = ChannelConfUtil.getFlag(tmpBut.getSelection());
+                    cha.getViewMap().setNCBSrcFlag(srcFlag);
+                    ErlLogger.debug("srcBut bug:"+srcFlag);
+                    setTableSt();
+                    //testSrc();
+                } else if (tmpBut == csBut) {
                     ErlLogger.debug("csBut bug!");
                     csFlag = ChannelConfUtil.getFlag(tmpBut.getSelection());
-                    cha.getViewMap().setOCBCsFlag(csFlag);
+                    cha.getViewMap().setNCBCsFlag(csFlag);
                     ErlLogger.debug("csBut bug:"+csFlag);
                     setTableSt();
                     //testCs();
@@ -287,7 +312,7 @@ public class OldCallBackChannel {
     }
 
     public void setTableSt(){
-        if (csFlag ){
+        if (srcFlag || csFlag ){
             table.setEnabled(true);
             addBut.setEnabled(true);
             if (table.getItemCount()>0)
@@ -309,9 +334,27 @@ public class OldCallBackChannel {
         composite.setVisible(false);
     }
 
-    /***
+
+    /**
      * form data
      */
+    private FormData setLabelForm(int i){
+        FormData tmp_form = new FormData();
+        tmp_form.left = new FormAttachment(0,40+i*120);
+        tmp_form.right = new FormAttachment(0, 120+i*120);
+        tmp_form.top = new FormAttachment(0, 10);
+        return tmp_form;
+    }
+
+    private FormData setButForm(int i){
+        FormData tmp_form = new FormData();
+
+        tmp_form.left = new FormAttachment(0,20+i*120);
+        tmp_form.right = new FormAttachment(0, 40+i*120);
+        tmp_form.top = new FormAttachment(0,10);
+        return tmp_form;
+    }
+
     private FormData setButtonLayout(int i){
         FormData comsite_form = new FormData();
         comsite_form.left = new FormAttachment(100, -150);
@@ -320,4 +363,11 @@ public class OldCallBackChannel {
         return comsite_form;
     }
 
+    private void testCs(){
+        templateBuilder.createNCBCsTemplate(cha);
+    }
+
+    private void testSrc(){
+        templateBuilder.createSrcTemplate(cha);
+    }
 }

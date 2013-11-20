@@ -130,7 +130,7 @@ public class EwpChannels implements Cloneable{
     public OtpErlangList get_views_list(){
         ArrayList<OtpErlangObject> list = new ArrayList<OtpErlangObject>();
         if (cha_entry.equalsIgnoreCase(CHANNEL_ADAPTER)){
-            HashMap<TableItem, AdapterView> viewMap = add_view.viewMap;
+            HashMap<TableItem, AdapterView> viewMap = add_view.getAdapterViewMap();
             Map<TableItem, AdapterView> map = viewMap;
             Iterator<Entry<TableItem, AdapterView>> chaiter = map.entrySet().iterator();
 
@@ -145,10 +145,13 @@ public class EwpChannels implements Cloneable{
         } else if(cha_entry.equalsIgnoreCase(NEW_CALLBACK)){
 
         } else {
-            Iterator<OldCallbackParams> chaiter = add_view.oldList.iterator();
+            HashMap<TableItem, OldCallbackParams> tmpOldViewMap = add_view.oldViewMap;
+            Map<TableItem, OldCallbackParams> map = tmpOldViewMap;
+            Iterator<Entry<TableItem, OldCallbackParams>> chaiter = map.entrySet().iterator();
             while(chaiter.hasNext()){
-                OldCallbackParams tmp = chaiter.next();
-                OtpErlangTuple tmpRe = formParamsStr(tmp.tranCode, tmp.viewName);
+                Entry<TableItem, OldCallbackParams> tmp = chaiter.next();
+                OldCallbackParams tmpParams = tmp.getValue();
+                OtpErlangTuple tmpRe = formParamsStr(tmpParams.tranCode, tmpParams.viewName);
                 list.add(tmpRe);
             }
         }

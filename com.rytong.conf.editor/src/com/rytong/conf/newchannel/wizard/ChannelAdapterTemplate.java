@@ -1,33 +1,19 @@
 package com.rytong.conf.newchannel.wizard;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.part.FileEditorInput;
 import org.erlide.jinterface.ErlLogger;
 
-import com.rytong.conf.editor.ChannelConfPlugin;
 import com.rytong.conf.editor.pages.EwpChannels;
+import com.rytong.conf.util.ChannelConfFileUtil;
 import com.rytong.conf.util.FormatErlangSource;
 
 public class ChannelAdapterTemplate {
@@ -35,14 +21,10 @@ public class ChannelAdapterTemplate {
     private static String SRC_PATH="/src/channels/";
     private static String TEMP_PATH = "/public/cs/channels/";
 
-    private static String channelAdapterTem = "channel_adapter_cs_template.tmp";
-    private static String channelAdapterxHtmlTem = "channel_adapter_xHtml_template.tmp";
-    private static String channelAdapterErlTem = "channel_adapter_erl_template.tmp";
-    private static String newCallbackCsTmp = "channel_newCallback_cs_template.tmp";
-
     private String projectPath="";
     private NewChaWizard wizard;
     private FormatErlangSource srcBuilder;
+    private ChannelConfFileUtil fileBuilder;
 
     private static String CHANNEL_TEMPLATE_DESTINATION =  "/public/www/resource_dev/";
     private static String[] COMMON_CHANNEL_DIR = new String[]{"images", "css", "lua", "xhtml","channels"};
@@ -59,21 +41,6 @@ public class ChannelAdapterTemplate {
     private static String TEMPLATE_EXTENSION_XHTML= "xhtml";
 
 
-    /*
-%% Channel adapter templates dirs.
--define(CHANNEL_TEMPLATE_DIR_LIST, ["xhtml", "css", "lua", "images", "json"]).
--define(CHANNEL_MODULE_DESTINATION, "src/channels/").
--define(CHANNEL_TEMPLATE_DESTINATION, "public/www/resource_dev/").
--define(CHANNEL_TEMPLATE, "templates/channel_adapter_template.tmp").
-%% dirs for adapter channel
--define(COMMON_ROOT_DIR, ["wp", "iphone", "android", "common"]).
--define(COMMON_BASE_DIR, ["default"]).
--define(COMMON_CHANNEL_DIR, ["images", "css", "lua", "xhtml","channels"]).
--define(COMMON_CHANNELS, "channels").
-     */
-
-    //private enum offPath{"xhtml", "css", "lua", "images", "json"};
-
     public ChannelAdapterTemplate(NewChaWizard wizard) {
         // TODO Auto-generated constructor stub
         this.wizard = wizard;
@@ -81,17 +48,13 @@ public class ChannelAdapterTemplate {
         IProject tmpProject = ((FileEditorInput) tmpEditor.getEditorInput()).getFile().getProject();
         projectPath = tmpProject.getLocation().toString();
         srcBuilder = new FormatErlangSource();
+        fileBuilder = new ChannelConfFileUtil();
     }
 
     public ChannelAdapterTemplate ChannelAdapterTemplate(){
         return this;
     }
 
-    public String getSourcePath(String app, String chaId){
-        if (chaId != null)
-            return SRC_PATH.concat(chaId).concat(".erl");
-        return SRC_PATH.concat(app).concat("_temp").concat(".erl");
-    }
 
     public String getCsTemFile(String chaId, String name, String tranCode, String tail){
         if (chaId != null){
@@ -103,15 +66,7 @@ public class ChannelAdapterTemplate {
         }
         return projectPath.concat(TEMP_PATH).concat(chaId).concat("temp").concat(tail).concat(".cs");
     }
-    public String getCsTemFile(String path, String chaId, String name, String tranCode, String tail){
-        if (chaId != null){
-            if (!name.equalsIgnoreCase("") && name != null){
-                return path.concat(name).concat(".cs");
-            } else
-                return path.concat(chaId).concat("_").concat(tranCode).concat(tail).concat(".cs");
-        }
-        return path.concat("temp").concat(tail).concat(".cs");
-    }
+
 
     public String getTemFile(String path, String chaId, String name, String tranCode, String tail){
         if (chaId != null){
@@ -127,23 +82,8 @@ public class ChannelAdapterTemplate {
         return path.concat("/").concat(extension).concat("/").concat(tranCode).concat(".").concat(extension);
     }
 
-    public String getCsTemPath(String chaId){
-        if (chaId != null)
-            return projectPath.concat(TEMP_PATH).concat(chaId).concat("/");
-        return projectPath.concat(TEMP_PATH);
-    }
-
     private String getOffRootPath() {
         return projectPath.concat(CHANNEL_TEMPLATE_DESTINATION);
-    }
-
-    private String getSrcFile(String chaId){
-        String path = getSrcPath();
-        createPath(new File(path));
-        return path.concat(chaId).concat(".erl");
-    }
-    private String getSrcPath(){
-        return projectPath.concat(SRC_PATH);
     }
 
     private File initialOffRootPath(){
@@ -152,59 +92,6 @@ public class ChannelAdapterTemplate {
         if (!offPath.exists())
             offPath.mkdirs();
         return offPath;
-    }
-
-    public void tmpTest(NewChaWizard wizard, EwpChannels cha){
-        TextEditor tmpEditor = wizard.getTextEditor();
-        IPath filePath =  ((FileEditorInput) tmpEditor.getEditorInput()).getFile().getLocation();
-        //ErlLogger.debug("URL:"+((FileEditorInput) tmpEditor.getEditorInput()).getURI());
-        //ErlLogger.debug("Path1:"+((FileEditorInput) tmpEditor.getEditorInput()).getPath());
-        File appFile = filePath.toFile();
-        IProject tmpProject = ((FileEditorInput) tmpEditor.getEditorInput()).getFile().getProject();
-        String path = tmpProject.getLocation().toString();
-        Path srcPath = new Path(path+"/src/channels");
-        File srcF = new File(path+"/src/channels/");
-
-        Path tmpPath = new Path(path+"/public/cs/channels/"+cha.cha_id);
-        File csPath = new File(path+"/public/cs/channels/"+cha.cha_id);
-        File csTmp = new File(path+"/public/cs/channels/"+cha.cha_id+"/"+ cha.cha_id+".cs");
-        File tmpF = new File(path+"/src/channels/"+cha.cha_id+"/"+"");
-
-        ErlLogger.debug("Path:"+csPath.toString());
-
-
-
-        URL url = ChannelConfPlugin.getDefault().getBundle()
-                .getEntry("templates/"+"channel_adapter");
-        ErlLogger.debug("url:-----"+url.toString());
-        String content="";
-        try {
-            File tempDir = new File(FileLocator.toFileURL(url).getFile());
-            for (File f : tempDir.listFiles()) {
-                if (f.getName().equalsIgnoreCase("channel_oldCallback_cs_template.cs")){
-                ErlLogger.debug("f:"+f.getAbsolutePath());
-                content = srcBuilder.getContent(f);
-                }
-                //@Fix me
-            }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        if (!csPath.exists()){
-            csPath.mkdirs();
-            if (!csTmp.exists()){
-                try {
-                    FileWriter fw = new FileWriter(csTmp);
-                    ErlLogger.debug("File content:"+content);
-                    fw.write(content);
-                    fw.close();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 
     /***
@@ -222,11 +109,11 @@ public class ChannelAdapterTemplate {
             String channelPath = initial_dir(rootPath, cha);
 
             ErlLogger.debug("channelPath:"+channelPath);
-            String xHtmlTmpFileName = getXhtmlTmpPath();
-            String xHtmlTmpcontent = srcBuilder.getTemplateContent(cha.cha_entry, xHtmlTmpFileName);
+            String xHtmlTmpFileName = fileBuilder.getXhtmlTmpPath();
+            String xHtmlTmpcontent = fileBuilder.getTemplateContent(cha.cha_entry, xHtmlTmpFileName);
 
-            String csTmpFileName = getPluginTmpPath(cha.cha_entry);
-            String csTmpContent = srcBuilder.getTemplateContent(cha.cha_entry, csTmpFileName);
+            String csTmpFileName = fileBuilder.getPluginTmpPath(cha.cha_entry);
+            String csTmpContent = fileBuilder.getTemplateContent(cha.cha_entry, csTmpFileName);
 
             csTmpContent = csTmpContent.replaceAll("\\$channel", cha.cha_id);
 
@@ -249,11 +136,11 @@ public class ChannelAdapterTemplate {
 
     private void createJsonTmp(File jsonFile, String content, String tranCode){
         content = content.replaceAll("\\$trancode", tranCode);
-        doCreateTmp(jsonFile, content);
+        fileBuilder.doCreateTmp(jsonFile, content);
     }
 
     private void createXhtmlFile(File xhtmlFile, String content){
-        doCreateTmp(xhtmlFile, content);
+        fileBuilder.doCreateTmp(xhtmlFile, content);
     }
 
     private String initial_dir(File rootPath, EwpChannels cha){
@@ -355,14 +242,14 @@ public class ChannelAdapterTemplate {
         if (cha.cha_entry.equalsIgnoreCase(EwpChannels.CHANNEL_ADAPTER)&&viewMap.getSrcFlag()){
             HashMap<TableItem, AdapterView> adapterMap = viewMap.getAdapterViewMap();
 
-            String srcPath = getSrcFile(cha.cha_id);
+            String srcPath = fileBuilder.getSrcFile(projectPath,cha.cha_id);
             File srcFile = new File(srcPath);
             ErlLogger.debug("srcPath:".concat(srcPath));
 
-            String tmpFileName = getAdapterErlTmpPath();
+            String tmpFileName = fileBuilder.getAdapterErlTmpPath();
             String content = srcBuilder.formatAdaoterErlSource(cha, tmpFileName);
             //ErlLogger.debug("content:"+content);
-            doCreateTmp(srcFile, content);
+            fileBuilder.doCreateTmp(srcFile, content);
         }
     }
 
@@ -375,14 +262,14 @@ public class ChannelAdapterTemplate {
         if (viewMap.getCsFlag()){
             HashMap<TableItem, AdapterView> adapterMap = viewMap.getAdapterViewMap();
 
-            String csPathStr = getCsTemPath(cha.cha_id);
+            String csPathStr = fileBuilder.getCsTemPath(projectPath, cha.cha_id);
             File csPath = new File(csPathStr);
-            createPath(csPath);
+            fileBuilder.createPath(csPath);
 
             ErlLogger.debug("csPath:"+csPath);
 
-            String tmpFileName = getPluginTmpPath(cha.cha_entry);
-            String content = srcBuilder.getTemplateContent(cha.cha_entry, tmpFileName);
+            String tmpFileName = fileBuilder.getPluginTmpPath(cha.cha_entry);
+            String content = fileBuilder.getTemplateContent(cha.cha_entry, tmpFileName);
 
             content = content.replaceAll("\\$channel", cha.cha_id);
 
@@ -395,50 +282,10 @@ public class ChannelAdapterTemplate {
                 String tranCode = tmpView.tranCode;
                 String csName = tmpView.viewName;
                 content = content.replaceAll("\\$trancode", tranCode);
-                File csTmp = new File(getCsTemFile(csPathStr, cha.cha_id, csName, tranCode, ""));
+                File csTmp = new File(fileBuilder.getCsTemFile(csPathStr, cha.cha_id, csName, tranCode, ""));
                 ErlLogger.debug("csTmp:"+csTmp);
-                doCreateTmp(csTmp, content);
+                fileBuilder.doCreateTmp(csTmp, content);
             }
         }
-    }
-
-    public void doCreateTmp( File tmpFile, String content){
-        if (!tmpFile.exists()){
-            try {
-                FileWriter fw = new FileWriter(tmpFile);
-                //ErlLogger.debug("File content:"+content);
-                fw.write(content);
-                fw.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        } else
-            ErlLogger.debug("The template file "+ tmpFile.getName() +"is exit!");
-    }
-
-
-    private String getPluginTmpPath(String channelType){
-        if (channelType.equalsIgnoreCase(EwpChannels.CHANNEL_ADAPTER))
-            return channelAdapterTem;
-        else if (channelType.equalsIgnoreCase(EwpChannels.NEW_CALLBACK))
-            return newCallbackCsTmp;
-        else
-            return "";
-    }
-
-    private String getXhtmlTmpPath(){
-        return channelAdapterxHtmlTem;
-    }
-
-    private String getAdapterErlTmpPath(){
-        return channelAdapterErlTem;
-    }
-
-
-
-    private void createPath(File path){
-        if (!path.exists())
-            path.mkdirs();
     }
 }

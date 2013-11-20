@@ -17,7 +17,7 @@
             ryt = RYTL:new{};
 
             function forward()
-                to_trancode = "$to_trancode";
+                to_trancode = "$trancode";
                 if to_trancode == "chain_tail" then
                     ryt:alert("这是最后一个页面了！");
                 else

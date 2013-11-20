@@ -30,6 +30,7 @@ import com.rytong.conf.editor.pages.EwpChannels;
 public class NewChaWizard extends Wizard {
     private static String PAGE_TITLE="New Channel Wizard";
     private ChannelAdapterTemplate createTmpUtil;
+    private ChannelCallBackTemplate callbackTmpUtil;
     protected EwpChannels cha = new EwpChannels();
     private CollectionsPage parent=null;
 
@@ -94,6 +95,7 @@ public class NewChaWizard extends Wizard {
     public void addPages() {
         ErlLogger.debug("add page!");
         createTmpUtil = new ChannelAdapterTemplate(this);
+        callbackTmpUtil = new ChannelCallBackTemplate(this);
         if (selectId != null){
             cha = parent.ChaMap.get(selectId).clone();
             detailPage = new NewChaWizardDetailPage(this);
@@ -152,6 +154,11 @@ public class NewChaWizard extends Wizard {
             createTmpUtil.createCsTemplate(cha);
             createTmpUtil.createOffTemplate(cha);
             createTmpUtil.createAdpErlTemplate(cha);
+        } else if (cha.cha_entry.equalsIgnoreCase(EwpChannels.NEW_CALLBACK)){
+            callbackTmpUtil.createNCBCsTemplate(cha);
+            callbackTmpUtil.createSrcTemplate(cha);
+        } else {
+            callbackTmpUtil.createOCBCsTemplate(cha);
         }
     }
 
