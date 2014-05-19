@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            name="Sample Category"
+            id="com.rytong.template.debugtool.commands.category">
+      </category>
+      <command
+            name="Sample Command"
+            categoryId="com.rytong.template.debugtool.commands.category"
+            id="com.rytong.template.debugtool.commands.sampleCommand">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            commandId="com.rytong.template.debugtool.commands.sampleCommand"
+            class="com.rytong.template.debugtool.handlers.SyncContentHandler">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.rytong.template.debugtool.commands.sampleCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+6"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </key>
+   </extension>
+   <extension
+         id="com.template.debugtool.sets"
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="com.rytong.template.debugtool.toolbars.sampleToolbar">
+            <command
+                  commandId="com.rytong.template.debugtool.commands.sampleCommand"
+                  icon="icons/sample.gif"
+                  tooltip="Say hello world"
+                  id="com.rytong.template.debugtool.toolbars.sampleCommand">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editorActions">
+      <editorContribution
+            id="com.rytong.template.debugtool.editorContribution1"
+            targetID="com.rytong.editors.TemplateEditor">
+         <action
+               class="com.rytong.template.debugtool.actions.SyncDLPageAction"
+               icon="icons/sync_dl.png"
+               id="com.rytong.template.debugtool.SyncDLPageAction"
+               label="Download debug page from client"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="download the debug page from client">
+         </action>
+         <action
+               actionID="com.rytong.template.debugtool.SyncPageAction"
+               class="com.rytong.template.debugtool.actions.SyncPageAction"
+               disabledIcon="icons/disarefresh.gif"
+               icon="icons/sync_up.png"
+               id="com.rytong.template.debugtool.SyncPageAction"
+               label="Sync edited page"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Sync the edited page">
+         </action>
+         <action
+               class="com.rytong.template.debugtool.actions.SyncServerAction"
+               icon="icons/synced.gif"
+               id="com.rytong.template.debugtool.SyncServerAction"
+               label="&amp;Socket Server"
+               style="push"
+               toolbarPath="Normal/additions"
+               tooltip="Start a socket server.">
+         </action>
+      </editorContribution>
+   </extension>
+
+</plugin>
