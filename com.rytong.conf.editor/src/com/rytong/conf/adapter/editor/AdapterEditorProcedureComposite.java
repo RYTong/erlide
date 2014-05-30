@@ -3,6 +3,7 @@ package com.rytong.conf.adapter.editor;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -268,12 +269,22 @@ public class AdapterEditorProcedureComposite {
     }
 
     private void initial_combo_adapter(){
-        Object[] tmpObj = parent.getAdpList().getAdapterArray();
-        ArrayList<String> tmpArray = new ArrayList<String>();
+        Object[] tmpObj = parent.getAdpList().getAdapterArray();  //获取复制对象， 这一步可以忽略
+        ArrayList<String> tmpArray = new ArrayList<String>(); // 初始化一个数组
+//        String[] test = {"北京", "上海", "骨弓", "待定"}; // 要付的值
+//        for (int i=0; i< test.length; i++){            // 赋值
+//            tmpArray.add((String) test[i]);
+//        }
+//
+//        combo_adapter.setItems((String [] ) tmpArray.toArray(new String[tmpArray.size()])); // 给combox复制
+//        combo_adapter.select(0);  // 默认选中
+
+
         for (int i=0; i< tmpObj.length; i++){
             tmpArray.add(((EwpAdapter) tmpObj[i]).getName());
         }
         combo_adapter.setItems((String[]) tmpArray.toArray(new String[tmpArray.size()]));
+
     }
 
     public void setParamsTable(EwpProcedure adp){

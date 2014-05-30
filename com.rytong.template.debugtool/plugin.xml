@@ -37,12 +37,6 @@
             locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
          <toolbar
                id="com.rytong.template.debugtool.toolbars.sampleToolbar">
-            <command
-                  commandId="com.rytong.template.debugtool.commands.sampleCommand"
-                  icon="icons/sample.gif"
-                  tooltip="Say hello world"
-                  id="com.rytong.template.debugtool.toolbars.sampleCommand">
-            </command>
          </toolbar>
       </menuContribution>
    </extension>
@@ -53,7 +47,7 @@
             targetID="com.rytong.editors.TemplateEditor">
          <action
                class="com.rytong.template.debugtool.actions.SyncDLPageAction"
-               icon="icons/sync_dl.png"
+               icon="icons/arrow_down.png"
                id="com.rytong.template.debugtool.SyncDLPageAction"
                label="Download debug page from client"
                style="push"
@@ -64,7 +58,7 @@
                actionID="com.rytong.template.debugtool.SyncPageAction"
                class="com.rytong.template.debugtool.actions.SyncPageAction"
                disabledIcon="icons/disarefresh.gif"
-               icon="icons/sync_up.png"
+               icon="icons/arrow_up.png"
                id="com.rytong.template.debugtool.SyncPageAction"
                label="Sync edited page"
                style="push"
@@ -73,7 +67,7 @@
          </action>
          <action
                class="com.rytong.template.debugtool.actions.SyncServerAction"
-               icon="icons/synced.gif"
+               icon="icons/sync_on.png"
                id="com.rytong.template.debugtool.SyncServerAction"
                label="&amp;Socket Server"
                style="push"

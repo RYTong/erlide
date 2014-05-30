@@ -1,9 +1,19 @@
 package com.rytong.template.debugtool.actions;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -36,6 +46,10 @@ public class SyncServerAction implements IEditorActionDelegate{
 
     private Activator  parent;
     private IWorkbench workbench;
+    private String sync_down_key = "sync_down";
+    private String sync_on_key = "sync_on";
+    private URL sync_png_url = null;
+    private URL sync_on_png_url = null;
 
     public SyncSocket serverSocket = null;
     public String port_str = "8080";
@@ -46,6 +60,8 @@ public class SyncServerAction implements IEditorActionDelegate{
         serverSocket = parent.getSyncServer();
         workbench = PlatformUI.getWorkbench();
         parent.setSyncServerAct(this);
+        sync_png_url = Activator.getDefault().getBundle().getEntry("icons/sync_down.png");
+        sync_on_png_url = Activator.getDefault().getBundle().getEntry("icons/sync_on.png");
         //IViewPart[] tmp = parent.getWorkbench().getActiveWorkbenchWindow().getActivePage().getViews();
         //ErlLogger.debug("SyncServerAction  len:"+tmp.length);
 
@@ -84,6 +100,8 @@ public class SyncServerAction implements IEditorActionDelegate{
         if (newDialog.getReturnCode()==Window.OK){
             // start over
             if (!serverSocket.getServerStatus()){
+                IResource isour = null;
+                action.setImageDescriptor(createByRegistry(sync_down_key, sync_png_url));
                 port_str = newDialog.dialogKeyStr;
                 ErlLogger.debug("port to :"+Integer.valueOf(port_str));
                 serverSocket.CreateSocket(Integer.valueOf(port_str));
@@ -95,6 +113,10 @@ public class SyncServerAction implements IEditorActionDelegate{
                 //tmp_act.
             } else {
                 serverSocket.CloseSocket();
+                ErlLogger.debug("close server~");
+
+                action.setImageDescriptor(createByRegistry(sync_on_key, sync_on_png_url));
+                ErlLogger.debug("all close~");
                 //serverSocket.sendServerMsg(document.get());
             }
 
@@ -120,6 +142,34 @@ public void showErrorMsg(IWorkbenchWindow window, String msg){
     MessageDialog.openError(window.getShell(),
             "Synchronal server!",
             msg);
+}
+
+public ImageDescriptor createByRegistry(String key, URL imagePath) {
+
+    ImageRegistry imageRegistry = JFaceResources.getImageRegistry();
+    ImageDescriptor image = imageRegistry.getDescriptor(key);
+    if (image == null) {
+        URL fullPathString = null;
+        try {
+
+            fullPathString = new File(FileLocator.toFileURL(imagePath).getFile()).toURL();
+        } catch (MalformedURLException e) {
+            ErlLogger.debug("print MalformedURLException:"+e.getLocalizedMessage());
+            return null;
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            ErlLogger.debug("print io:"+e.getLocalizedMessage());
+            return null;
+        }
+        ImageDescriptor imageDescriptor = ImageDescriptor
+                .createFromURL(fullPathString);
+
+        if (imageDescriptor != null) {
+            imageRegistry.put(key, imageDescriptor);
+            image = imageRegistry.getDescriptor(key);
+        }
+    }
+    return image;
 }
 
 

@@ -1,5 +1,6 @@
 package com.rytong.template.debugtool.actions;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringBufferInputStream;
 
@@ -10,6 +11,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.IStorageEditorInput;
 
+import com.rytong.template.debugtool.util.TmpStorage;
+
 public class TmpStringEditorInput implements IStorageEditorInput{
     private final String inputString;
 
@@ -17,7 +20,6 @@ public class TmpStringEditorInput implements IStorageEditorInput{
     public TmpStringEditorInput(String inputString){
         this.inputString = inputString;
     }
-
 
     @Override
     public boolean exists() {
@@ -58,29 +60,12 @@ public class TmpStringEditorInput implements IStorageEditorInput{
     @Override
     public IStorage getStorage() throws CoreException {
         // TODO Auto-generated method stub
-        return new TmpStorage();
+        return new TmpStorage(inputString);
     }
 
-    private final class TmpStorage implements IStorage {
-        public InputStream getContents() throws CoreException {
-            return new StringBufferInputStream(inputString);
-        }
-
-        public IPath getFullPath() {
-            return null;
-        }
-
-        public String getName() {
-            return TmpStringEditorInput.this.getName();
-        }
-
-        public boolean isReadOnly() {
-            return false;
-        }
-
-        public Object getAdapter(Class adapter) {
-            return null;
-        }
+    public String getContent(){
+        return inputString;
     }
+
 
 }

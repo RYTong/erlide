@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.window.Window;
@@ -35,6 +36,8 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.part.FileEditorInput;
 import org.erlide.jinterface.ErlLogger;
 
 import com.rytong.conf.editor.pages.EwpChannels;
@@ -67,12 +70,15 @@ public class NewChaWizardDetailPage extends WizardPage {
     private Button editBut ;
     private Button removeBut ;
 
+    private Button testBut;
+
     private Composite parent;
 
     private static String dialogKeyStr;
     private static String dialogValueStr;
 
     private static TableItem[] selectItem;
+    private IProject erlProject;
 
 
     protected NewChaWizardDetailPage(NewChaWizard wizard) {
@@ -83,6 +89,8 @@ public class NewChaWizardDetailPage extends WizardPage {
         this.cha = wizard.cha;
         this.keyMap = wizard.keyMap;
         this.selectId = wizard.selectId;
+        TextEditor tmpEditor = wizard.getTextEditor();
+        erlProject = ((FileEditorInput) tmpEditor.getEditorInput()).getFile().getProject();
         // TODO Auto-generated constructor stub
     }
 
@@ -120,6 +128,7 @@ public class NewChaWizardDetailPage extends WizardPage {
         chaAppText = new Text(composite, SWT.BORDER);
         chaAppText.setLayoutData(setButtonLayout(1));
 
+
         nameLabel = new Label(composite, SWT.NONE);
         nameLabel.setText("Name*:");
         nameLabel.setLayoutData(setLabelLayout(2));
@@ -145,6 +154,7 @@ public class NewChaWizardDetailPage extends WizardPage {
 
         chaIdText.addListener(SWT.Modify, listener);
         chaAppText.addListener(SWT.Modify, listener);
+        chaAppText.setText(erlProject.getName());
         chaNameText.addListener(SWT.Modify, listener);
         setCheckButtonListener(chaStateBut);
 
@@ -227,6 +237,18 @@ public class NewChaWizardDetailPage extends WizardPage {
         rem_form.top = new FormAttachment(0,57);
         removeBut.setLayoutData(rem_form);
         removeBut.setEnabled(false);
+
+        /**
+         *  use for test
+        testBut = new Button(props, SWT.BORDER);
+        testBut.setText("tet");
+        FormData testButF = new FormData();
+        testButF.left = new FormAttachment(100,-130);
+        testButF.right = new FormAttachment(100,-5);
+        testButF.top = new FormAttachment(0,84);
+        testBut.setLayoutData(testButF);
+        */
+
         setButtonListener();
 
     }
@@ -464,9 +486,22 @@ public class NewChaWizardDetailPage extends WizardPage {
                 //table
             }
         });
+
+//        testBut.addSelectionListener(new SelectionAdapter(){
+//            public void widgetSelected(SelectionEvent e) {
+//                ErlLogger.debug("test button press !");
+//                // @FIXME check_props is false,the item should be removed.
+//                //cha.check_props(selectItem[0].getText(0))
+//                dotest();
+//                //table
+//            }
+//        });
     }
 
 
+    private void dotest(){
+        ErlLogger.debug("project name:".concat(erlProject.getName()));
+    }
 
     /*
       Rectangle screenSize = Display.getDefault().getClientArea();
