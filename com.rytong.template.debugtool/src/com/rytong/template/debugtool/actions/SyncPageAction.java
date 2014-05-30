@@ -1,6 +1,9 @@
 package com.rytong.template.debugtool.actions;
 
+import java.io.InputStream;
+
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.IDocument;
@@ -60,30 +63,40 @@ public class SyncPageAction implements IEditorActionDelegate {
         }
 
         IEditorInput input = part.getEditorInput();
-        IDocument document = ((ITextEditor) part).getDocumentProvider()
-                .getDocument(part.getEditorInput());
-        //
-        IFile file = ((IFileEditorInput) input).getFile();
-        String tmp_ext = file.getFileExtension();
-        ErlLogger.debug("file extension:"+file.getFileExtension());
-
-        String low_ext = tmp_ext.toLowerCase();
         int send_result = 0;
-        if (low_ext.equalsIgnoreCase("xhtml") || low_ext.equalsIgnoreCase("cs")){
-            send_result = serverSocket.sendServerMsg(document.get());
+
+        if (input instanceof TmpStringEditorInput){
+
+            String tmp_str = ((TmpStringEditorInput) input).getContent();
+            send_result = serverSocket.sendServerMsg(tmp_str.toString());
         } else {
-            boolean tmp_msg = MessageDialog.openConfirm(window.getShell(), "Sync Content Notic", "您要同步的报文可能不是标准的EMP页面，是否要继续同步？");
-            ErlLogger.debug("tmp_msg:"+tmp_msg);
-            if (tmp_msg){
+
+            IDocument document = ((ITextEditor) part).getDocumentProvider()
+                    .getDocument(part.getEditorInput());
+            //
+            IFile file = ((IFileEditorInput) input).getFile();
+            String tmp_ext = file.getFileExtension();
+            ErlLogger.debug("file extension:"+file.getFileExtension());
+
+            String low_ext = tmp_ext.toLowerCase();
+
+            if (low_ext.equalsIgnoreCase("xhtml") || low_ext.equalsIgnoreCase("cs")){
                 send_result = serverSocket.sendServerMsg(document.get());
+            } else {
+                boolean tmp_msg = MessageDialog.openConfirm(window.getShell(), "Sync Content Notic", "您要同步的报文可能不是标准的EMP页面，是否要继续同步？");
+                ErlLogger.debug("tmp_msg:"+tmp_msg);
+                if (tmp_msg){
+                    send_result = serverSocket.sendServerMsg(document.get());
+                }
             }
+
         }
+
         if (send_result == 2){
             MessageDialog.openInformation(window.getShell(), "Notic", "没有与调试服务连接的设备，请启动客户端并与当前服务连接~");
-        } else {
+        } else if (send_result == 1){
             MessageDialog.openInformation(window.getShell(), "Notic", "发送成功~");
         }
-
     }
 
     @Override
