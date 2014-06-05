@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Properties;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -39,11 +40,21 @@ public class ErlangPlugin extends Plugin {
     private static ErlangPlugin plugin;
     private ErlangCore core;
 
+    private static final String static_ewp_path = "../ewp";
+    private static final String static_ewp_rpm_path = "/usr/local/lib/ewp";
+
+    /**
+     * @since 1.1
+     */
+    public static String cmd_which="/user/bin/which";
     public static String yawsPath;
     public static String ewpPath;
 
     public static String yawsVer="unknown";
     public static String ewpVer="unknown";
+
+    private static String OS_LINUX_TYPE="Linux";
+    private static String OS_MAC_TYPE="Mac OS X";
 
     public ErlangPlugin() {
         super();
@@ -123,16 +134,30 @@ public class ErlangPlugin extends Plugin {
         } catch (Exception e){
             e.printStackTrace();
         }
-        return null;
+        File file = new File(static_ewp_path);
+        if (!file.exists())
+            return static_ewp_rpm_path;
+        else
+            return static_ewp_path;
     }
 
+
+    /**
+     *
+     * @return
+     */
     private String get_yaws_version() {
         try {
-            String lineStr = exec_cmd("yaws --version");
-            if (lineStr != null) {
-                String v[] = lineStr.split(" ");
-                return v[1];
-            }
+            if (check_linux_os_type()){
+                String lineStr = exec_cmd("yaws --version");
+                if (lineStr != null) {
+                    String v[] = lineStr.split(" ");
+                    return v[1];
+                }
+                else
+                    return "unknown";
+            }else
+                return "unknown";
         } catch (Exception e) {
             System.out.println(e.getStackTrace());
         }
@@ -175,26 +200,60 @@ public class ErlangPlugin extends Plugin {
 
 
     /**
+     * add os type check
      * @since 1.1
      */
     public static String exec_cmd(String cmd) {
-        Runtime run = Runtime.getRuntime();
-        String lineStr = null;
-        try {
-            Process p = run.exec(cmd);
-            BufferedInputStream in = new BufferedInputStream(p.getInputStream());
-            BufferedReader inBr = new BufferedReader(new InputStreamReader(in));
-            lineStr = inBr.readLine();
-            if (p.waitFor() != 0) {
-                if (p.exitValue() == 1)
-                    return null;
+        if (check_os_type()){
+            Runtime run = Runtime.getRuntime();
+            String lineStr = null;
+            try {
+
+                Process p = run.exec(cmd);
+                BufferedInputStream in = new BufferedInputStream(p.getInputStream());
+                BufferedReader inBr = new BufferedReader(new InputStreamReader(in));
+                lineStr = inBr.readLine();
+                if (p.waitFor() != 0) {
+                    if (p.exitValue() == 1)
+                        return null;
+                }
+                inBr.close();
+                in.close();
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            inBr.close();
-            in.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+            return lineStr;
         }
-        return lineStr;
+        else
+            return null;
+    }
+
+
+    /**
+     * check the os type,if the type of os is unix like ,
+     * return true, else return false
+     * @since 1.1
+     */
+    public static boolean check_os_type(){
+        Properties props = System.getProperties();
+        String os = props.getProperty("os.name");
+        if (os.equalsIgnoreCase(OS_LINUX_TYPE) || os.equalsIgnoreCase(OS_MAC_TYPE))
+            return true;
+        else
+            return false;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public static boolean check_linux_os_type(){
+        Properties props = System.getProperties();
+        String os = props.getProperty("os.name");
+        if (os.equalsIgnoreCase(OS_LINUX_TYPE))
+            return true;
+        else
+            return false;
     }
 
 }

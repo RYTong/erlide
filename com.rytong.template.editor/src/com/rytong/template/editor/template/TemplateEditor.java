@@ -188,36 +188,36 @@ public class TemplateEditor extends ScriptEditor {
                     validator.validate(fs);
                     System.out.println("Result:Valid!");
                     }catch (Exception e){
-                    	e.printStackTrace();
-                    	System.out.println("Result : Invalid!");
+                        e.printStackTrace();
+                        System.out.println("Result : Invalid!");
                     }
                     */
-        			ErlLogger.debug("is valide:"+parser.isValidating());
-        			ErlLogger.debug("is namespace:"+parser.isNamespaceAware());
+                    ErlLogger.debug("is valide:"+parser.isValidating());
+                    ErlLogger.debug("is namespace:"+parser.isNamespaceAware());
                     InputStream fc = file.getContents();
 
-            		int i = -1;
-            		//org.apache.commons.io.output.ByteArrayOutputStream
-            		ByteArrayOutputStream is2str = new ByteArrayOutputStream();
-            		while ((i = fc.read()) != -1) {
-            			is2str.write(i);
-            		}
-            		String filestr = is2str.toString();
+                    int i = -1;
+                    //org.apache.commons.io.output.ByteArrayOutputStream
+                    ByteArrayOutputStream is2str = new ByteArrayOutputStream();
+                    while ((i = fc.read()) != -1) {
+                        is2str.write(i);
+                    }
+                    String filestr = is2str.toString();
 
-            		Pattern pattern = Pattern.compile("[\n\t\r\\s]*<[\n\r\t\\s]*\\?[\n\r\\s\t]*xml");
-            		Matcher matcher = pattern.matcher(filestr);
-            		ErlLogger.debug("find result:"+matcher.find(0));
+                    Pattern pattern = Pattern.compile("[\n\t\r\\s]*<[\n\r\t\\s]*\\?[\n\r\\s\t]*xml");
+                    Matcher matcher = pattern.matcher(filestr);
+                    ErlLogger.debug("find result:"+matcher.find(0));
 
-            		if (matcher.find(0) == true){
-            			parser.parse(file.getContents(), reporter);
-            		} else {
+                    if (matcher.find(0) == true){
+                        parser.parse(file.getContents(), reporter);
+                    } else {
 //            			StringBufferInputStream s1 = new StringBufferInputStream("<ewp_tmpl_root>");
 //            			StringBufferInputStream s2 = new StringBufferInputStream("</ewp_tmpl_root>");
-							InputStream s1 = new ByteArrayInputStream("<ewp_tmpl_root>".getBytes());
-							InputStream s2 = new ByteArrayInputStream("</ewp_tmpl_root>".getBytes());
-            			SequenceInputStream s = new SequenceInputStream(s1, file.getContents());
-            			parser.parse(new SequenceInputStream(s, s2), reporter);
-            		}
+                            InputStream s1 = new ByteArrayInputStream("<ewp_tmpl_root>".getBytes());
+                            InputStream s2 = new ByteArrayInputStream("</ewp_tmpl_root>".getBytes());
+                        SequenceInputStream s = new SequenceInputStream(s1, file.getContents());
+                        parser.parse(new SequenceInputStream(s, s2), reporter);
+                    }
 
                 }
                 catch (SAXParseException se) {

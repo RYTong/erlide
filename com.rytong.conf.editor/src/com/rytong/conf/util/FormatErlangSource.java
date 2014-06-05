@@ -46,7 +46,7 @@ public class FormatErlangSource {
     private static final String RE_ADAPTER_ERL_MODULE = "\\$module";
     private static final String RE_ADAPTER_ERL_DATE = "\\$date";
     private static final String RE_ADAPTER_ERL_FUN = "\\$function";
-    private static final String RE_ADAPTER_ERL_PARAMS = "\\$params";
+    private static final String RE_ADAPTER_ERL_PARAMS = "$params";
     private static final String RE_ADAPTER_ERL_ADAPTER = "\\$adapter";
     private static final String RE_ADAPTER_ERL_PROCEDURE = "\\$procedure";
     private static final String RE_ADAPTER_ERL_KEYLIST = "\\$keylist";
@@ -78,7 +78,7 @@ public class FormatErlangSource {
 
         //ErlLogger.debug("content:"+content);
         String funContent = formatAdapterFunction(cha, content);
-        //ErlLogger.debug("funContent:"+funContent);
+        ErlLogger.debug("funContent:"+funContent);
         return content.replaceAll(RE_ADAPTER_ERL_FUN, funContent);
     }
 
@@ -102,11 +102,19 @@ public class FormatErlangSource {
             initialKeyList = initialKeyList.replaceAll(ADAPTER_REQUEST_PARAMS_VAL, ADAPTER_TRANCODE_VAR);
             String[] params = formatAdapterParamsList(tmpView, initialKeyList);
 
-            tmpContent = tmpContent.replaceAll(RE_ADAPTER_ERL_PARAMS, params[0]);
+            tmpContent = tmpContent.replace(RE_ADAPTER_ERL_PARAMS, params[0]);
             tmpContent = tmpContent.replaceAll(RE_ADAPTER_ERL_TRANCODE, tmpView.tranCode);
-            tmpContent = tmpContent.replaceAll(RE_ADAPTER_ERL_ADAPTER, tmpView.adapter);
-            tmpContent = tmpContent.replaceAll(RE_ADAPTER_ERL_PROCEDURE, tmpView.procedure);
-            tmpContent = tmpContent.replaceAll(RE_ADAPTER_ERL_KEYLIST, params[1]);
+
+            if (!tmpView.adapter.equalsIgnoreCase("")){
+                tmpContent = tmpContent.replaceAll(RE_ADAPTER_ERL_ADAPTER, tmpView.adapter);
+                tmpContent = tmpContent.replaceAll(RE_ADAPTER_ERL_PROCEDURE, tmpView.procedure);
+                tmpContent = tmpContent.replaceAll(RE_ADAPTER_ERL_KEYLIST, params[1]);
+                tmpContent = tmpContent.replace("$preadapter_region", "");
+                tmpContent = tmpContent.replaceAll("\\$noadapter_region(?s).*noadapter_region", "");
+            } else {
+                tmpContent = tmpContent.replace("$noadapter_region", "");
+                tmpContent = tmpContent.replaceAll("\\$preadapter_region(?s).*preadapter_region", "");
+            }
 
             resultFunContent = resultFunContent.concat(tmpContent).concat(separator).concat(separator);
         }
