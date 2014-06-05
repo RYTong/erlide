@@ -7,7 +7,7 @@
       <editor
             class="com.rytong.template.editor.template.TemplateEditor"
             default="false"
-            extensions="cs"
+            extensions="cs,xhtml"
             icon="icons/cs.gif"
             id="com.rytong.editors.TemplateEditor"
             name="EWP Template Editor">

@@ -1,7 +1,11 @@
 package com.rytong.template.debugtool.actions;
 
+import java.io.File;
 import java.io.IOException;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
@@ -19,6 +23,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.erlide.jinterface.ErlLogger;
@@ -29,6 +35,7 @@ import com.rytong.template.debugtool.util.SyncSocket;
 public class SyncDLPageAction implements IEditorActionDelegate {
     private Activator  parent;
     private IWorkbench workbench;
+    private String projectPath;
     public SyncSocket serverSocket = null;
 
     public SyncDLPageAction(){
@@ -40,6 +47,11 @@ public class SyncDLPageAction implements IEditorActionDelegate {
         //workbench.getActiveWorkbenchWindow();
         IActionBars tmp = parent.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor().getEditorSite().getActionBars();
         ErlLogger.debug("tmp  len:"+tmp.getToolBarManager().getItems().length);
+
+        IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
+        IProject tmpProject = ((FileEditorInput) window.getActivePage().getActiveEditor().getEditorInput()).getFile().getProject();
+        projectPath = tmpProject.getLocation().toString();
+        ErlLogger.debug("projectPath:"+projectPath);
 
     }
 
@@ -66,11 +78,19 @@ public class SyncDLPageAction implements IEditorActionDelegate {
         } else if (send_result.equalsIgnoreCase("")){
             MessageDialog.openInformation(window.getShell(), "Notic", "没有可接受的报文~");
         } else {
+
             boolean con_res = MessageDialog.openConfirm(window.getShell(), "Notic", "是否要创建新的编辑窗口~？");
 
             if (con_res){
                 try {
-                    page.openEditor(new TmpStringEditorInput(send_result), "com.rytong.editors.TemplateEditor", true);
+                    //page.openEditor(new TmpStringEditorInput(send_result), "com.rytong.editors.TemplateEditor", true);
+                    IEditorPart editor  =  PlatformUI.getWorkbench()
+                            .getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+
+                    File file=new File(projectPath+"/tmp/eclipse_tmp.xhtml");
+                    //file.
+
+                    IDE.openEditor(page, new TmpStringEditorInput(send_result), "com.rytong.editors.TemplateEditor");
                 } catch (PartInitException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();

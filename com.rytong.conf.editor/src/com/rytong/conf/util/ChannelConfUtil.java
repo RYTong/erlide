@@ -563,8 +563,6 @@ public class ChannelConfUtil {
         private void setOkButton(){
 
             if (view.tranCode.replace(" ", "").isEmpty()||
-                    view.adapter.replace(" ", "").isEmpty()||
-                    view.procedure.replace(" ", "").isEmpty()||
                     view.viewName.replace(" ", "").isEmpty())
                 okBut.setEnabled(false);
             else
