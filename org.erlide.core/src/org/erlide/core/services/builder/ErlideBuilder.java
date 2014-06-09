@@ -12,6 +12,7 @@ package org.erlide.core.services.builder;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -118,6 +119,7 @@ public class ErlideBuilder {
             throws CoreException {
         final long time = System.currentTimeMillis();
         final IProject project = getProject();
+        ErlLogger.debug("pname:"+project.getName());
         if (project == null || !project.isAccessible()) {
             return new IProject[0];
         }
@@ -133,6 +135,7 @@ public class ErlideBuilder {
             initializeBuilder(monitor);
 
             final IPath out = erlProject.getOutputLocation();
+            ErlLogger.debug("out:"+out);
             final IResource outr = project.findMember(out);
             if (outr != null) {
                 try {
@@ -146,6 +149,15 @@ public class ErlideBuilder {
             final OtpErlangList compilerOptions = CompilerOptions.get(project);
             ErlLogger.debug(">>> compiler options ::: " + compilerOptions);
 
+            //erlProject.
+
+
+            Iterator<IPath> tmpIterator = erlProject.getSourceDirs().iterator();
+            while (tmpIterator.hasNext()){
+                IPath tmpPaht = tmpIterator.next();
+                ErlLogger.debug("iterator path:"+tmpPaht.toString());
+            }
+            //ErlLogger.debug(""+project);
             final Set<BuildResource> resourcesToBuild = getResourcesToBuild(
                     kind, args, project, resourceDelta);
             final int n = resourcesToBuild.size();
@@ -170,6 +182,7 @@ public class ErlideBuilder {
                     notifier.checkCancel();
                     final IResource resource = bres.getResource();
                     // notifier.aboutToCompile(resource);
+                    //ErlLogger.debug("cccccccccccccccccccccccccccccccccc:"+resource.getName());
                     if ("erl".equals(resource.getFileExtension())) {
                         final String outputDir = erlProject.getOutputLocation()
                                 .toString();
@@ -211,6 +224,7 @@ public class ErlideBuilder {
 
                             helper.completeCompile(project, resource, r,
                                     backend, compilerOptions);
+                            //ErlLogger.debug("cccccccccccccccccccccccccccccccccc:"+resource.getName());
                             notifier.compiled(resource);
 
                             done.add(result);
@@ -272,17 +286,22 @@ public class ErlideBuilder {
         submon.beginTask("retrieving resources to build",
                 IProgressMonitor.UNKNOWN);
         if (kind == IncrementalProjectBuilder.FULL_BUILD) {
+            ErlLogger.debug("----------111---------");
+
             resourcesToBuild = helper.getAffectedResources(args,
                     currentProject, submon);
         } else {
+            ErlLogger.debug("----------2222---------");
             final IResourceDelta delta = resourceDelta;
             final Path path = new Path(".settings/org.erlide.core.prefs");
             if (delta != null && delta.findMember(path) != null) {
+                ErlLogger.debug("----------222221111111---------");
                 ErlLogger
                         .info("project configuration changed: doing full rebuild");
                 resourcesToBuild = helper.getAffectedResources(args,
                         currentProject, submon);
             } else {
+                ErlLogger.debug("----------2222333333---------");
                 resourcesToBuild = helper.getAffectedResources(args, delta,
                         submon);
             }

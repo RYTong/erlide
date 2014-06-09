@@ -1,32 +1,29 @@
 package com.rytong.template.debugtool.actions;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorActionDelegate;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
-import org.eclipse.ui.texteditor.ITextEditor;
+
 import org.erlide.jinterface.ErlLogger;
 
 import com.rytong.template.debugtool.Activator;
@@ -36,6 +33,8 @@ public class SyncDLPageAction implements IEditorActionDelegate {
     private Activator  parent;
     private IWorkbench workbench;
     private String projectPath;
+    private IWorkbenchWindow window;
+    private IProject tmpProject;
     public SyncSocket serverSocket = null;
 
     public SyncDLPageAction(){
@@ -48,10 +47,9 @@ public class SyncDLPageAction implements IEditorActionDelegate {
         IActionBars tmp = parent.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor().getEditorSite().getActionBars();
         ErlLogger.debug("tmp  len:"+tmp.getToolBarManager().getItems().length);
 
-        IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
-        IProject tmpProject = ((FileEditorInput) window.getActivePage().getActiveEditor().getEditorInput()).getFile().getProject();
-        projectPath = tmpProject.getLocation().toString();
-        ErlLogger.debug("projectPath:"+projectPath);
+        this.window = workbench.getActiveWorkbenchWindow();
+
+
 
     }
 
@@ -87,10 +85,25 @@ public class SyncDLPageAction implements IEditorActionDelegate {
                     IEditorPart editor  =  PlatformUI.getWorkbench()
                             .getActiveWorkbenchWindow().getActivePage().getActiveEditor();
 
-                    File file=new File(projectPath+"/tmp/eclipse_tmp.xhtml");
-                    //file.
+                    IFile tmp_file =  check_tmp_folder();
+                    ErlLogger.debug("naem:"+editor.getEditorInput().getName());
+                    ErlLogger.debug("tmp_file:"+tmp_file.exists());
+                    try {
+                        tmp_file.refreshLocal(IResource.DEPTH_ZERO,null);
+                        if (!tmp_file.exists()){
+                            tmp_file.create(new ByteArrayInputStream(send_result.getBytes()), false, null);
 
-                    IDE.openEditor(page, new TmpStringEditorInput(send_result), "com.rytong.editors.TemplateEditor");
+                        } else {
+                            tmp_file.setContents(new ByteArrayInputStream(send_result.getBytes()), false, true, null);
+                        }
+                        ErlLogger.debug("tmp_file:"+tmp_file.exists());
+
+                    } catch (CoreException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+
+                    IDE.openEditor(page, tmp_file, "com.rytong.editors.TemplateEditor", true);
                 } catch (PartInitException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -99,6 +112,46 @@ public class SyncDLPageAction implements IEditorActionDelegate {
         }
 
     }
+
+    private IFile check_tmp_folder(){
+        this.tmpProject = ((FileEditorInput) window.getActivePage().getActiveEditor().getEditorInput()).getFile().getProject();
+        projectPath = tmpProject.getLocation().toString();
+        try {
+            String tmp_str = ((FileEditorInput) window.getActivePage().getActiveEditor().getEditorInput()).getFile().getPersistentProperty(IDE.EDITOR_KEY);
+            ErlLogger.debug("tmp_str:"+tmp_str);
+        } catch (CoreException e1) {
+            // TODO Auto-generated catch blockz
+            e1.printStackTrace();
+        }
+        ErlLogger.debug("projectPath:"+projectPath);
+        IFolder tmp_foldor = tmpProject.getFolder("/tmp");
+        if (!tmp_foldor.exists()){
+            try {
+                tmp_foldor.create(true, true, null);
+            } catch (CoreException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
+
+        File newFile = new File(projectPath+"/tmp/eclipse_tmp.xhtml");
+
+        if (!newFile.exists()){
+            // InputStream inputStreamJava = new ByteArrayInputStream("this is a tmp file~".getBytes());
+            try {
+                newFile.createNewFile();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                ErlLogger.debug("new file failed~");
+            }
+
+        }
+        IFile tmp_file = tmpProject.getFile(new Path("/tmp/eclipse_tmp.xhtml"));
+        return tmp_file;
+    }
+
 
     @Override
     public void selectionChanged(IAction action, ISelection selection) {

@@ -24,6 +24,7 @@ import org.erlide.jinterface.ErlLogger;
 
 import com.rytong.template.debugtool.Activator;
 import com.rytong.template.debugtool.util.SyncSocket;
+import com.rytong.template.editor.template.TemplateEditor;
 
 
 public class SyncPageAction implements IEditorActionDelegate {
@@ -70,10 +71,12 @@ public class SyncPageAction implements IEditorActionDelegate {
             String tmp_str = ((TmpStringEditorInput) input).getContent();
             send_result = serverSocket.sendServerMsg(tmp_str.toString());
         } else {
+            //((TemplateEditor) part).getDocumentProvider().getDocument(page);
+            IDocument document = ((TemplateEditor) part).getDocumentProvider().getDocument(part.getEditorInput());
 
-            IDocument document = ((ITextEditor) part).getDocumentProvider()
-                    .getDocument(part.getEditorInput());
-            //
+//            IDocument document = ((ITextEditor) part).getDocumentProvider()
+//            		.getDocument(part.getEditorInput());
+
             IFile file = ((IFileEditorInput) input).getFile();
             String tmp_ext = file.getFileExtension();
             ErlLogger.debug("file extension:"+file.getFileExtension());
