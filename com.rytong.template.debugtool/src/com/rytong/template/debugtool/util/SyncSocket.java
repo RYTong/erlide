@@ -65,8 +65,6 @@ public class SyncSocket {
                 clients.get(i).getWriter().print("close");
                 clients.get(i).getWriter().flush();
                 clients.get(i).getWriter().close();
-
-
                 clients.get(i).getReader().close();
                 clients.get(i).writer.close();
                 clients.get(i).socket.close();
@@ -74,6 +72,7 @@ public class SyncSocket {
             }
             if (serverThread != null)
                 serverThread.stop();
+
             ErlLogger.debug(" serverThread stop");
             if (server != null)
                 server.close();
@@ -116,9 +115,9 @@ public class SyncSocket {
             ClientThread client = clients.get(i);
             clients.get(i).getWriter().flush();
             String tmp_msg = download_store.get(client);
-            ErlLogger.debug("tmp_msg 2:"+tmp_msg);
+            //ErlLogger.debug("tmp_msg 2:"+tmp_msg);
             if (tmp_msg != null){
-                download_store.put(client, "");
+                //download_store.put(client, "");
                 return tmp_msg;
             }
         }

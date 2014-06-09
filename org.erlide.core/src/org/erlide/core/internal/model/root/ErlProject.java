@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.ICommand;
@@ -73,7 +74,7 @@ import com.google.common.collect.Lists;
 
 /**
  * Handle for an Erlang Project.
- * 
+ *
  * <p>
  * A Erlang Project internally maintains a devpath that corresponds to the
  * project's classpath. The classpath may include source folders from the
@@ -83,11 +84,11 @@ import com.google.common.collect.Lists;
  * other projects, and thus uses the devpath rather than the classpath (which is
  * really a compilation path). The devpath mimics the classpath, except has
  * source folder entries in place of output locations in external projects.
- * 
+ *
  * <p>
  * Each ErlProject has a NameLookup facility that locates elements on by name,
  * based on the devpath.
- * 
+ *
  * @see IErlProject
  */
 public class ErlProject extends Openable implements IErlProject {
@@ -188,11 +189,11 @@ public class ErlProject extends Openable implements IErlProject {
     private void addEmpExternals(final List<IErlElement> children) {
         //final IBackend backend = CoreUtil.getBuildOrIdeBackend(fProject);
         if (ErlangPlugin.yawsPath != null)
-	        children.add(new ErlYawsExternalReferenceEntryList(this, "yaws-"+ErlangPlugin.yawsVer));
+            children.add(new ErlYawsExternalReferenceEntryList(this, "yaws-"+ErlangPlugin.yawsVer));
         if (ErlangPlugin.ewpPath != null)
-	        children.add(new ErlEwpExternalReferenceEntryList(this, "ewp-"+ErlangPlugin.ewpVer));
+            children.add(new ErlEwpExternalReferenceEntryList(this, "ewp-"+ErlangPlugin.ewpVer));
     }
-    
+
     private void addExternals(final List<IErlElement> children) {
         final String externalIncludes = getExternalIncludesString();
         final String externalModules = getExternalModulesString();
@@ -352,7 +353,7 @@ public class ErlProject extends Openable implements IErlProject {
      * given handle. Two handles represent the same project if they are
      * identical or if they represent a project with the same underlying
      * resource and occurrence counts.
-     * 
+     *
      * @see ErlElement#equals(Object)
      */
     @Override
@@ -485,7 +486,7 @@ public class ErlProject extends Openable implements IErlProject {
     /**
      * Answers an PLUGIN_ID which is used to distinguish project/entries during
      * package fragment root computations
-     * 
+     *
      * @return String
      */
     public String rootID() {
@@ -610,7 +611,7 @@ public class ErlProject extends Openable implements IErlProject {
      * Returns a canonicalized path from the given external path. Note that the
      * return path contains the same number of segments and it contains a device
      * only if the given path contained one.
-     * 
+     *
      * @param externalPath
      *            IPath
      * @see java.io.File for the definition of a canonicalized path
@@ -837,12 +838,26 @@ public class ErlProject extends Openable implements IErlProject {
     public Collection<IPath> getSourceDirs() {
         final ErlModelCache modelCache = getModelCache();
         Collection<IPath> sourceDirs = modelCache.getSourceDirs(this);
-        if (sourceDirs == null) {
+
+        //if (sourceDirs == null) {
             final IOldErlangProjectProperties properties = getProperties();
             sourceDirs = properties.getSourceDirs();
-            sourceDirs = resolvePaths(sourceDirs);
-            modelCache.putSourceDirs(this, sourceDirs);
-        }
+//            sourceDirs = resolvePaths(sourceDirs);
+//            modelCache.putSourceDirs(this, sourceDirs);
+//            Iterator<IPath> tmpIterator2 = sourceDirs.iterator();
+//            while (tmpIterator2.hasNext()){
+//                IPath tmpPaht = tmpIterator2.next();
+//                ErlLogger.debug("before path:"+tmpPaht.toString());
+//            }
+
+        //}
+
+//        Iterator<IPath> tmpIterator1 = sourceDirs.iterator();
+//        while (tmpIterator1.hasNext()){
+//            IPath tmpPaht = tmpIterator1.next();
+//            ErlLogger.debug("after path:"+tmpPaht.toString());
+//        }
+
         return sourceDirs;
     }
 

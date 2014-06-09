@@ -15,7 +15,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.editors;bundle-version="3.7.0",
  org.erlide.ui,
  org.erlide.jinterface;bundle-version="0.15.2",
- org.erlide.core;bundle-version="1.1.0"
+ org.erlide.core;bundle-version="1.1.0",
+ org.eclipse.ui.workbench.texteditor;bundle-version="3.7.0",
+ com.rytong.template.editor;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.ui.texteditor
